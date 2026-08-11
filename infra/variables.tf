@@ -26,6 +26,20 @@ variable "domain_alias" {
   default     = "michelsalib.com"
 }
 
+variable "mapped_domains" {
+  description = <<-EOT
+    Which hostnames get a Cloud Run domain mapping.
+
+    Not simply "all four": a mapping whose DNS does not point at ghs sits with a
+    pending certificate forever. michelsalib.com is on Netim nameservers, where it
+    already 301s to about.me preserving path and query, so redirecting it there is
+    cheaper than mapping it. Add its two hostnames here only if its DNS moves to
+    records pointing at ghs.
+  EOT
+  type        = list(string)
+  default     = ["micheldev.com", "www.micheldev.com"]
+}
+
 variable "enable_domain_mappings" {
   description = <<-EOT
     Domain mappings need every domain verified in Search Console under the same

@@ -152,17 +152,8 @@ resource "google_cloud_run_v2_service_iam_member" "public" {
 # is not the canonical apex. Cloudflare fronts these, so its DNS records point
 # at Google's ghs.googlehosted.com addresses with the proxy enabled and SSL mode
 # Full (strict) — Cloud Run still terminates TLS with its own managed cert.
-locals {
-  domains = [
-    var.domain_apex,
-    "www.${var.domain_apex}",
-    var.domain_alias,
-    "www.${var.domain_alias}",
-  ]
-}
-
 resource "google_cloud_run_domain_mapping" "site" {
-  for_each = var.enable_domain_mappings ? toset(local.domains) : toset([])
+  for_each = var.enable_domain_mappings ? toset(var.mapped_domains) : toset([])
 
   location = var.region
   name     = each.value
