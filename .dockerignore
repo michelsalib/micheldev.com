@@ -1,0 +1,4 @@
+*
+# The image needs exactly two things: the built site and the file server.
+!dist
+!src/server.ts

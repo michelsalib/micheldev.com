@@ -1,0 +1,87 @@
+# yaml-language-server: $schema=./site.schema.json
+# ─────────────────────────────────────────────────────────────────────────────
+# Site-level configuration. The homepage copy lives here; the career content
+# comes from cv.yaml so it can never disagree with the CV.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# The canonical origin. michelsalib.com 301-redirects here — see `hosts`.
+origin: https://micheldev.com
+
+hosts:
+  canonical: micheldev.com
+  # Anything reaching the service on one of these gets a 301 to the canonical
+  # host, same path. Keeps one URL in the index and one story in analytics
+  # nobody is collecting.
+  redirect:
+    - www.micheldev.com
+    - michelsalib.com
+    - www.michelsalib.com
+
+meta:
+  title: Michel Salib — web lead developer, Paris
+  description: >-
+    Michel Salib, web lead developer in Paris. Fifteen years of realtime
+    financial-news platforms at London Stock Exchange, Refinitiv and Thomson
+    Reuters, plus open source with 510 GitHub stars.
+  locale: en
+
+hero:
+  eyebrow: Paris, France
+  # The through-line, not a job list: the domain changed from financial news to
+  # horse racing, the problem shape did not. Keep the current employer in here —
+  # the panel beside it names Matchem, and an opening paragraph that starts at
+  # London Stock Exchange reads as out of date next to it.
+  role_html: >-
+    I build <em>realtime data platforms</em>, and lead the teams that run them.
+  thesis_html: >-
+    Fifteen years on one problem: move a lot of data to a lot of people, fast,
+    without going down. Financial news at <strong>Thomson Reuters</strong>,
+    Refinitiv and the <strong>London Stock Exchange</strong> — where that meant
+    150k+ monthly readers, 10M+ API requests a day and twenty developers — and
+    horse racing at <strong>Matchem</strong> today. Before any of it, founder and
+    CTO of my own company.
+
+sections:
+  work:
+    path: /work
+    hue: work
+    note: |
+      Summary here.
+      Detail on the
+      CV page.
+    # "Financial news" was accurate until Matchem, which is horse racing, sat at
+    # the top of this timeline. And the count was hardcoded at four while the
+    # timeline renders six — so it is gone rather than corrected, because the
+    # next hire would break it again.
+    heading: Realtime data, at the scale where it breaks
+    lede_html: >-
+      Different industries, one problem shape: move a lot of data to a lot of
+      people, fast, without going down. Full detail — projects, numbers, stacks
+      — lives on the <a href="/cv">CV page</a>, generated from the same file as
+      this timeline.
+  projects:
+    path: /projects
+    hue: projects
+    note: |
+      Nights and
+      weekends. Built
+      because I wanted
+      to use them.
+    heading: What I build when nobody is paying me
+    lede_html: >-
+      Day job is realtime finance at scale. These are the opposite: small,
+      finished, and running on infrastructure I pay for myself — six services
+      under this domain, one repository, one deploy.
+  elsewhere:
+    path: /elsewhere
+    hue: elsewhere
+    note: |
+      Everything else
+      with my name
+      attached.
+    heading: The rest of the map
+    lede_html: >-
+      If you arrived here from a search, this is where the trail continues.
+
+footer:
+  note: Cloud Run · us-central1 · no trackers, no cookies

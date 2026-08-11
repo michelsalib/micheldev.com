@@ -1,0 +1,341 @@
+/* Pseudo-elements too: `*` alone does not match them, and box-sizing is not
+   inherited, so ::before/::after would silently default to content-box — which
+   made the bordered timeline dot 4px wider than declared and threw it 2px off
+   the rail. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--h-work);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+.wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+.mono {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Display type: normal width, weight 700. Deliberately not the condensed 800
+   used in the first pass — this reads senior rather than shouty. */
+h1,
+h2,
+h3,
+.disp {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  letter-spacing: -0.021em;
+  text-wrap: balance;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 10px 16px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  z-index: 100;
+}
+.skip:focus {
+  left: 8px;
+  top: 8px;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────── */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+
+.bar-in {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 28px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.wordmark {
+  font-family: var(--f-mono);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: baseline;
+}
+.wordmark .back {
+  color: var(--ink-3);
+  margin-right: 7px;
+}
+.wordmark b {
+  font-weight: 700;
+}
+.wordmark span {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.bar .here {
+  font-family: var(--f-mono);
+  font-size: 13.5px;
+  color: var(--h-work);
+  font-weight: 600;
+}
+
+.bar nav {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+/* Scoped to `.nav-link` rather than every `a` in the nav. As a blanket
+   `.bar nav a` at (0,2,1) it silently outranked the PDF button (.dl) and the
+   language switcher, stripping their padding and colour — the PDF pill collapsed
+   to a 35x29 circle with --ink-2 text on a near-white background. Any component
+   dropped into the nav from now on is unaffected. */
+.bar nav a.nav-link {
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  color: var(--ink-2);
+  padding: 4px 0;
+  border-bottom: 1.5px solid transparent;
+  transition:
+    color 0.16s ease,
+    border-color 0.16s ease;
+}
+.bar nav a.nav-link:hover {
+  color: var(--ink);
+  border-bottom-color: currentColor;
+}
+.bar nav a.nav-link.cv {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.toggle {
+  appearance: none;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  color: var(--ink-2);
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    color 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+.toggle:hover {
+  color: var(--ink);
+  border-color: var(--ink-3);
+}
+.toggle:active {
+  transform: scale(0.93);
+}
+.toggle svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+/* The icon shows the theme you would switch TO, across all three states. */
+.toggle .i-sun {
+  display: none;
+}
+.toggle .i-moon {
+  display: block;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .toggle .i-sun {
+    display: block;
+  }
+  :root:not([data-theme="light"]) .toggle .i-moon {
+    display: none;
+  }
+}
+:root[data-theme="dark"] .toggle .i-sun {
+  display: block;
+}
+:root[data-theme="dark"] .toggle .i-moon {
+  display: none;
+}
+
+/* ── Tags ────────────────────────────────────────────────────────────────── */
+.tag {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+.tag.hue {
+  color: var(--hue);
+  border-color: color-mix(in srgb, var(--hue) 45%, transparent);
+  background: color-mix(in srgb, var(--hue) 8%, transparent);
+}
+.tag.live {
+  color: var(--live);
+  border-color: color-mix(in srgb, var(--live) 45%, transparent);
+  background: color-mix(in srgb, var(--live) 9%, transparent);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+footer {
+  margin-top: clamp(56px, 7vw, 96px);
+  border-top: 1px solid var(--rule);
+  padding: 24px 0 42px;
+}
+.foot-in {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.foot-in a {
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--rule-strong);
+}
+.foot-in a:hover {
+  color: var(--ink);
+  border-bottom-color: currentColor;
+}
+.foot-in .sp {
+  margin-left: auto;
+}
+
+/* ── Motion primitives ───────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes draw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @keyframes fill {
+    from {
+      clip-path: inset(0 0 100% 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+}
+
+/* ── Hue plumbing ────────────────────────────────────────────────────────── */
+/* These are classes rather than inline `style="--hue: …"` because the CSP is
+   `style-src 'self'` with no 'unsafe-inline', which blocks style attributes
+   outright: the attribute stays in the DOM and contributes zero declarations, so
+   every accent silently fell back to --ink — grey spine, no node rings, grey
+   years. Classes keep the policy tight and put the mapping in one place. */
+.hue-1 {
+  --hue: var(--w1);
+}
+.hue-2 {
+  --hue: var(--w2);
+}
+.hue-3 {
+  --hue: var(--w3);
+}
+.hue-4 {
+  --hue: var(--w4);
+}
+.hue-5 {
+  --hue: var(--w5);
+}
+.hue-6 {
+  --hue: var(--w6);
+}
+
+.hue-work {
+  --hue: var(--h-work);
+}
+.hue-projects {
+  --hue: var(--h-projects);
+}
+.hue-elsewhere {
+  --hue: var(--h-elsewhere);
+}
+
+/* Panel hue, for the two hero cards. */
+.ph-work {
+  --ph: var(--h-work);
+}
+.ph-projects {
+  --ph: var(--h-projects);
+}

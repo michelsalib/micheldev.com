@@ -1,0 +1,429 @@
+# yaml-language-server: $schema=./cv.schema.json
+# ─────────────────────────────────────────────────────────────────────────────
+# Single source of truth for the CV.
+#
+# Renders three ways, all from this file:
+#   1. /cv                     — the HTML page (crawlable)
+#   2. /cv-en.pdf, /cv-fr.pdf  — generated in CI, headless Chrome + @media print
+#   3. the /work timeline on the homepage
+#
+# Translatable prose is a { en, fr } map. Everything factual (dates, employers,
+# technologies, numbers) is locale-independent and written once.
+#
+# CURRENT ROLE: set `to: present` on an entry. That is the only switch — the
+# renderer then labels it "Currently", gives it a live green dot, prints
+# "2026 — now", and promotes it into the homepage hero panel. Nothing else to
+# touch. Every other entry gets a closed year range and a neutral hue dot.
+#
+# Sources: "CV - English.pdf" and "CV - Français.pdf" (Canva exports), read
+# 2026-08-11. French prose below is lifted from your own FR CV, not translated
+# by me, except where the FR CV had English left in it (marked FR-WAS-ENGLISH).
+# ─────────────────────────────────────────────────────────────────────────────
+
+person:
+  name: Michel Salib
+  location:
+    en: Paris, France
+    fr: Paris 13
+  # No email or phone here. This repository is public, so this file is public,
+  # and GitHub code search is exactly where a phone number gets harvested from.
+  # They come from the CV_EMAIL and CV_PHONE environment variables — repository
+  # secrets in CI — and reach only the PDFs. The schema rejects both keys here,
+  # so adding one back fails `bun run validate` instead of publishing it.
+  links:
+    site: https://micheldev.com
+    github: https://github.com/michelsalib
+
+privacy:
+  # Which contact fields reach which output.
+  page: [site, github] # /cv is crawlable — no email, no phone
+  pdf: [email, phone, site, github]
+
+headline:
+  en: Web Lead Developer
+  fr: Web Lead Développeur
+
+# The "I'm looking for a position…" opener from both Canva CVs is deliberately
+# omitted: Michel is not searching, and the site carries no availability signal.
+summary:
+  en: >-
+    Architecture- and performance-oriented web lead developer. I work on
+    scalability, realtime data flows and the industrialisation of solutions —
+    combining technical design, optimisation and team leadership.
+  fr: >-
+    Lead Developer Web orienté architecture et performance. Je travaille sur la
+    scalabilité, les flux de données en temps réel et l'industrialisation des
+    solutions — en alliant conception technique, optimisation et pilotage
+    d'équipes.
+
+# ── Experience, most recent first ────────────────────────────────────────────
+experience:
+  - employer: Matchem
+    from: 2025
+    to: present
+    location: Paris
+    hue: work-1
+    context:
+      en: Media editor dedicated to horse racing.
+      fr: Groupe média consacré aux courses hippiques.
+    roles:
+      - title: Senior Backend Developer
+        projects:
+          - name: Horse Racing Data Plateform
+            lead:
+              en: Complete rebuilt of the backend tech stack for aggregating, storing and distributing horse racing data
+              fr: Refonte complète de la stack technique backend pour l'agrègation, le stockage et la distribution des données hippiques
+            points:
+              en:
+                - Establishment of the tech stack, architecture and development practices.
+                - Mentoring of the integration teams, mobile and web.
+                - Build around PubSub events aggregation, MongoDB, OpenAPI compliant REST API, SSE support
+              fr:
+                - Etablissement de la stack technique, de l'architecture cloud et des pratiques de dévelopement.
+                - Accompagnement des equipes d'intégration, mobile et web.
+                - Aggrégation d'event PubSub, MongoDB, API REST au standard OpenAPI, support SSE
+            scale:
+              en: 10k daily users, 10 b2b customers
+              fr: 10k visiteurs quotidiens, 10 clients b2b  
+            facts:
+              - { label: { en: developers, fr: développeurs }, value: 4 }
+            stack: [Typescript, Bun, GCP, Docker, MongoDB]
+
+  - employer: London Stock Exchange
+    from: 2021
+    to: 2025
+    location: Paris
+    hue: work-2
+    context:
+      en: 24k+ employees across the world. Merger of London Stock Exchange and Refinitiv.
+      fr: 24k+ employés dans le monde. Fusion entre le London Stock Exchange et Refinitiv.
+    roles:
+      - title: News Senior Lead Developer
+        projects:
+          - name: News
+            lead:
+              en: >-
+                News has 150k+ monthly users, for text, images, video and
+                realtime.
+              fr: >-
+                News a 150k+ utilisateurs mensuels pour du texte, des images,
+                de la vidéo et du temps réel.
+            points:
+              en:
+                - Oversight of News integration within the company and with business partners (Reuters, Microsoft…)
+                - Decision owner for tech and operations, and holder of the domain knowledge
+                - Responsible for every project below, plus the video applications
+                - Reduced outages to zero across 2023 and 2024
+              fr:
+                - Supervision de l'intégration de News au sein de l'entreprise et des partenaires commerciaux (Reuters, Microsoft…)
+                - Décisionnaire de la tech, des opérations et détenteur des connaissances
+                - Responsable des projets ci-dessous et des applications vidéo
+                - Réduction à zéro des arrêts de service en 2023 et 2024
+            scale:
+              en: "Work on applications, web components, APIs and cloud:"
+              fr: "Travail sur les applications, WebComponents, APIs et le Cloud :"
+            facts:
+              - { label: { en: team led, fr: équipe }, value: 20 }
+              - { label: { en: repositories owned, fr: repositories }, value: "20+" }
+            stack: [TypeScript, Node.js, AWS, Docker, Redis, DynamoDB]
+
+  - employer: Refinitiv
+    from: 2018
+    to: 2021
+    location: Paris
+    hue: work-3
+    context:
+      en: 18k+ employees across the world. Split from Thomson Reuters.
+      fr: 18k+ employés dans le monde. Scission de Thomson Reuters.
+    roles:
+      - title: Senior Lead Developer
+        projects:
+          - name: News AWS APIs
+            lead:
+              en: >-
+                Migrated the News platform from private cloud to AWS, making it
+                possible to distribute the data to partners by API.
+              fr: >-
+                Migration de la plateforme de News du cloud privé à AWS,
+                permettant de distribuer les données par API aux partenaires.
+            points:
+              en:
+                - Established the development, operations, resiliency and scalability plans
+                - Established a migration plan with a zero-downtime objective
+                - Decision owner for architecture, cost, security, quality, standards and operations
+              fr:
+                - Établissement des plans de développement, opérationnels, de résilience et de scalabilité
+                - Établissement d'un plan de migration avec un objectif zéro arrêt de service
+                - Décisionnaire sur l'architecture, les coûts, la sécurité, la qualité, les standards et les opérations
+            scale:
+              en: "Weekly releases, with a strong focus on deployment and quality:"
+              fr: "Mise en production hebdomadaire avec un fort intérêt sur le déploiement et la qualité :"
+            facts:
+              - { label: { en: team led, fr: équipe }, value: "16+" }
+            stack: [TypeScript, Node.js, AWS, Docker, Redis, DynamoDB]
+
+  - employer: Thomson Reuters
+    from: 2013
+    to: 2018
+    location: Paris
+    hue: work-4
+    context:
+      en: 25k+ employees across the world.
+      fr: 25k+ employés dans le monde.
+    roles:
+      - title: Senior Lead Developer
+        projects:
+          - name: New Module
+            lead:
+              en: >-
+                Rebuilt the realtime data distribution layer, delivering
+                hundreds of events per second to 150k+ users.
+              fr: >-
+                Reconstruction de la couche de distribution des données temps
+                réel, délivrant des centaines d'évènements par seconde à plus
+                de 150k utilisateurs.
+            points:
+              en:
+                - Established the technical stack, the architecture, QA and the migration plan
+                - Worked on the algorithms reconciling realtime and historical data
+              fr:
+                - Établissement de la stack technique, de l'architecture, de la QA et du plan de migration
+                - Travail sur les algorithmes servant à résoudre les données temps réel et historiques
+            scale:
+              en: "Migrated over a few months with no incident:"
+              fr: "Migration en quelques mois sans incident :"
+            points_extra:
+              en:
+                - Moved a 10-person team from a C++ stack to JavaScript/TypeScript
+                - Built new development and support tooling
+                - Replaced a C++ layer with a JS Electron module
+              fr:
+                - Accompagnement d'une équipe de 10 personnes d'une stack C++ à JavaScript/TypeScript
+                - Développement de nouveaux outils de dev et de support
+                - Remplacement d'une couche C++ par un module JS Electron
+            stack: [TypeScript, WebSocket, Electron, TDD]
+
+      - title: Lead Developer
+        projects:
+          - name: Top News
+            lead:
+              en: >-
+                Rebuilt the multimedia news application so it was state of the
+                art.
+              fr: >-
+                Reconstruction de l'application pour que les news multimédia
+                soient à la pointe.
+            points:
+              en:
+                - Homepage reaching 30k weekly users
+                - Worked with Reuters journalists to define the best workflows
+                - Integrated UX and a design system into the agile methodology, with a bi-weekly automated release
+              fr:
+                # FR-WAS-ENGLISH: these three were still in English on the FR CV.
+                - Page d'accueil de 30k utilisateurs hebdomadaires
+                - Travail avec les journalistes de Reuters pour définir les meilleurs workflows
+                - Intégration de l'UX et du design system dans la méthodologie agile, avec une release automatisée toutes les deux semaines
+            scale:
+              en: "Shipped within 6 months:"
+              fr: "Livré en 6 mois :"
+            facts:
+              - { label: { en: fullstack team, fr: équipe fullstack }, value: 12 }
+            points_extra:
+              en:
+                - "Integrated modern web behaviours: offline, notifications, responsiveness, live updates"
+              fr:
+                # FR-WAS-ENGLISH
+                - "Intégration des comportements web modernes : hors-ligne, notifications, responsive, mises à jour en direct"
+            stack: [Angular, TypeScript, Node.js]
+
+          - name: News Web Services
+            lead:
+              en: >-
+                Built the JSON API distributing news inside Eikon.
+              fr: >-
+                Développement de l'API JSON pour distribuer les news au sein
+                d'Eikon.
+            points:
+              en:
+                - Established the API standards and the development framework
+                - Established and led the agile practice
+                - Strong focus on performance, database access and caching
+              fr:
+                - Établissement des standards d'API et du framework de développement
+                - Établissement et leadership des méthodes agiles
+                - Fort accent sur la performance, la base de données et le cache
+            scale:
+              en: "Serves 10M+ requests per day:"
+              fr: "Répond à 10M+ de requêtes par jour :"
+            facts:
+              - { label: { en: team moved to Node, fr: équipe migrée vers Node }, value: 8 }
+            points_extra:
+              en:
+                - Hosted on the private cloud platform
+              fr:
+                - Hébergé sur le cloud privé
+            stack: [TypeScript, Node.js, Express, OpenAPI, Redis]
+
+  - employer: Best Comparator
+    from: 2011
+    to: 2013
+    location: Paris
+    hue: work-5
+    # The BCC* open-source bundles carry this company's initials — the Symfony
+    # work in /projects and this role are the same chapter.
+    open_source_prefix: BCC
+    context:
+      en: 5 employees. My own company, in an incubator.
+      fr: 5 employés. Ma propre société, en incubateur.
+    roles:
+      - title: Founder — CTO
+        projects:
+          - name: Clever Pick
+            lead:
+              en: Built a recommendation API, sold as SaaS.
+              fr: Développement d'une API SaaS de recommandation.
+            points:
+              en:
+                - Integrated with the first circle of customers
+                - Distributed AI and machine-learning models
+              fr:
+                - Intégration avec le premier cercle de clients
+                - Modèles d'IA et de machine learning distribués
+            scale:
+              en: "Pivot demonstrated in 3 months:"
+              fr: "Pivot démontré en 3 mois :"
+            points_extra:
+              en:
+                - Open-source contributions to Symfony
+              fr:
+                - Contributions open source à Symfony
+            stack: [PHP, Symfony, Elasticsearch, Mahout, Hadoop, Kafka]
+
+          - name: Best Comparator
+            lead:
+              en: >-
+                Built a product comparison website, with an emphasis on AI and
+                the social graph.
+              fr: >-
+                Développement d'un site web de comparaison de produits, avec un
+                accent sur l'IA et le social graph.
+            points:
+              en:
+                - Integrated 10+ merchant partners
+                - Compared 50+ product categories
+                - Technology sold to a media group
+              fr:
+                - Intégration de 10+ commerçants partenaires
+                - Comparaison à travers 50+ catégories de produits
+                # FR-WAS-ENGLISH
+                - Technologie vendue à un groupe média
+            scale:
+              en: "One year to a working site with a validated business model:"
+              fr: "Un an pour atteindre un site fonctionnel avec un business model validé :"
+            facts:
+              - { label: { en: employees, fr: employés }, value: 5 }
+            stack: [PHP, Symfony, Elasticsearch]
+
+  - employer: ECE Paris
+    employer_full:
+      en: ECE Paris Engineering School
+      fr: ECE Paris École d'ingénieurs
+    from: 2011
+    to: 2013
+    location: Paris
+    hue: work-6
+    context:
+      en: 215,000 alumni. Part time, alongside Best Comparator.
+      fr: 215 000 alumnis. Temps partiel, en parallèle de Best Comparator.
+    roles:
+      - title:
+          en: Programming teacher
+          fr: Professeur de programmation
+        projects:
+          - name:
+              en: Java, L3 students
+              fr: Java aux étudiants L3
+            lead:
+              en: Lectures to a class of 150 students.
+              fr: Cours magistraux à 150 étudiants.
+            points:
+              en:
+                - Ran the subject for the whole year group — practicals, projects, assignments and grading
+              fr:
+                - Dirigeant la matière pour toute la promotion, incluant les travaux pratiques, les projets, les devoirs et les évaluations
+            facts:
+              - { label: { en: students, fr: étudiants }, value: 150 }
+            stack: [Java]
+
+          - name:
+              en: Practical classes
+              fr: Travaux pratiques
+            lead:
+              en: C++, C# and Java classes, from L2 to M2.
+              fr: Classes de C++, C# et Java, du niveau L2 à M2.
+            points:
+              en: []
+              fr: []
+            stack: [C++, "C#", Java]
+
+# ── Education ────────────────────────────────────────────────────────────────
+education:
+  - institution:
+      en: ECE Paris Engineering School
+      fr: ECE Paris École d'ingénieurs
+    year: 2011
+    award:
+      en: Engineering degree in software development and information systems
+      fr: Diplôme d'ingénieur en développement logiciel et systèmes d'information
+  - institution: UC Irvine
+    year: 2011
+    award:
+      en: Summer programme — management and global manufacturing
+      fr: Cursus d'été — management et conception globale
+  - institution: Concordia, Montreal
+    year: 2008
+    award:
+      en: Full semester — software development and management
+      fr: Semestre entier — développement logiciel et management
+
+# ── Skills, in the CV's own order ────────────────────────────────────────────
+skills:
+  - group: Dev
+    items: [TypeScript, Node.js, NestJS, Angular, Web Components, HTTP APIs]
+  - group: Cloud
+    items: [AWS, Azure, Docker]
+  - group: DB
+    items: [DocumentDB, Redis, SQL]
+  - group:
+      en: Practice
+      fr: Pratiques
+    items: [CI/CD, Git, GitLab, GitHub, TDD, DDD]
+  - group:
+      en: Project
+      fr: Projet
+    items: [Jira, Notion, Lucidchart, Confluence, Agile, Team leadership]
+
+# Not on the Canva CVs, but the most current thing about him — and the stack
+# the rest of this site is built on. Rendered as its own block.
+skills_current:
+  label:
+    en: Now, off the clock
+    fr: En ce moment, hors bureau
+  items: [Bun, Elysia, React 19, Terraform, Google Cloud, MongoDB, Biome]
+
+languages:
+  # "Anglais courant" appears in the FR CV's skills block; French is native.
+  - { name: { en: French, fr: Français }, level: { en: Native, fr: Natif } }
+  - { name: { en: English, fr: Anglais }, level: { en: Fluent, fr: Courant } }
+
+interests:
+  en: [Personal development projects, Guitar, Theatre, Films, Video games]
+  fr: [Projets de développement personnel, Guitare, Théatre, Films, Jeux vidéo]
+
+# ── Headline numbers, for the homepage hero ──────────────────────────────────
+# Every one traces to a line above. Nothing rounded up.
+metrics:
+  - { value: "15", label: { en: years shipping, fr: ans d'expérience } }
+  - { value: "20", label: { en: developers led, fr: développeurs encadrés } }
+  - { value: "150k+", label: { en: monthly users, fr: utilisateurs mensuels } }
+  - { value: "10M+", label: { en: API req / day, fr: requêtes API / jour } }

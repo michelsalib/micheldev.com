@@ -1,0 +1,25 @@
+/* Ubuntu Sans and Ubuntu Sans Mono, variable, subset to latin and self-hosted.
+   The Ubuntu Font Licence permits embedding. Two files, 89 KB together, so there
+   is no CDN and no third-party request anywhere on this site.
+
+   Kept out of the minified bundle on purpose: Bun's CSS bundler resolves url()
+   against the entrypoint's directory, and these are root-relative paths that
+   only exist once dist/ is assembled. This file is concatenated verbatim, which
+   is fine — it is already as small as it gets. */
+
+@font-face {
+  font-family: "USans";
+  src: url("/assets/fonts/ubuntu-sans.woff2") format("woff2-variations");
+  font-weight: 100 800;
+  font-stretch: 75% 100%;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "USansMono";
+  src: url("/assets/fonts/ubuntu-sans-mono.woff2") format("woff2-variations");
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: swap;
+}

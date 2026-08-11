@@ -1,0 +1,97 @@
+/* ── Colour ────────────────────────────────────────────────────────────────
+   Light is the base set. Neutrals carry a violet bias so they read as chosen
+   rather than inherited. Five employer hues walk around the wheel, and the
+   three homepage sections reuse three of them, so both pages are one system.
+
+   Three theme states, not two: an explicit choice stamps data-theme on <html>,
+   and the default "system" setting stamps nothing — so the media query has to
+   be guarded against an explicit light choice, and the [data-theme] block has
+   to restate the tokens to win in the other direction.                       */
+
+:root {
+  --paper: #fbfafd;
+  --surface: #ffffff;
+  --surface-2: #f4f2f9;
+  --ink: #141220;
+  --ink-2: #56526b;
+  --ink-3: #8b86a0;
+  --rule: #e5e2ee;
+  --rule-strong: #cfcade;
+
+  --w1: #5b34e8; /* London Stock Exchange — violet  */
+  --w2: #1f5fd0; /* Refinitiv            — blue    */
+  --w3: #0a7686; /* Thomson Reuters      — teal    */
+  --w4: #b81c6d; /* Best Comparator      — magenta */
+  --w5: #9a5b09; /* ECE Paris            — ochre   */
+  --w6: #b52d3a; /* spare, for a sixth entry — crimson */
+
+  --h-work: var(--w1);
+  --h-projects: var(--w4);
+  --h-elsewhere: var(--w3);
+
+  /* Semantic, deliberately separate from the accent hues. */
+  --live: #10894a;
+
+  --shadow:
+    0 1px 2px rgb(20 18 32 / 0.04), 0 8px 24px -12px rgb(20 18 32 / 0.1);
+
+  --max: 1080px;
+  --rail: 158px;
+  --gap: 40px;
+
+  --f-display: "USans", "Ubuntu Sans", "Ubuntu", system-ui, sans-serif;
+  --f-body: "USans", "Ubuntu Sans", "Ubuntu", system-ui, sans-serif;
+  --f-mono: "USansMono", "Ubuntu Sans Mono", ui-monospace, monospace;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0d0b14;
+    --surface: #14111f;
+    --surface-2: #1a1729;
+    --ink: #efedf7;
+    --ink-2: #a6a1bb;
+    --ink-3: #746e8a;
+    --rule: #241f33;
+    --rule-strong: #362f4c;
+
+    --w1: #a08cff;
+    --w2: #6fa8ff;
+    --w3: #45cdda;
+    --w4: #ff74ad;
+    --w5: #e0a336;
+    --w6: #ff8f8f;
+
+    --live: #3ddc84;
+
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 10px 30px -14px rgb(0 0 0 / 0.7);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper: #0d0b14;
+  --surface: #14111f;
+  --surface-2: #1a1729;
+  --ink: #efedf7;
+  --ink-2: #a6a1bb;
+  --ink-3: #746e8a;
+  --rule: #241f33;
+  --rule-strong: #362f4c;
+
+  --w1: #a08cff;
+  --w2: #6fa8ff;
+  --w3: #45cdda;
+  --w4: #ff74ad;
+  --w5: #e0a336;
+  --w6: #ff8f8f;
+
+  --live: #3ddc84;
+
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.5), 0 10px 30px -14px rgb(0 0 0 / 0.7);
+
+  color-scheme: dark;
+}

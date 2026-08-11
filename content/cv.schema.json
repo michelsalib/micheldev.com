@@ -1,0 +1,326 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "micheldev.com CV data",
+  "description": "Source of truth for /cv, the generated PDFs, and the homepage timeline.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["person", "headline", "summary", "experience"],
+  "$defs": {
+    "text": {
+      "description": "A plain string, or a per-locale map. A bare string is used for both locales.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["en", "fr"],
+          "properties": {
+            "en": {
+              "type": "string"
+            },
+            "fr": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "textList": {
+      "oneOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["en", "fr"],
+          "properties": {
+            "en": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "fr": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "year": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1990,
+          "maximum": 2100
+        },
+        {
+          "const": "present",
+          "description": "Marks the current role: renders as \"Currently\", gets a live dot, and is promoted into the homepage hero."
+        }
+      ]
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "value"],
+      "properties": {
+        "label": {
+          "$ref": "#/$defs/text"
+        },
+        "value": {
+          "type": ["string", "integer"]
+        }
+      }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/text"
+        },
+        "lead": {
+          "$ref": "#/$defs/text",
+          "description": "The one-line summary."
+        },
+        "points": {
+          "$ref": "#/$defs/textList"
+        },
+        "scale": {
+          "$ref": "#/$defs/text",
+          "description": "The transition line before points_extra."
+        },
+        "points_extra": {
+          "$ref": "#/$defs/textList"
+        },
+        "facts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/fact"
+          }
+        },
+        "stack": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "skillGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["group", "items"],
+      "properties": {
+        "group": {
+          "$ref": "#/$defs/text"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "properties": {
+    "person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "location": {
+          "$ref": "#/$defs/text"
+        },
+        "links": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "description": "Identity. email and phone are deliberately NOT permitted here: this repo is public, so this file is public. They are supplied via the CV_EMAIL and CV_PHONE environment variables (repository secrets in CI) and reach only the generated PDFs. additionalProperties is false, so adding either key back fails validation instead of quietly publishing it."
+    },
+    "privacy": {
+      "description": "Which contact fields each output may render. The page is crawlable, so keep email and phone out of it.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "page": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pdf": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "headline": {
+      "$ref": "#/$defs/text"
+    },
+    "summary": {
+      "$ref": "#/$defs/text"
+    },
+    "experience": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["employer", "from", "to", "roles"],
+        "properties": {
+          "employer": {
+            "type": "string",
+            "description": "Short name, used in the summary bar."
+          },
+          "employer_full": {
+            "$ref": "#/$defs/text",
+            "description": "Long name, used as the heading."
+          },
+          "from": {
+            "$ref": "#/$defs/year"
+          },
+          "to": {
+            "$ref": "#/$defs/year"
+          },
+          "location": {
+            "type": "string"
+          },
+          "hue": {
+            "description": "Which of the five timeline hues this employer takes.",
+            "enum": ["work-1", "work-2", "work-3", "work-4", "work-5", "work-6"]
+          },
+          "context": {
+            "$ref": "#/$defs/text",
+            "description": "Company size, history, framing."
+          },
+          "open_source_prefix": {
+            "type": "string",
+            "description": "Repo prefix tied to this employer, e.g. BCC for Best Comparator."
+          },
+          "roles": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["title", "projects"],
+              "properties": {
+                "title": {
+                  "$ref": "#/$defs/text"
+                },
+                "projects": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "$ref": "#/$defs/project"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "education": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["institution", "year"],
+        "properties": {
+          "institution": {
+            "$ref": "#/$defs/text"
+          },
+          "year": {
+            "type": "integer"
+          },
+          "award": {
+            "$ref": "#/$defs/text"
+          }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/skillGroup"
+      }
+    },
+    "skills_current": {
+      "description": "Stack not on the Canva CVs. Rendered as its own block.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items"],
+      "properties": {
+        "label": {
+          "$ref": "#/$defs/text"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "level"],
+        "properties": {
+          "name": {
+            "$ref": "#/$defs/text"
+          },
+          "level": {
+            "$ref": "#/$defs/text"
+          }
+        }
+      }
+    },
+    "interests": {
+      "$ref": "#/$defs/textList"
+    },
+    "metrics": {
+      "description": "Headline numbers for the homepage hero. Each must trace to a line in experience.",
+      "type": "array",
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["value", "label"],
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "label": {
+            "$ref": "#/$defs/text"
+          }
+        }
+      }
+    }
+  }
+}

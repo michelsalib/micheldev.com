@@ -1,0 +1,775 @@
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  padding: clamp(48px, 7vw, 88px) 0 clamp(40px, 5vw, 64px);
+  overflow: hidden;
+}
+
+/* Ambient hairline field, drifting on scroll. The one decorative element. */
+.field {
+  position: absolute;
+  inset: -20% -10% -30%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: linear-gradient(
+    to right,
+    var(--rule) 0 1px,
+    transparent 1px 100%
+  );
+  background-size: 84px 100%;
+  mask-image: radial-gradient(120% 80% at 20% 16%, #000 0%, transparent 72%);
+}
+
+.hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 372px);
+  gap: clamp(30px, 4.5vw, 60px);
+  align-items: start;
+}
+
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.eyebrow::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--rule);
+}
+
+.hero h1 {
+  font-size: clamp(38px, 5.6vw, 62px);
+  line-height: 1.02;
+  margin: 16px 0 0;
+}
+
+.role {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 500;
+  font-size: clamp(17px, 2.1vw, 22px);
+  line-height: 1.32;
+  letter-spacing: -0.014em;
+  color: var(--ink-2);
+  margin: 14px 0 0;
+  max-width: 30ch;
+}
+.role em {
+  font-style: normal;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.thesis {
+  margin: 20px 0 0;
+  max-width: 52ch;
+  font-size: 16.5px;
+  color: var(--ink-2);
+}
+.thesis strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.facts {
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--rule);
+}
+.facts li {
+  padding: 13px 22px 13px 0;
+  margin-right: 22px;
+  border-right: 1px solid var(--rule);
+}
+.facts li:last-child {
+  border-right: 0;
+  margin-right: 0;
+  padding-right: 0;
+}
+.facts .n {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 27px;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+.facts .l {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: block;
+  margin-top: 6px;
+}
+
+/* ── Hero panels ─────────────────────────────────────────────────────────── */
+/* Two stacked panels: the professional record, and the open source running
+   right now. Each takes its hue from the section it points into, via --ph. */
+.panels {
+  display: grid;
+  gap: 14px;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 17px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* The record panel's dot is the section hue, not the green live token: that
+   role has an end date, and a live dot would claim something untrue. The
+   projects panel does get the live token — those services are actually up. */
+.panel-head .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ph);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ph) 18%, transparent);
+  flex: none;
+}
+.panel-head .dot.is-live {
+  background: var(--live);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 20%, transparent);
+}
+.panel-head .yrs {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.panel-body {
+  padding: 15px 17px 17px;
+}
+
+.panel .co {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.018em;
+  line-height: 1.2;
+  margin: 0;
+}
+.panel .ti {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  color: var(--ph);
+  font-weight: 600;
+  margin: 5px 0 0;
+}
+.panel .cx {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  margin: 7px 0 0;
+  line-height: 1.6;
+}
+
+.panel ul.hi {
+  margin: 13px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.panel ul.hi li {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+}
+.panel ul.hi li::before {
+  content: "";
+  flex: none;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ph);
+  transform: translateY(-2px);
+}
+.panel ul.hi b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.panel ul.oss {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+}
+.panel ul.oss li {
+  border-top: 1px solid var(--rule);
+}
+.panel ul.oss li:first-child {
+  border-top: 0;
+}
+.panel ul.oss a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 9px 0;
+  transition: color 0.15s ease;
+}
+.panel ul.oss .n {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.panel ul.oss a:hover .n {
+  color: var(--ph);
+}
+.panel ul.oss .n .ld {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--live);
+  flex: none;
+  transform: translateY(-3px);
+}
+.panel ul.oss .m {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+.panel ul.oss .d {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  color: var(--ink-3);
+  grid-column: 1 / -1;
+  margin-top: -4px;
+  line-height: 1.55;
+}
+
+.panel-foot {
+  border-top: 1px solid var(--rule);
+  padding: 10px 17px;
+  background: var(--surface-2);
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+}
+.panel-foot a {
+  color: var(--ph);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.panel-foot a .ar {
+  transition: transform 0.18s ease;
+}
+.panel-foot a:hover .ar {
+  transform: translateX(3px);
+}
+
+/* ── Sections ────────────────────────────────────────────────────────────── */
+section.zone {
+  padding: clamp(46px, 6vw, 80px) 0 0;
+}
+
+.zone-grid {
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+
+.rail {
+  position: sticky;
+  top: 80px;
+}
+.rail .path {
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--hue);
+  display: block;
+}
+.rail .rule {
+  height: 2px;
+  background: var(--hue);
+  margin: 10px 0 12px;
+  transform-origin: left;
+}
+.rail .note {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  line-height: 1.65;
+  color: var(--ink-3);
+}
+
+.zone h2 {
+  font-size: clamp(24px, 3.1vw, 34px);
+  line-height: 1.1;
+  margin: 0;
+}
+
+.lede {
+  margin: 12px 0 0;
+  max-width: 62ch;
+  color: var(--ink-2);
+  font-size: 16px;
+}
+.lede a {
+  color: var(--ink);
+  border-bottom: 1px solid var(--hue);
+  font-weight: 500;
+}
+.lede a:hover {
+  color: var(--hue);
+}
+
+.sub-h {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 36px 0 0;
+}
+.sub-h::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--rule);
+}
+
+/* ── Work timeline ───────────────────────────────────────────────────────── */
+.tl {
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+
+  /* One axis for the rail and the dots, on whole pixels, so they cannot drift
+     apart or straddle a device row. Same scheme as the CV page. */
+  --rail-x: 4px;
+  --bar-w: 2px;
+  --dot-d: 8px;
+  --dot-top: 8px;
+}
+
+.tl > li {
+  position: relative;
+  padding: 0 0 26px 30px;
+}
+.tl > li:last-child {
+  padding-bottom: 2px;
+}
+
+/* Each entry draws the rail segment from its own dot down to the next one.
+   height:100% of the entry is exactly the distance between two dot centres, so
+   the rail starts at the first dot and stops at the last — no stub above the
+   first bullet and nothing dangling past the last. */
+.tl > li::after {
+  content: "";
+  position: absolute;
+  left: var(--rail-x);
+  margin-left: calc(var(--bar-w) / -2);
+  top: calc(var(--dot-top) + var(--dot-d) / 2);
+  width: var(--bar-w);
+  height: 100%;
+  background: var(--rule-strong);
+}
+.tl > li:last-child::after {
+  display: none;
+}
+
+.tl > li::before {
+  content: "";
+  position: absolute;
+  left: var(--rail-x);
+  margin-left: calc(var(--dot-d) / -2);
+  top: var(--dot-top);
+  width: var(--dot-d);
+  height: var(--dot-d);
+  border-radius: 999px;
+  background: var(--paper);
+  border: 2px solid var(--hue);
+  z-index: 1; /* the dot sits on top of the rail, not under it */
+}
+.tl > li.now::before {
+  background: var(--hue);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--hue) 16%, transparent);
+}
+
+.tl .when {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.05em;
+  color: var(--hue);
+  font-weight: 600;
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+.tl .who {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 19px;
+  letter-spacing: -0.018em;
+  margin: 4px 0 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tl .who .t {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-2);
+  letter-spacing: 0;
+}
+.tl p.b {
+  margin: 7px 0 0;
+  color: var(--ink-2);
+  font-size: 14.5px;
+  max-width: 60ch;
+}
+.tl .stack {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* ── Project rows ────────────────────────────────────────────────────────── */
+.rows {
+  margin: 10px 0 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.4fr) auto;
+  gap: 20px;
+  align-items: baseline;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--rule);
+  transition: background 0.16s ease;
+}
+.row:hover {
+  background: var(--surface-2);
+}
+.row .name {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: -0.015em;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.row .name .arrow {
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  color: var(--hue);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+.row:hover .name .arrow {
+  opacity: 1;
+  transform: none;
+}
+.row:hover .name {
+  color: var(--hue);
+}
+.row .desc {
+  color: var(--ink-2);
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+.row .desc .subs {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+.row .tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ── Archive table ───────────────────────────────────────────────────────── */
+.archive-scroll {
+  overflow-x: auto;
+  margin: 10px 0 0;
+}
+table.archive {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 520px;
+}
+table.archive th {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 400;
+  text-align: left;
+  padding: 0 14px 9px 0;
+  border-bottom: 1px solid var(--rule-strong);
+}
+table.archive th.num,
+table.archive td.num {
+  text-align: right;
+  padding-right: 0;
+}
+table.archive td {
+  padding: 10px 14px 10px 0;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-2);
+  vertical-align: baseline;
+}
+table.archive tbody tr:hover td {
+  background: var(--surface-2);
+}
+table.archive td.repo {
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+table.archive td.num {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  font-weight: 600;
+  white-space: nowrap;
+}
+table.archive td.lang {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+table.archive tfoot td {
+  border-bottom: 0;
+  padding-top: 11px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+table.archive tfoot td.num {
+  color: var(--hue);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ── Elsewhere ───────────────────────────────────────────────────────────── */
+.links {
+  margin: 14px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(228px, 1fr));
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+}
+.link {
+  padding: 17px 18px;
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: background 0.16s ease;
+}
+.link:hover {
+  background: var(--surface-2);
+}
+.link .k {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.015em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.link:hover .k {
+  color: var(--hue);
+}
+.link .k .ext {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-left: auto;
+  transition:
+    transform 0.18s ease,
+    color 0.18s ease;
+}
+.link:hover .k .ext {
+  color: var(--hue);
+  transform: translate(2px, -2px);
+}
+.link .h {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  line-height: 1.6;
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 4% cover 26%;
+    }
+    .rail .rule {
+      animation: draw linear both;
+      animation-timeline: view();
+      animation-range: entry 4% cover 22%;
+    }
+    .field {
+      animation: drift linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+
+  @keyframes drift {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-64px, -180px, 0);
+    }
+  }
+
+  .hero .in {
+    animation: rise 0.6s cubic-bezier(0.22, 0.68, 0.32, 1) both;
+  }
+  .hero .in:nth-child(1) {
+    animation-delay: 0.02s;
+  }
+  .hero .in:nth-child(2) {
+    animation-delay: 0.08s;
+  }
+  .hero .in:nth-child(3) {
+    animation-delay: 0.14s;
+  }
+  .hero .in:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+  .hero .in:nth-child(5) {
+    animation-delay: 0.26s;
+  }
+  .panels .panel {
+    animation: rise 0.68s cubic-bezier(0.22, 0.68, 0.32, 1) both;
+  }
+  .panels .panel:nth-child(1) {
+    animation-delay: 0.18s;
+  }
+  .panels .panel:nth-child(2) {
+    animation-delay: 0.27s;
+  }
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .zone-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .rail {
+    position: static;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .rail .rule {
+    flex: 1;
+    margin: 0;
+  }
+  .rail .note {
+    display: none;
+  }
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+  }
+  .row .tags {
+    justify-content: flex-start;
+  }
+  .bar nav a.hide-s {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .facts li {
+    padding-right: 15px;
+    margin-right: 15px;
+  }
+  .facts .n {
+    font-size: 23px;
+  }
+  .links {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* The archive lede sits under a sub-heading rather than a section heading. */
+.lede-tight {
+  margin-top: 12px;
+}

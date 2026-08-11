@@ -1,0 +1,112 @@
+# yaml-language-server: $schema=./projects.schema.json
+# ─────────────────────────────────────────────────────────────────────────────
+# Projects, links, and the open-source archive. Edit → commit → push.
+#
+# `services` are the deployed apps under *.micheldev.com. Their subdomains are
+# rendered from `subdomains` so the list on the page can never drift from what
+# is actually mapped in Terraform.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Shown in the hero's second panel and at the top of /projects.
+active:
+  - name: Notion connectors
+    url: https://notion-tmdb.micheldev.com
+    repo: https://github.com/michelsalib/notion-tmdb
+    live: true
+    meta: bun · gcp
+    tags: [typescript, bun, gcp]
+    blurb: >-
+      Turns a plain Notion database into a self-updating tracker — type a title,
+      the connector fills in the rest. Four sources plus two scheduled backup
+      jobs.
+    hero_blurb: >-
+      6 services on *.micheldev.com — films, books, games, theatre, and two
+      backup jobs.
+    subdomains:
+      - notion-tmdb
+      - notion-gbook
+      - notion-igdb
+      - notion-billetreduc
+      - notion-backup
+      - bitwarden-backup
+
+  - name: media-cast
+    url: https://github.com/michelsalib/media-cast
+    live: false
+    meta: typescript
+    tags: [typescript, chromecast]
+    blurb: >-
+      Streams local media straight to a Chromecast, without uploading it
+      anywhere first.
+
+  - name: audio-tray
+    url: https://github.com/michelsalib/audio-tray
+    live: false
+    meta: rust · 2026
+    tags: [rust, desktop]
+    blurb: >-
+      A tray app for switching audio devices — and my excuse to write Rust in
+      anger rather than in tutorials.
+
+  - name: updater
+    url: https://github.com/michelsalib/updater
+    live: false
+    meta: typescript · 2026
+    tags: [typescript, windows]
+    blurb: Update checking and installation for Windows desktop applications.
+
+# The Symfony2-era open source. `BCC` is Best Comparator, the company in the
+# 2011–2013 slot on the CV — the same chapter, and the page says so.
+archive:
+  heading: Open source · the Best Comparator years
+  lede: >-
+    Published while running my own company on Symfony2 — which is why they all
+    carry its initials. Archived now, but real teams installed them.
+  total_repos: 50
+  repos:
+    # Block mappings with quoted values. These were flow mappings ({ ... }) and
+    # the commas inside the descriptions were read as entry separators, so three
+    # rows silently lost half their text to phantom null keys.
+    - name: BCCCronManagerBundle
+      what: "Cron table manager for Symfony2"
+      lang: PHP
+      stars: 163
+    - name: BCCResqueBundle
+      what: "php-resque job queues, integrated into Symfony2"
+      lang: PHP
+      stars: 119
+    - name: BCCExtraToolsBundle
+      what: "Translation extractor, locale date parsing, unit conversion"
+      lang: PHP
+      stars: 93
+    - name: BCCAutoMapperBundle
+      what: "Object-to-object mapper"
+      lang: PHP
+      stars: 63
+    - name: Gi7
+      what: "A GitHub client for Windows Phone 7"
+      lang: "C#"
+      stars: 31
+    - name: BCCEnumerableUtility
+      what: "Array, string and enumerable helpers"
+      lang: PHP
+      stars: 21
+    - name: chai-shallow-deep-equal
+      what: "Shallow deep-equal assertion for Chai"
+      lang: JS
+      stars: 20
+
+# /elsewhere
+links:
+  - name: Curriculum vitae
+    url: /cv
+    host: micheldev.com/cv
+    note: page · PDF · EN and FR
+  - name: GitHub
+    url: https://github.com/michelsalib
+    host: github.com/michelsalib
+    note: 50 repos · 15 years of history
+  - name: Notion connectors
+    url: https://notion-tmdb.micheldev.com
+    host: notion-tmdb.micheldev.com
+    note: Free and hosted, no install

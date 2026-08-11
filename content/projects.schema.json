@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "micheldev.com projects, archive and links",
+  "description": "Drives the /projects section, the open-source archive table, and /elsewhere.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["active", "archive", "links"],
+
+  "properties": {
+    "active": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Current projects. Shown in the hero's second panel and under 'Running now'.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "url", "meta", "tags", "blurb"],
+        "properties": {
+          "name": { "type": "string" },
+          "url": {
+            "type": "string",
+            "pattern": "^(https://|/)",
+            "description": "Where the row links. A live service should point at the service, not the repo."
+          },
+          "repo": { "type": "string", "pattern": "^https://" },
+          "live": {
+            "type": "boolean",
+            "description": "Deployed and reachable. Grants the green live dot, which must not be claimed otherwise."
+          },
+          "meta": {
+            "type": "string",
+            "description": "Short right-aligned label in the hero panel, e.g. 'bun · gcp'."
+          },
+          "tags": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string" },
+            "description": "The first tag is painted in the section hue."
+          },
+          "blurb": { "type": "string" },
+          "hero_blurb": {
+            "type": "string",
+            "description": "Optional shorter line, used only in the hero panel."
+          },
+          "subdomains": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+              "description": "Bare label only — the apex is added when rendering."
+            },
+            "uniqueItems": true,
+            "description": "Must match the subdomains actually mapped in Terraform."
+          }
+        },
+        "dependentRequired": {
+          "subdomains": ["live"]
+        }
+      }
+    },
+
+    "archive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["heading", "lede", "total_repos", "repos"],
+      "properties": {
+        "heading": { "type": "string" },
+        "lede": { "type": "string" },
+        "total_repos": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Total public repos, for the 'N of M' footer."
+        },
+        "repos": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "what", "lang", "stars"],
+            "properties": {
+              "name": { "type": "string" },
+              "what": {
+                "type": "string",
+                "description": "Quote this if it contains a comma — see the note in projects.yaml."
+              },
+              "lang": { "type": "string" },
+              "stars": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+
+    "links": {
+      "type": "array",
+      "minItems": 1,
+      "description": "The /elsewhere grid.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "url", "host", "note"],
+        "properties": {
+          "name": { "type": "string" },
+          "url": { "type": "string", "pattern": "^(https://|/)" },
+          "host": {
+            "type": "string",
+            "description": "Displayed under the name — the bare host and path, no scheme."
+          },
+          "note": { "type": "string" }
+        }
+      }
+    }
+  }
+}

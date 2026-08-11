@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "micheldev.com site configuration",
+  "description": "Homepage copy, section headings, and the canonical/redirect hosts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["origin", "hosts", "meta", "hero", "sections", "footer"],
+
+  "$defs": {
+    "hostname": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$",
+      "description": "A bare hostname — no scheme, no path, no port."
+    },
+    "section": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "hue", "note", "heading", "lede_html"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^/[a-z0-9-]*$",
+          "description": "Rendered as the label in the section's margin rail."
+        },
+        "hue": {
+          "enum": ["work", "projects", "elsewhere"],
+          "description": "Which --h-* token the section paints with."
+        },
+        "note": {
+          "type": "string",
+          "description": "Short marginal note. Line breaks are honoured as authored."
+        },
+        "heading": { "type": "string" },
+        "lede_html": {
+          "type": "string",
+          "description": "May contain markup — one of the few fields that bypasses escaping."
+        }
+      }
+    }
+  },
+
+  "properties": {
+    "origin": {
+      "type": "string",
+      "pattern": "^https://[^/]+$",
+      "description": "Canonical origin, no trailing slash. Used for canonical URLs and the sitemap."
+    },
+
+    "hosts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical", "redirect"],
+      "properties": {
+        "canonical": { "$ref": "#/$defs/hostname" },
+        "redirect": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/hostname" },
+          "uniqueItems": true,
+          "description": "Hosts the server 301s to the canonical one, path and query preserved."
+        }
+      }
+    },
+
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "description", "locale"],
+      "properties": {
+        "title": { "type": "string", "maxLength": 70 },
+        "description": {
+          "type": "string",
+          "minLength": 50,
+          "maxLength": 320,
+          "description": "Meta description. Search engines truncate well past 160 characters."
+        },
+        "locale": { "enum": ["en", "fr"] }
+      }
+    },
+
+    "hero": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["eyebrow", "role_html", "thesis_html"],
+      "properties": {
+        "eyebrow": { "type": "string" },
+        "role_html": { "type": "string", "description": "May contain markup." },
+        "thesis_html": {
+          "type": "string",
+          "description": "May contain markup."
+        }
+      }
+    },
+
+    "sections": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["work", "projects", "elsewhere"],
+      "properties": {
+        "work": { "$ref": "#/$defs/section" },
+        "projects": { "$ref": "#/$defs/section" },
+        "elsewhere": { "$ref": "#/$defs/section" }
+      }
+    },
+
+    "footer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["note"],
+      "properties": { "note": { "type": "string" } }
+    }
+  }
+}

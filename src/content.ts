@@ -1,0 +1,206 @@
+/**
+ * Loads and types the YAML in `content/`.
+ *
+ * Translatable prose is a `{ en, fr }` map; anything factual is a bare value.
+ * `t()` collapses either shape for a given locale, so templates never branch on
+ * which form a field happens to use.
+ */
+
+import { parse } from "yaml";
+
+export const LOCALES = ["en", "fr"] as const;
+export type Locale = (typeof LOCALES)[number];
+
+export type Text = string | Record<Locale, string>;
+export type TextList = string[] | Record<Locale, string[]>;
+
+/** Resolves a translatable value for one locale. */
+export function t(value: Text | undefined, locale: Locale): string {
+  if (value === undefined) return "";
+  return typeof value === "string" ? value : (value[locale] ?? value.en);
+}
+
+/** Same, for lists. Missing entries collapse to empty rather than throwing. */
+export function tl(value: TextList | undefined, locale: Locale): string[] {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  return value[locale] ?? value.en ?? [];
+}
+
+// ── cv.yaml ──────────────────────────────────────────────────────────────────
+
+export type Fact = { label: Text; value: string | number };
+
+export type Project = {
+  name: Text;
+  lead?: Text;
+  points?: TextList;
+  scale?: Text;
+  points_extra?: TextList;
+  facts?: Fact[];
+  stack?: string[];
+};
+
+export type Role = { title: Text; projects: Project[] };
+
+/** `to: "present"` is the single switch that marks the current role. */
+export type Employment = {
+  employer: string;
+  employer_full?: Text;
+  from: number;
+  to: number | "present";
+  location?: string;
+  hue?: string;
+  context?: Text;
+  open_source_prefix?: string;
+  roles: Role[];
+};
+
+export type Cv = {
+  person: {
+    name: string;
+    location?: Text;
+    email?: string;
+    phone?: string;
+    links?: Record<string, string>;
+  };
+  privacy?: { page?: string[]; pdf?: string[] };
+  headline: Text;
+  summary: Text;
+  experience: Employment[];
+  education?: { institution: Text; year: number; award?: Text }[];
+  skills?: { group: Text; items: string[] }[];
+  skills_current?: { label?: Text; items: string[] };
+  languages?: { name: Text; level: Text }[];
+  interests?: TextList;
+  metrics?: { value: string; label: Text }[];
+};
+
+// ── site.yaml ────────────────────────────────────────────────────────────────
+
+export type SectionConfig = {
+  path: string;
+  hue: string;
+  note: string;
+  heading: string;
+  lede_html: string;
+};
+
+export type Site = {
+  origin: string;
+  hosts: { canonical: string; redirect: string[] };
+  meta: { title: string; description: string; locale: string };
+  hero: { eyebrow: string; role_html: string; thesis_html: string };
+  sections: Record<"work" | "projects" | "elsewhere", SectionConfig>;
+  footer: { note: string };
+};
+
+// ── projects.yaml ────────────────────────────────────────────────────────────
+
+export type ActiveProject = {
+  name: string;
+  url: string;
+  repo?: string;
+  live?: boolean;
+  meta: string;
+  tags: string[];
+  blurb: string;
+  hero_blurb?: string;
+  subdomains?: string[];
+};
+
+export type Projects = {
+  active: ActiveProject[];
+  archive: {
+    heading: string;
+    lede: string;
+    total_repos: number;
+    repos: { name: string; what: string; lang: string; stars: number }[];
+  };
+  links: { name: string; url: string; host: string; note: string }[];
+};
+
+// ── Loading ──────────────────────────────────────────────────────────────────
+
+export type Content = { cv: Cv; site: Site; projects: Projects };
+
+async function load<T>(path: string): Promise<T> {
+  const text = await Bun.file(path).text();
+  return parse(text) as T;
+}
+
+/**
+ * Email and phone come from the environment, never from cv.yaml.
+ *
+ * The repository is public, so anything in content/ is public — and GitHub code
+ * search indexes it, which is a well-known harvesting surface for exactly these
+ * two fields. They are supplied as CV_EMAIL and CV_PHONE (repository secrets in
+ * CI) and reach only the PDFs, which are built from the copies under .print/.
+ *
+ * cv.schema.json forbids both keys under `person`, so re-adding one to the YAML
+ * fails validation rather than quietly publishing it.
+ *
+ * Unset is a supported state: the PDFs simply print without a contact line, so a
+ * clone with no secrets still builds. CI has them, so the published PDFs do too.
+ */
+function withContact(cv: Cv): Cv {
+  const email = process.env["CV_EMAIL"]?.trim();
+  const phone = process.env["CV_PHONE"]?.trim();
+  return {
+    ...cv,
+    person: {
+      ...cv.person,
+      ...(email ? { email } : {}),
+      ...(phone ? { phone } : {}),
+    },
+  };
+}
+
+export async function loadContent(dir = "content"): Promise<Content> {
+  const [cv, site, projects] = await Promise.all([
+    load<Cv>(`${dir}/cv.yaml`),
+    load<Site>(`${dir}/site.yaml`),
+    load<Projects>(`${dir}/projects.yaml`),
+  ]);
+  return { cv: withContact(cv), site, projects };
+}
+
+// ── Derived helpers ──────────────────────────────────────────────────────────
+
+export function isCurrent(job: Employment): boolean {
+  return job.to === "present";
+}
+
+/** "2021 — 2025", or "2021 — now" for the current role. */
+export function years(job: Employment, locale: Locale): string {
+  const end =
+    job.to === "present" ? (locale === "fr" ? "auj." : "now") : job.to;
+  return `${job.from} — ${end}`;
+}
+
+/**
+ * Maps a `hue: work-3` key onto the class that sets --hue.
+ *
+ * A class, not an inline style: the CSP blocks style attributes, which made every
+ * accent fall back to --ink.
+ */
+export function hueClass(job: Employment, index: number): string {
+  const n = job.hue?.match(/^work-(\d)$/)?.[1] ?? String(index + 1);
+  return `hue-${n}`;
+}
+
+/** The same mapping as a var() reference, for contexts that need the value. */
+export function hueVar(job: Employment, index: number): string {
+  const n = job.hue?.match(/^work-(\d)$/)?.[1] ?? String(index + 1);
+  return `var(--w${n})`;
+}
+
+/** Total stars across the archive, so the figure on the page is never stale. */
+export function totalStars(projects: Projects): number {
+  return projects.archive.repos.reduce((sum, r) => sum + r.stars, 0);
+}
+
+/** The employer to feature in the homepage hero panel. */
+export function featured(cv: Cv): Employment {
+  return cv.experience.find(isCurrent) ?? (cv.experience[0] as Employment);
+}

@@ -1,0 +1,174 @@
+/**
+ * Prints /cv and /cv/fr to PDF with headless Chrome.
+ *
+ * The PDFs come from the same markup and the same `@media print` block in
+ * 04-cv.css as the page, so they cannot drift from it. The one difference is the
+ * contact line: only the copies under .print/ carry the email and phone, and
+ * those are never served or containerised.
+ *
+ * This replaced a version that put the contact line in the deployed HTML and
+ * hid it with `display: none`. That is not hiding — the text shipped in the
+ * public /cv source, where any crawler or scraper could read it. The two files
+ * that hold it now live outside dist/ entirely.
+ *
+ * Chrome is found via CHROME_PATH (set in CI), or from the usual local paths.
+ */
+
+import { existsSync } from "node:fs";
+import { handle } from "../src/server.ts";
+
+const CANDIDATES = [
+  process.env["CHROME_PATH"],
+  "/usr/bin/google-chrome",
+  "/usr/bin/google-chrome-stable",
+  "/usr/bin/chromium",
+  "/usr/bin/chromium-browser",
+  "/mnt/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+  "/mnt/c/Program Files/Microsoft/Edge/Application/msedge.exe",
+  "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
+].filter((path): path is string => Boolean(path));
+
+const PAGES = [
+  {
+    path: "/cv",
+    out: "dist/michel-salib-cv-en.pdf",
+    print: ".print/cv/index.html",
+  },
+  {
+    path: "/cv/fr",
+    out: "dist/michel-salib-cv-fr.pdf",
+    print: ".print/cv/fr/index.html",
+  },
+];
+
+/** Path -> the print copy that overrides it, for the local print server. */
+const OVERRIDES = new Map(PAGES.map((page) => [page.path, page.print]));
+
+/** A CV that runs past this is a layout bug, not a long career. */
+const MAX_PAGES = 3;
+
+/**
+ * Counts page objects in a PDF without a parser: `/Type /Page` not followed by
+ * `s`, so the `/Pages` tree node is not miscounted.
+ */
+function countPages(bytes: Uint8Array): number {
+  const text = new TextDecoder("latin1").decode(bytes);
+  return text.match(/\/Type\s*\/Page(?![s/\w])/g)?.length ?? 0;
+}
+
+function findChrome(): string {
+  const found = CANDIDATES.find((path) => existsSync(path));
+  if (!found) {
+    console.error(
+      "No Chrome found. Set CHROME_PATH, or install Chrome/Chromium.",
+    );
+    console.error("Tried:\n" + CANDIDATES.map((p) => `  ${p}`).join("\n"));
+    process.exit(1);
+  }
+  return found;
+}
+
+/**
+ * Windows binaries reached through WSL cannot read Linux paths, so when the
+ * browser lives under /mnt/c the output has to land somewhere it can write.
+ */
+function isWindowsBinary(chrome: string): boolean {
+  return chrome.startsWith("/mnt/");
+}
+
+async function main() {
+  const chrome = findChrome();
+
+  // Serve dist/ on a scratch port; Chrome prints from a real URL so relative
+  // asset paths, fonts and the stylesheet all resolve exactly as in production.
+  // The two CV paths are served from .print/ instead, so the printed copy carries
+  // the contact line while everything else — CSS, fonts, JS — comes from dist/
+  // through the production handler.
+  const server = Bun.serve({
+    port: 0,
+    async fetch(request) {
+      const override = OVERRIDES.get(new URL(request.url).pathname);
+      if (override) {
+        const file = Bun.file(override);
+        if (!(await file.exists())) {
+          throw new Error(
+            `${override} is missing — run \`bun run build\`, which writes it`,
+          );
+        }
+        return new Response(file, {
+          headers: { "content-type": "text/html; charset=utf-8" },
+        });
+      }
+
+      const headers = new Headers(request.headers);
+      headers.set("host", "localhost");
+      return handle(
+        new Request(request.url, { method: request.method, headers }),
+      );
+    },
+  });
+
+  const base = `http://localhost:${server.port}`;
+  console.log(`printing from ${base} using ${chrome}`);
+
+  try {
+    for (const page of PAGES) {
+      const target = isWindowsBinary(chrome)
+        ? `${process.env["TEMP_WIN"] ?? "C:\\Windows\\Temp"}\\${page.out.split("/").pop()}`
+        : page.out;
+
+      const proc = Bun.spawn(
+        [
+          chrome,
+          "--headless=new",
+          "--disable-gpu",
+          "--no-sandbox",
+          "--no-pdf-header-footer",
+          "--virtual-time-budget=8000",
+          `--print-to-pdf=${target}`,
+          `${base}${page.path}`,
+        ],
+        { stdout: "ignore", stderr: "pipe" },
+      );
+
+      const code = await proc.exited;
+      if (code !== 0) {
+        console.error(await new Response(proc.stderr).text());
+        throw new Error(`Chrome exited ${code} printing ${page.path}`);
+      }
+
+      if (isWindowsBinary(chrome)) {
+        // Copy back from the Windows-visible location into dist/.
+        const winPath = target.replace(/\\/g, "/").replace(/^C:/i, "/mnt/c");
+        await Bun.write(page.out, Bun.file(winPath));
+      }
+
+      const size = Bun.file(page.out).size;
+      if (size < 10_000) {
+        throw new Error(
+          `${page.out} is only ${size} bytes — print likely failed`,
+        );
+      }
+
+      // A print stylesheet can fail in a way that still produces a plausible
+      // file: the scroll-driven animations once froze at opacity 0, giving seven
+      // near-blank pages. Page count is the cheap signal that catches it.
+      const pages = countPages(await Bun.file(page.out).bytes());
+      if (pages > MAX_PAGES) {
+        throw new Error(
+          `${page.out} has ${pages} pages (max ${MAX_PAGES}) — the print ` +
+            `layout is probably broken; render it and look before raising this`,
+        );
+      }
+
+      console.log(
+        `  ${page.path} -> ${page.out} (${(size / 1024).toFixed(0)} KB, ` +
+          `${pages} page${pages === 1 ? "" : "s"})`,
+      );
+    }
+  } finally {
+    server.stop(true);
+  }
+}
+
+await main();

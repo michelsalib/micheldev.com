@@ -1,0 +1,31 @@
+{
+  "name": "micheldev.com",
+  "version": "1.0.0",
+  "description": "Michel Salib's personal site — a static hub built from YAML",
+  "type": "module",
+  "private": true,
+  "author": "michelsalib@gmail.com",
+  "license": "MIT",
+  "scripts": {
+    "build": "bun run src/build.ts",
+    "dev": "bun run src/dev.ts",
+    "start": "bun run src/server.ts",
+    "pdf": "bun run scripts/pdf.ts",
+    "validate": "bun run scripts/validate.ts",
+    "check": "biome check",
+    "fix": "biome check --write .",
+    "format": "biome format --write .",
+    "lint": "biome lint",
+    "typecheck": "bun x tsgo -p . --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.7",
+    "@types/bun": "^1.3.0",
+    "@typescript/native-preview": "^7.0.0-dev.20260707.2",
+    "ajv": "^8.17.1"
+  }
+}

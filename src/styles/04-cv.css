@@ -1,0 +1,991 @@
+/* ── Masthead ────────────────────────────────────────────────────────────── */
+.mast {
+  padding: clamp(40px, 6vw, 68px) 0 30px;
+  border-bottom: 1px solid var(--rule);
+}
+
+.mast .eyebrow {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0;
+}
+.mast h1 {
+  font-size: clamp(36px, 5.4vw, 58px);
+  line-height: 1.02;
+  margin: 14px 0 0;
+}
+.mast .headline {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 500;
+  font-size: clamp(17px, 2.1vw, 22px);
+  letter-spacing: -0.014em;
+  color: var(--h-work);
+  margin: 10px 0 0;
+}
+.mast .summary {
+  margin: 20px 0 0;
+  max-width: 62ch;
+  font-size: 16.5px;
+  color: var(--ink-2);
+}
+
+.metrics {
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--rule);
+}
+.metrics li {
+  padding: 13px 22px 13px 0;
+  margin-right: 22px;
+  border-right: 1px solid var(--rule);
+}
+.metrics li:last-child {
+  border-right: 0;
+  margin-right: 0;
+  padding-right: 0;
+}
+.metrics .n {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 27px;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+.metrics .l {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: block;
+  margin-top: 6px;
+}
+
+/* ── Language switch + download ──────────────────────────────────────────── */
+.lang-switch {
+  display: flex;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.lang-switch a {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 5px 10px;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+.lang-switch a[aria-current="true"] {
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+}
+.lang-switch a:not([aria-current="true"]):hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.dl {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--paper);
+  background: var(--ink);
+  padding: 7px 13px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease;
+}
+.dl:hover {
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+/* ── Navigable summary ───────────────────────────────────────────────────── */
+.toc {
+  position: sticky;
+  top: 54px;
+  z-index: 40;
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: saturate(140%) blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+.toc-in {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 9px 28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+}
+.toc-in::-webkit-scrollbar {
+  display: none;
+}
+
+/* Edge affordances: when the strip overflows, the hidden side fades out under a
+   chevron. Shown only on the side that can actually scroll. */
+.toc::before,
+.toc::after {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  width: 46px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.22s ease;
+  display: grid;
+  align-items: center;
+  font-family: var(--f-mono);
+  font-size: 17px;
+  line-height: 1;
+  color: var(--ink-2);
+}
+.toc::before {
+  content: "\2039";
+  left: 0;
+  justify-items: start;
+  padding-left: 9px;
+  background: linear-gradient(to right, var(--paper) 42%, transparent);
+}
+.toc::after {
+  content: "\203A";
+  right: 0;
+  justify-items: end;
+  padding-right: 9px;
+  background: linear-gradient(to left, var(--paper) 42%, transparent);
+}
+.toc.can-left::before {
+  opacity: 1;
+}
+.toc.can-right::after {
+  opacity: 1;
+}
+
+.toc .lbl {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  flex: none;
+  padding-right: 4px;
+}
+
+.toc a {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  color: var(--ink-2);
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  padding: 4px 11px;
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+.toc a .pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--hue);
+  flex: none;
+  transition: box-shadow 0.18s ease;
+}
+.toc a .yr {
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+  font-size: 10.5px;
+}
+.toc a:hover {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--hue) 55%, transparent);
+}
+.toc a[aria-current="true"] {
+  color: var(--hue);
+  font-weight: 600;
+  border-color: color-mix(in srgb, var(--hue) 60%, transparent);
+  background: color-mix(in srgb, var(--hue) 10%, transparent);
+}
+.toc a[aria-current="true"] .pip {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hue) 22%, transparent);
+}
+.toc a[aria-current="true"] .yr {
+  color: color-mix(in srgb, var(--hue) 70%, var(--ink-3));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .toc-in {
+    scroll-behavior: auto;
+  }
+}
+
+/* ── Two-column body ─────────────────────────────────────────────────────── */
+.cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 208px;
+  gap: 44px;
+  align-items: start;
+  padding: 38px 0 0;
+}
+
+aside {
+  position: sticky;
+  top: 106px;
+  display: grid;
+  gap: 26px;
+}
+
+.blk .h {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--rule-strong);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.blk dl {
+  margin: 0;
+  display: grid;
+  gap: 9px;
+  font-size: 13.5px;
+}
+.blk dl > div {
+  display: grid;
+  gap: 2px;
+}
+.blk dt {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--h-work);
+  font-weight: 600;
+}
+.blk dd {
+  margin: 0;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.blk .edu {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 13px;
+}
+.blk .edu li {
+  display: grid;
+  gap: 3px;
+}
+.blk .edu .yr {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.blk .edu .inst {
+  font-weight: 600;
+  font-size: 13.5px;
+}
+.blk .edu .aw {
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.45;
+}
+
+.blk .plain {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13.5px;
+  color: var(--ink-2);
+  display: grid;
+  gap: 5px;
+}
+
+.blk .links-list {
+  display: grid;
+  gap: 6px;
+}
+.blk .links-list a {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+.blk .links-list a:hover {
+  color: var(--h-elsewhere);
+}
+.blk .links-list a .ext {
+  color: var(--ink-3);
+  margin-left: auto;
+}
+
+.privacy {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--ink-3);
+  border: 1px dashed var(--rule-strong);
+  border-radius: 4px;
+  padding: 9px 11px;
+}
+
+/* ── The timeline ────────────────────────────────────────────────────────── */
+section.exp h2 {
+  font-size: clamp(22px, 2.8vw, 30px);
+  margin: 0 0 4px;
+}
+section.exp .sect-note {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+  margin: 0 0 22px;
+}
+
+.tl {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  /* One axis for everything on the spine. The bar and the node rings are both
+     centred on it via negative margins, so they cannot drift apart. */
+  --rail-x: 7px;
+  --bar-w: 2px;
+  --node-d: 14px;
+}
+
+/* Track and fill are the list's own two pseudo-elements — a <span> child of an
+   <ol> would be invalid markup. */
+.tl::before,
+.tl::after {
+  content: "";
+  position: absolute;
+  left: var(--rail-x);
+  width: var(--bar-w);
+  margin-left: calc(var(--bar-w) / -2);
+  /* Starts at the first node's centre, so no stub pokes out of the ring.
+     Measured in JS from the node element itself. */
+  top: var(--spine-top, 12px);
+  bottom: 6px;
+  border-radius: var(--bar-w);
+  pointer-events: none;
+}
+.tl::before {
+  background: var(--rule-strong);
+}
+.tl::after {
+  /* Even-band fallback until JS measures the real offsets — and the value used
+     if JS never runs at all. */
+  background: var(
+    --spine,
+    linear-gradient(var(--w1), var(--w2), var(--w3), var(--w4), var(--w5))
+  );
+  /* Default fully revealed: without scroll-driven animation support the reader
+     still gets a complete, correct spine. */
+  clip-path: inset(0 0 0 0);
+}
+
+.job {
+  position: relative;
+  padding: 0 0 34px 34px;
+  scroll-margin-top: 116px;
+}
+.job:last-child {
+  padding-bottom: 6px;
+}
+
+.job > .node {
+  position: absolute;
+  left: var(--rail-x);
+  margin-left: calc(var(--node-d) / -2);
+  top: 5px;
+  width: var(--node-d);
+  height: var(--node-d);
+  border-radius: 999px;
+  background: var(--paper);
+  border: 2px solid var(--hue);
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+.job > .node::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--hue);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.job.current > .node::after {
+  opacity: 1;
+}
+
+.job-head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.job-head .co {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+}
+.job-head .yrs {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hue);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
+.job-head .loc {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+.job .ctx {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+  margin: 6px 0 0;
+  line-height: 1.6;
+}
+
+.role-blk {
+  margin: 18px 0 0;
+}
+.role-blk > .rt {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin: 0 0 12px;
+}
+.role-blk > .rt::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--rule);
+}
+
+.proj {
+  border-left: 2px solid var(--rule);
+  padding: 0 0 0 16px;
+  margin: 0 0 16px;
+}
+.proj:last-child {
+  margin-bottom: 0;
+}
+.proj:hover {
+  border-left-color: var(--hue);
+}
+
+.proj .pn {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 15.5px;
+  letter-spacing: -0.012em;
+  margin: 0;
+}
+.proj .pl {
+  margin: 4px 0 0;
+  color: var(--ink-2);
+  font-size: 14.5px;
+  max-width: 62ch;
+}
+
+.proj ul {
+  margin: 9px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 5px;
+}
+.proj ul li {
+  display: flex;
+  gap: 9px;
+  align-items: baseline;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+.proj ul li::before {
+  content: "";
+  flex: none;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--rule-strong);
+  transform: translateY(-2px);
+}
+
+.proj .scale {
+  margin: 10px 0 0;
+  font-size: 13.5px;
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.proj .pf {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 10px 0 0;
+}
+.pf .kv {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 3px;
+  padding: 3px 8px;
+}
+.pf .kv .v {
+  font-family: var(--f-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--hue);
+  font-variant-numeric: tabular-nums;
+}
+.pf .kv .k {
+  font-family: var(--f-mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.proj .stack {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 11px 0 0;
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    /* Paced against document scroll across exactly the spine's own height, so
+       the colour boundary holds a fixed line on screen instead of sweeping
+       across it. Neither view() range works here: the boundary's offset from
+       the viewport top is progress × viewport height, so `cover` ends up at the
+       very top (last employer left grey) and `contain` starts there (first half
+       left grey). Range measured in JS — see layoutSpine in cv.ts. clip-path
+       rather than scaleY, so the gradient reveals instead of squashing. */
+    .tl::after {
+      animation: fill linear both;
+      animation-timeline: scroll(root block);
+      animation-range: var(--fill-from, 0px) var(--fill-to, 100%);
+    }
+
+    /* Opacity only, never translate: .job carries the node, and the spine lives
+       on .tl. Transforming the job slides its node off the rail while the rail
+       stays put — and offsetTop cannot see it, so the gradient boundaries would
+       silently desync too. The rise gesture goes to .proj, which carries no
+       rail furniture. */
+    .job {
+      animation: fade linear both;
+      animation-timeline: view();
+      animation-range: entry 3% cover 24%;
+    }
+    .proj {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 5% cover 30%;
+    }
+    .metrics li {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 2% cover 20%;
+    }
+    .blk {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 2% cover 22%;
+    }
+  }
+
+  .mast .in {
+    animation: rise 0.6s cubic-bezier(0.22, 0.68, 0.32, 1) both;
+  }
+  .mast .in:nth-child(1) {
+    animation-delay: 0.02s;
+  }
+  .mast .in:nth-child(2) {
+    animation-delay: 0.08s;
+  }
+  .mast .in:nth-child(3) {
+    animation-delay: 0.14s;
+  }
+  .mast .in:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 880px) {
+  .cols {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+  aside {
+    position: static;
+    order: 2;
+  }
+  section.exp {
+    order: 1;
+  }
+  .bar .here {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .metrics li {
+    padding-right: 15px;
+    margin-right: 15px;
+  }
+  .metrics .n {
+    font-size: 23px;
+  }
+  .dl span.t {
+    display: none;
+  }
+}
+
+/* Hidden on screen, shown by the print block below. Must stay ABOVE that
+   block: same specificity, so whichever comes last wins. */
+.print-contact {
+  display: none;
+}
+
+/* Print MUST come last in this file. A4 at 12mm margins is about 703 CSS px, so
+   the max-width:880px block below applies while printing too — and at equal
+   specificity the later rule wins. When print sat above it, `aside { order: 2 }`
+   overrode the print order and pushed the skills band to the end of the PDF. */
+/* ── Print: this is exactly what CI turns into the PDF ───────────────────── */
+@media print {
+  :root {
+    --paper: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #ffffff;
+    --ink: #111111;
+    --ink-2: #333333;
+    --ink-3: #666666;
+    --rule: #dddddd;
+    --rule-strong: #bbbbbb;
+    /* Darkened for ink — the screen hues are too light on paper. */
+    --w1: #3d1fc4;
+    --w2: #16459b;
+    --w3: #075662;
+    --w4: #91134f;
+    --w5: #6f4106;
+    --w6: #8e1f2a;
+  }
+
+  @page {
+    size: A4;
+    margin: 11mm 12mm 12mm;
+  }
+
+  /* Scroll-driven animations have no scrollport when printing, so they freeze on
+     their `from` keyframe — opacity 0 — and the CV prints blank while the
+     translated boxes still take up space. `!important` on purpose: a silently
+     empty PDF is far worse than an over-strong declaration, and this must not
+     break if the motion rules are ever moved after this block. */
+  .job,
+  .proj,
+  .metrics li,
+  .blk,
+  .mast .in,
+  .tl::after {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+
+  .bar,
+  .toc,
+  footer,
+  .privacy,
+  .skip {
+    display: none;
+  }
+
+  /* Everything below is sized in pt. The screen sheet is in px, which survives
+     into print as 1/96in and prints a third too large for a CV. */
+  body {
+    font-size: 9pt;
+    line-height: 1.36;
+    overflow-x: visible;
+  }
+  .wrap {
+    max-width: none;
+    padding: 0;
+  }
+
+  .mast {
+    padding: 0 0 9pt;
+  }
+  .mast .eyebrow {
+    font-size: 7.5pt;
+  }
+  .mast h1 {
+    font-size: 20pt;
+    margin-top: 3pt;
+  }
+  .mast .headline {
+    font-size: 11pt;
+    margin-top: 3pt;
+  }
+  .mast .summary {
+    font-size: 9pt;
+    margin-top: 5pt;
+    max-width: none;
+  }
+  .metrics {
+    margin-top: 9pt;
+  }
+  .metrics li {
+    padding: 5pt 11pt 5pt 0;
+    margin-right: 11pt;
+  }
+  .metrics .n {
+    font-size: 14pt;
+  }
+  .metrics .l {
+    font-size: 7pt;
+    margin-top: 2pt;
+  }
+
+  /* Chrome fragments a two-column grid badly across pages — the aside ended up
+     alone on pages 6 and 7. Single column instead, with the aside promoted above
+     the experience as a compact band, so skills stay on page one where a
+     recruiter looks for them. */
+  .cols {
+    display: flex;
+    flex-direction: column;
+    gap: 8pt;
+    padding-top: 8pt;
+  }
+  aside {
+    order: 0;
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7pt 14pt;
+  }
+  section.exp {
+    order: 1;
+  }
+
+  .blk .h {
+    font-size: 7pt;
+    padding-bottom: 3pt;
+    margin-bottom: 5pt;
+  }
+  .blk dl {
+    gap: 5pt;
+    font-size: 9pt;
+  }
+  .blk dt {
+    font-size: 7pt;
+  }
+  .blk .edu {
+    gap: 6pt;
+  }
+  .blk .edu .yr {
+    font-size: 7.5pt;
+  }
+  .blk .edu .inst {
+    font-size: 9pt;
+  }
+  .blk .edu .aw {
+    font-size: 8.2pt;
+  }
+  .blk .plain {
+    font-size: 9pt;
+    gap: 2pt;
+  }
+  .blk .links-list a {
+    font-size: 8.2pt;
+  }
+
+  section.exp h2 {
+    font-size: 13pt;
+    margin-bottom: 2pt;
+  }
+  section.exp .sect-note {
+    font-size: 8pt;
+    margin-bottom: 9pt;
+  }
+
+  /* No spine on paper: hide the rail and the rings, and reclaim the indent. */
+  .tl::before,
+  .tl::after {
+    display: none;
+  }
+  .job > .node {
+    display: none;
+  }
+  .job {
+    padding: 0 0 8pt 0;
+    /* `avoid` here stranded up to a third of a page whenever a tall employer did
+       not fit. Splitting an employer across pages is fine; splitting one project
+       is not, so the constraint belongs on .proj. */
+    break-inside: auto;
+  }
+  .job:last-child {
+    padding-bottom: 0;
+  }
+  .job-head .co {
+    font-size: 11.5pt;
+  }
+  .job-head .yrs {
+    font-size: 8.5pt;
+  }
+  .job-head .loc {
+    font-size: 8pt;
+  }
+  .job .ctx {
+    font-size: 7.5pt;
+    margin-top: 3pt;
+  }
+
+  /* Never strand a heading at the foot of a page. `break-after: avoid` pulls the
+     employer name, its context line and the role title onto the next page along
+     with the content they introduce — otherwise "London Stock Exchange / NEWS
+     SENIOR LEAD DEVELOPER" sits alone at the bottom and its projects start
+     overleaf. orphans/widows do the same job inside running text. */
+  .job-head,
+  .job .ctx,
+  .role-blk > .rt,
+  .proj .pn,
+  section.exp h2,
+  section.exp .sect-note,
+  .blk .h {
+    break-after: avoid;
+  }
+
+  p,
+  .proj ul li {
+    orphans: 3;
+    widows: 3;
+  }
+
+  .role-blk {
+    margin-top: 6pt;
+  }
+  .role-blk > .rt {
+    font-size: 8.5pt;
+    margin-bottom: 6pt;
+  }
+
+  .proj {
+    margin-bottom: 5pt;
+    padding-left: 9pt;
+    border-left-width: 1.5pt;
+    break-inside: avoid;
+  }
+  .proj .pn {
+    font-size: 10pt;
+  }
+  .proj .pl {
+    font-size: 8.8pt;
+    margin-top: 2pt;
+    max-width: none;
+  }
+  .proj ul {
+    gap: 1.5pt;
+    margin-top: 3pt;
+  }
+  .proj ul li {
+    font-size: 8.5pt;
+  }
+  .proj .scale {
+    font-size: 8.5pt;
+    margin-top: 4pt;
+  }
+  .proj .pf,
+  .proj .stack {
+    margin-top: 4pt;
+    gap: 3.5pt;
+  }
+
+  .tag {
+    font-size: 7pt;
+    padding: 1.5pt 4pt;
+  }
+  .pf .kv {
+    padding: 1.5pt 5pt;
+  }
+  .pf .kv .v {
+    font-size: 9pt;
+  }
+  .pf .kv .k {
+    font-size: 6.5pt;
+  }
+
+  /* Print-only, and now in the masthead rather than the aside: on paper contact
+     details belong beside the name, and in the three-column band it cost a whole
+     row — which pushed the CV onto a fourth page. */
+  .print-contact {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 8pt;
+    color: var(--ink-2);
+    margin: 6pt 0 0;
+    letter-spacing: 0.02em;
+  }
+}
