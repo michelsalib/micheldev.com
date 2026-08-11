@@ -16,7 +16,7 @@ import {
   totalStars,
   years,
 } from "../content.ts";
-import { html, join, lines, type Renderable, raw } from "../html.ts";
+import { html, htmlLines, join, type Renderable, raw } from "../html.ts";
 import { type Assets, documentHead, footer, topBarHome } from "../partials.ts";
 
 const LOCALE = "en" as const;
@@ -59,7 +59,7 @@ function workSection({ cv, site }: Content): Renderable {
         <div class="rail">
           <span class="path">${section.path}</span>
           <div class="rule"></div>
-          <p class="note">${lines(section.note)}</p>
+          <p class="note">${htmlLines(section.note_html)}</p>
         </div>
         <div>
           <div class="reveal">
@@ -111,7 +111,7 @@ function projectsSection({ site, projects }: Content): Renderable {
         <div class="rail">
           <span class="path">${section.path}</span>
           <div class="rule"></div>
-          <p class="note">${lines(section.note)}</p>
+          <p class="note">${htmlLines(section.note_html)}</p>
         </div>
         <div>
           <div class="reveal">
@@ -206,7 +206,7 @@ function elsewhereSection({ site, projects }: Content): Renderable {
         <div class="rail">
           <span class="path">${section.path}</span>
           <div class="rule"></div>
-          <p class="note">${lines(section.note)}</p>
+          <p class="note">${htmlLines(section.note_html)}</p>
         </div>
         <div>
           <div class="reveal">

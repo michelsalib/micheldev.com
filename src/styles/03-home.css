@@ -338,6 +338,23 @@ section.zone {
   color: var(--ink-3);
 }
 
+/* The /work note links to the CV page, and base CSS sets `a { color: inherit;
+   text-decoration: none }` — so without this the link is clickable and looks
+   exactly like the prose around it, which defeats the point of linking it.
+   Quieter than `.lede a` on purpose: this is 11px mono sitting in the margin, so
+   full --ink weight with a solid hue rule would pull the eye off the heading. */
+.rail .note a {
+  color: var(--ink-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--hue) 55%, transparent);
+  transition:
+    color 0.16s ease,
+    border-color 0.16s ease;
+}
+.rail .note a:hover {
+  color: var(--ink);
+  border-bottom-color: var(--hue);
+}
+
 .zone h2 {
   font-size: clamp(24px, 3.1vw, 34px);
   line-height: 1.1;

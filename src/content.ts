@@ -81,7 +81,7 @@ export type Cv = {
 export type SectionConfig = {
   path: string;
   hue: string;
-  note: string;
+  note_html: string;
   heading: string;
   lede_html: string;
 };

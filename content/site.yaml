@@ -45,10 +45,10 @@ sections:
   work:
     path: /work
     hue: work
-    note: |
+    note_html: |
       Summary here.
       Detail on the
-      CV page.
+      <a href="/cv">CV page</a>.
     # "Financial news" was accurate until Matchem, which is horse racing, sat at
     # the top of this timeline. And the count was hardcoded at four while the
     # timeline renders six — so it is gone rather than corrected, because the
@@ -62,7 +62,7 @@ sections:
   projects:
     path: /projects
     hue: projects
-    note: |
+    note_html: |
       Nights and
       weekends. Built
       because I wanted
@@ -75,7 +75,7 @@ sections:
   elsewhere:
     path: /elsewhere
     hue: elsewhere
-    note: |
+    note_html: |
       Everything else
       with my name
       attached.

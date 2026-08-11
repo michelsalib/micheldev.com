@@ -6,7 +6,7 @@ import {
   loadContent,
   totalStars,
 } from "../src/content.ts";
-import { escapeHtml, html, lines, raw } from "../src/html.ts";
+import { escapeHtml, html, htmlLines, raw } from "../src/html.ts";
 
 let home = "";
 let cvEn = "";
@@ -35,8 +35,13 @@ describe("html helpers", () => {
     expect(escapeHtml(`" '`)).toBe("&quot; &#39;");
   });
 
-  test("lines() keeps authored breaks and still escapes", () => {
-    expect(String(lines("a\n<b>"))).toBe("a<br>&lt;b&gt;");
+  test("htmlLines() keeps authored breaks and passes markup through", () => {
+    // Unescaped by contract — it only ever receives *_html fields, which is what
+    // lets the /work marginal note carry a link to the CV page.
+    expect(String(htmlLines('a\n<a href="/cv">b</a>'))).toBe(
+      'a<br><a href="/cv">b</a>',
+    );
+    expect(String(htmlLines("trailing\n"))).toBe("trailing");
   });
 
   test("nullish and false render as nothing, not as text", () => {
@@ -138,6 +143,18 @@ describe("content is rendered, not invented", () => {
       expect(home).toContain("<span>Most recent</span>");
     }
     expect(home).toContain(job.employer);
+  });
+
+  test("the /work marginal note links to the CV, and is styled as a link", async () => {
+    // The note is a *_html field so it can carry this anchor. Base CSS strips
+    // colour and underline from every `a`, so the markup alone would render a
+    // link that looks exactly like the prose beside it — assert both halves.
+    expect(home).toContain('<a href="/cv">CV page</a>');
+
+    const href = home.match(/\/assets\/home\.[0-9a-z]{8}\.css/)?.[0];
+    const css = await Bun.file(`dist${href}`).text();
+    expect(css).toMatch(/\.rail \.note a\{[^}]*color:var\(--ink-2\)/);
+    expect(css).toMatch(/\.rail \.note a\{[^}]*border-bottom:/);
   });
 
   test("star total is summed from the data, never hardcoded", async () => {
