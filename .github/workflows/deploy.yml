@@ -130,7 +130,12 @@ jobs:
           # variable defaults to "" in variables.tf, budget.tf is `count =
           # billing_account == "" ? 0 : 1`, so an absent value means count = 0 —
           # every CI apply deleted the budget and every local apply recreated it.
-          TF_VAR_billing_account: ${{ vars.BILLING_ACCOUNT }}
+          # A secret rather than a variable, purely so the logs mask it: GitHub
+          # prints the env block of every run step, variables are not masked, and
+          # this repository is public. Not a credential — a billing account id is
+          # useless without IAM — but it is a financial identifier and there is no
+          # reason to publish it.
+          TF_VAR_billing_account: ${{ secrets.BILLING_ACCOUNT }}
         run: terraform apply -auto-approve
 
       - name: Smoke test the new revision
