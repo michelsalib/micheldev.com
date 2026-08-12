@@ -33,7 +33,7 @@ active:
   - name: media-cast
     url: https://github.com/michelsalib/media-cast
     live: false
-    meta: typescript
+    meta: typescript · win
     tags: [typescript, chromecast]
     blurb: >-
       Streams local media straight to a Chromecast, without uploading it
@@ -42,7 +42,7 @@ active:
   - name: audio-tray
     url: https://github.com/michelsalib/audio-tray
     live: false
-    meta: rust · 2026
+    meta: rust · win
     tags: [rust, desktop]
     blurb: >-
       A tray app for switching audio devices — and my excuse to write Rust in
@@ -51,7 +51,7 @@ active:
   - name: updater
     url: https://github.com/michelsalib/updater
     live: false
-    meta: typescript · 2026
+    meta: typescript · win
     tags: [typescript, windows]
     blurb: Update checking and installation for Windows desktop applications.
 
