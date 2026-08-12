@@ -19,27 +19,38 @@ hosts:
 
 meta:
   title: Michel Salib — web lead developer, Paris
+  # Present-first, same as the hero. Matchem lands around character 85, well
+  # inside the ~160 a search engine actually renders — the former employers
+  # carry the search volume, but the current one has to survive the truncation.
   description: >-
-    Michel Salib, web lead developer in Paris. Fifteen years of realtime
-    financial-news platforms at London Stock Exchange, Refinitiv and Thomson
-    Reuters, plus open source with 510 GitHub stars.
+    Michel Salib, web lead developer in Paris. Realtime data platforms — horse
+    racing at Matchem, fifteen years of financial news at London Stock Exchange,
+    Refinitiv and Thomson Reuters. Open source, 510 GitHub stars.
   locale: en
 
 hero:
   eyebrow: Paris, France
   # The through-line, not a job list: the domain changed from financial news to
-  # horse racing, the problem shape did not. Keep the current employer in here —
-  # the panel beside it names Matchem, and an opening paragraph that starts at
-  # London Stock Exchange reads as out of date next to it.
+  # horse racing, the problem shape did not. Present tense first, because the
+  # panel beside this opens on "Currently — Matchem", and a paragraph that
+  # starts at Thomson Reuters reads as out of date next to it.
+  #
+  # Every employer is named here, current one included, so the paragraph stands
+  # on its own — it is the first thing read, and it also gets lifted out of
+  # context by anything quoting the page. The panel beside it says "Matchem"
+  # too; that repetition is accepted, not an oversight.
+  #
+  # The old numbers (150k+, 10M+, twenty developers) are deliberately gone from
+  # the prose: the facts strip directly below the paragraph already renders them
+  # verbatim from cv.yaml `metrics`.
   role_html: >-
     I build <em>realtime data platforms</em>, and lead the teams that run them.
   thesis_html: >-
-    Fifteen years on one problem: move a lot of data to a lot of people, fast,
-    without going down. Financial news at <strong>Thomson Reuters</strong>,
-    Refinitiv and the <strong>London Stock Exchange</strong> — where that meant
-    150k+ monthly readers, 10M+ API requests a day and twenty developers — and
-    horse racing at <strong>Matchem</strong> today. Before any of it, founder and
-    CTO of my own company.
+    Right now: a horse-racing data platform at <strong>Matchem</strong>, rebuilt
+    from scratch — stack, architecture, practices. The fifteen years before
+    that: financial news at <strong>Thomson Reuters</strong>, Refinitiv and the
+    <strong>London Stock Exchange</strong>, the same problem with more people
+    watching. Before any of it, founder and CTO of my own company.
 
 sections:
   projects:
