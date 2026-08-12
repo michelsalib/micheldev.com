@@ -391,7 +391,7 @@ skills:
   - group: Dev
     items: [TypeScript, Node.js, NestJS, Angular, Web Components, HTTP APIs]
   - group: Cloud
-    items: [AWS, Azure, Docker]
+    items: [AWS, GCP, Azure, Docker]
   - group: DB
     items: [DocumentDB, Redis, SQL]
   - group:

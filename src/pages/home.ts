@@ -1,5 +1,5 @@
 /**
- * The homepage: a hub index. Career leads, projects follow, links close.
+ * The homepage: a hub index. Projects lead, career follows, links close.
  *
  * The work timeline and the hero metrics come from cv.yaml, so the homepage can
  * never disagree with the CV.
@@ -248,31 +248,6 @@ function heroPanels(content: Content): Renderable {
 
   return html`<div class="panels">
     <div
-      class="panel ph-work"
-      aria-label="${current ? "Current role" : "Most recent role"}"
-    >
-      <div class="panel-head">
-        <span
-          class="dot${raw(current ? " is-live" : "")}"
-          aria-hidden="true"
-        ></span>
-        <span>${current ? "Currently" : "Most recent"}</span>
-        <span class="yrs">${years(job, LOCALE)}</span>
-      </div>
-      <div class="panel-body">
-        <p class="co">${t(job.employer_full, LOCALE) || job.employer}</p>
-        <p class="ti">${t(role?.title, LOCALE)}</p>
-        ${job.context ? html`<p class="cx">${t(job.context, LOCALE)}</p>` : ""}
-        <ul class="hi">
-          ${highlights.map((item) => html`<li><span>${item}</span></li>`)}
-        </ul>
-      </div>
-      <div class="panel-foot">
-        <a href="/cv">Full CV — page and PDF <span class="ar">&rarr;</span></a>
-      </div>
-    </div>
-
-    <div
       class="panel ph-projects"
       aria-label="Open source running now"
     >
@@ -309,6 +284,31 @@ function heroPanels(content: Content): Renderable {
           >All projects — ${totalStars(projects)} stars
           <span class="ar">&rarr;</span></a
         >
+      </div>
+    </div>
+
+    <div
+      class="panel ph-work"
+      aria-label="${current ? "Current role" : "Most recent role"}"
+    >
+      <div class="panel-head">
+        <span
+          class="dot${raw(current ? " is-live" : "")}"
+          aria-hidden="true"
+        ></span>
+        <span>${current ? "Currently" : "Most recent"}</span>
+        <span class="yrs">${years(job, LOCALE)}</span>
+      </div>
+      <div class="panel-body">
+        <p class="co">${t(job.employer_full, LOCALE) || job.employer}</p>
+        <p class="ti">${t(role?.title, LOCALE)}</p>
+        ${job.context ? html`<p class="cx">${t(job.context, LOCALE)}</p>` : ""}
+        <ul class="hi">
+          ${highlights.map((item) => html`<li><span>${item}</span></li>`)}
+        </ul>
+      </div>
+      <div class="panel-foot">
+        <a href="/cv">Full CV — page and PDF <span class="ar">&rarr;</span></a>
       </div>
     </div>
   </div>`;
@@ -351,7 +351,7 @@ export function homePage(content: Content, assets: Assets): string {
           </div>
         </div>
       </section>
-      ${workSection(content)} ${projectsSection(content)}
+      ${projectsSection(content)} ${workSection(content)}
       ${elsewhereSection(content)}
     </main>
     ${footer(site)}`,

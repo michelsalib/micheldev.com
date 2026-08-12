@@ -42,6 +42,19 @@ hero:
     CTO of my own company.
 
 sections:
+  projects:
+    path: /projects
+    hue: projects
+    note_html: |
+      Nights and
+      weekends. Built
+      because I wanted
+      to use them.
+    heading: What I build when nobody is paying me
+    lede_html: >-
+      Day job is realtime finance at scale. These are the opposite: small,
+      finished, and running on infrastructure I pay for myself — six services
+      under this domain, one repository, one deploy.
   work:
     path: /work
     hue: work
@@ -59,19 +72,6 @@ sections:
       people, fast, without going down. Full detail — projects, numbers, stacks
       — lives on the <a href="/cv">CV page</a>, generated from the same file as
       this timeline.
-  projects:
-    path: /projects
-    hue: projects
-    note_html: |
-      Nights and
-      weekends. Built
-      because I wanted
-      to use them.
-    heading: What I build when nobody is paying me
-    lede_html: >-
-      Day job is realtime finance at scale. These are the opposite: small,
-      finished, and running on infrastructure I pay for myself — six services
-      under this domain, one repository, one deploy.
   elsewhere:
     path: /elsewhere
     hue: elsewhere

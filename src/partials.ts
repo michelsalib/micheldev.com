@@ -104,8 +104,8 @@ export function topBarHome(): Renderable {
     <div class="bar-in">
       <a class="wordmark" href="/"><b>micheldev</b><span>.com</span></a>
       <nav>
-        <a href="#work" class="nav-link hide-s">work</a>
         <a href="#projects" class="nav-link hide-s">projects</a>
+        <a href="#work" class="nav-link hide-s">work</a>
         <a href="#elsewhere" class="nav-link hide-s">elsewhere</a>
         <a href="/cv" class="nav-link cv">cv&nbsp;&rarr;</a>
         ${themeToggle()}

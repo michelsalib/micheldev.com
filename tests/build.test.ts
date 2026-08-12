@@ -235,7 +235,7 @@ describe("content is rendered, not invented", () => {
     const offenders: string[] = [];
 
     for await (const entry of glob.scan({ cwd: ".", dot: false })) {
-      if (/^(node_modules|dist|mockups|\.print|\.git)\//.test(entry)) continue;
+      if (/^(node_modules|dist|\.print|\.git)\//.test(entry)) continue;
       const text = await Bun.file(entry).text();
 
       // Any French mobile, however it is spaced or punctuated.

@@ -7,8 +7,9 @@
  */
 
 const BLEND = 190; // total px of cross-fade at each colour boundary
-const TAIL = 6; // matches the bar's bottom inset in CSS
+const SETTLE = 40; // px of scroll still to spare once the spine is full
 const READ_LINE_RATIO = 0.5; // where down the viewport the colour boundary sits
+const LIT_SPAN = 3; // half-width, in % of view progress, of a node's light-up
 
 const timeline = document.querySelector<HTMLElement>(".tl");
 const jobs = Array.from(document.querySelectorAll<HTMLElement>(".job"));
@@ -36,7 +37,15 @@ function layoutSpine(): void {
 
   const centres = jobs.map(nodeCentre);
   const head = centres[0] as number;
-  const end = timeline.offsetHeight - TAIL;
+
+  // The rail ends a short run-out past the last node rather than at the foot of
+  // its text — see --runout in 04-cv.css for why. Read from CSS so the run-out
+  // and the end-cap that marks it stay one number.
+  const runout =
+    Number.parseFloat(
+      getComputedStyle(timeline).getPropertyValue("--runout"),
+    ) || 0;
+  const end = (centres[centres.length - 1] as number) + runout;
   const span = end - head;
 
   // Pull the bar's start down to the first node, so the ring is not pierced.
@@ -44,6 +53,7 @@ function layoutSpine(): void {
   // device rows and read as off-centre against the ring.
   timeline.style.setProperty("--spine-top", `${Math.round(head)}px`);
   if (span <= 0) return;
+  timeline.style.setProperty("--spine-h", `${Math.round(span)}px`);
 
   // Each boundary gets its own fade, capped at 40% of the shorter neighbour so
   // a short band always keeps a solid core instead of being washed out.
@@ -83,11 +93,15 @@ function layoutSpine(): void {
   const from = Math.round(spineTopDoc - readLine);
   let to = Math.round(spineTopDoc - readLine + span);
 
-  // The ideal end can sit past the last scroll position the page can reach — the
-  // spine runs almost to the bottom of the document, so its final stretch is
-  // only ever seen low in the viewport. Without this clamp the bar tops out
-  // short of 100% and the last employer stays grey at the bottom of the page.
-  if (to > maxScroll) to = maxScroll;
+  // The ideal end can still sit past the last scroll position the page can
+  // reach, on a tall viewport or a short document. Without a clamp the bar tops
+  // out short of 100% and the last employer stays grey. Clamping to SETTLE short
+  // of the bottom rather than to the bottom itself matters: landing exactly on
+  // maxScroll means the spine only completes on the final pixel of the page —
+  // which reads as a spine frozen just shy of its own tip, because the reader
+  // runs out of scroll at the same instant. The cost is that the boundary drifts
+  // from the reading line over the clamped stretch, which is far less visible.
+  if (to > maxScroll - SETTLE) to = maxScroll - SETTLE;
   if (to <= from) to = from + 1;
 
   timeline.style.setProperty("--fill-from", `${from}px`);
@@ -149,6 +163,34 @@ function relayout(): void {
   paintEdges();
 }
 
+/**
+ * Hands the reading line to the node light-up in CSS, so READ_LINE_RATIO stays
+ * the only place that constant lives.
+ *
+ * A node's `view()` progress is a `cover` range of viewport + node height, so
+ * with a 14px node it is just how far up the viewport the node has travelled —
+ * and it runs the opposite way to the ratio, 0 being the bottom edge. Hence
+ * 1 - ratio. The node-height term cancels exactly at 0.5 and is a fraction of a
+ * percent either side of it, so this needs no remeasuring on resize.
+ */
+function primeLitRange(): void {
+  const mid = (1 - READ_LINE_RATIO) * 100;
+  const set = (name: string, value: number): void =>
+    timeline?.style.setProperty(name, `${value.toFixed(1)}%`) as undefined;
+
+  // A node lights as the front sweeps through it, so its range straddles the
+  // line.
+  set("--lit-a", mid - LIT_SPAN);
+  set("--lit-b", mid + LIT_SPAN);
+
+  // The end-cap is where the front stops rather than something it passes, so its
+  // range ends on the line: it is finished the moment the fill lands on it,
+  // instead of being caught half-lit with the spine already full.
+  set("--cap-a", mid - 2 * LIT_SPAN);
+  set("--cap-b", mid);
+}
+
+primeLitRange();
 relayout();
 // Fonts land after first paint and shift every offset.
 document.fonts?.ready.then(relayout);

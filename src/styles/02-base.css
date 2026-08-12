@@ -260,6 +260,25 @@ footer {
 }
 
 /* ── Motion primitives ───────────────────────────────────────────────────── */
+/* How far down the CV spine the fill has reached. Registered so it interpolates
+   as a percentage rather than as an uninterpolable token, which is what lets the
+   spine's leading edge be a soft mask instead of a hard clip. Top level, because
+   @property cannot be nested in @media. */
+@property --fill-p {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 100%;
+}
+
+/* A CV timeline node's colour, once the fill has reached it. Registered so it
+   interpolates as a colour, and inherited so the node's inner dot picks it up.
+   The initial value never shows: .job > .node always declares it. */
+@property --lit {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #0000;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @keyframes rise {
     from {
@@ -289,10 +308,30 @@ footer {
   }
   @keyframes fill {
     from {
-      clip-path: inset(0 0 100% 0);
+      --fill-p: 0%;
     }
     to {
-      clip-path: inset(0 0 0 0);
+      --fill-p: 100%;
+    }
+  }
+  @keyframes node-lit {
+    from {
+      --lit: var(--rule-strong);
+      transform: scale(0.86);
+    }
+    to {
+      --lit: var(--hue);
+      transform: scale(1);
+    }
+  }
+  /* The spine's end-cap takes the colour but not the pop: a terminus lights as
+     the fill lands on it, it does not arrive. */
+  @keyframes cap-lit {
+    from {
+      --lit: var(--rule-strong);
+    }
+    to {
+      --lit: var(--hue);
     }
   }
 }

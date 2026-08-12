@@ -7,13 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "**",
-      "!**/dist",
-      "!**/node_modules",
-      "!**/mockups",
-      "!**/infra/.terraform"
-    ]
+    "includes": ["**", "!**/dist", "!**/node_modules", "!**/infra/.terraform"]
   },
   "formatter": {
     "enabled": true,

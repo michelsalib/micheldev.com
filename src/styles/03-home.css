@@ -121,8 +121,8 @@
 }
 
 /* ── Hero panels ─────────────────────────────────────────────────────────── */
-/* Two stacked panels: the professional record, and the open source running
-   right now. Each takes its hue from the section it points into, via --ph. */
+/* Two stacked panels: the open source running right now, and the professional
+   record. Each takes its hue from the section it points into, via --ph. */
 .panels {
   display: grid;
   gap: 14px;

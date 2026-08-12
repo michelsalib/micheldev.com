@@ -146,7 +146,6 @@ src/
 scripts/          validate, pdf
 infra/            Terraform
 tests/            build output, server behaviour, print cascade
-mockups/          the design explorations this was built from
 ```
 
 `src/html.ts` escapes every interpolated value. Markup has to come through

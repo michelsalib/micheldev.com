@@ -393,6 +393,16 @@ section.exp .sect-note {
   --rail-x: 7px;
   --bar-w: 2px;
   --node-d: 14px;
+  --node-y: 5px;
+
+  /* How far the rail runs past the last node before its end-cap. The rail used
+     to run to the foot of the last employer's text, which put its tail ~360px
+     below the last node and only ~170px above the end of the document: there
+     was no scroll left for the fill to reach it at the reading line, so the
+     spine could only complete on the final pixel of the page and in practice
+     never looked finished. Ending on a run-out makes the tail reachable and
+     reads as a deliberate terminus. Also consumed by layoutSpine in cv.ts. */
+  --runout: 72px;
 }
 
 /* Track and fill are the list's own two pseudo-elements — a <span> child of an
@@ -407,7 +417,9 @@ section.exp .sect-note {
   /* Starts at the first node's centre, so no stub pokes out of the ring.
      Measured in JS from the node element itself. */
   top: var(--spine-top, 12px);
-  bottom: 6px;
+  /* Last node's centre plus --runout, measured in JS. The fallback is the old
+     full-height rail, which is right when nothing measures it. */
+  height: var(--spine-h, calc(100% - var(--spine-top, 12px) - 6px));
   border-radius: var(--bar-w);
   pointer-events: none;
 }
@@ -421,45 +433,85 @@ section.exp .sect-note {
     --spine,
     linear-gradient(var(--w1), var(--w2), var(--w3), var(--w4), var(--w5))
   );
-  /* Default fully revealed: without scroll-driven animation support the reader
-     still gets a complete, correct spine. */
-  clip-path: inset(0 0 0 0);
+  /* The reveal, as a soft leading edge rather than a guillotine: clip-path cuts
+     the 2px bar dead flat, which reads as a broken-off stub. The mask fades the
+     front over FRONT px instead. --fill-p defaults to 100% (registered in
+     02-base.css, with a var() fallback for browsers that ignore @property), so
+     without scroll-driven animation the reader still gets a complete spine. */
+  --front: 16px;
+  mask-image: linear-gradient(
+    to bottom,
+    #000 var(--fill-p, 100%),
+    #0000 calc(var(--fill-p, 100%) + var(--front))
+  );
 }
 
 .job {
   position: relative;
   padding: 0 0 34px 34px;
   scroll-margin-top: 116px;
+  /* Above .tl's two rail pseudos, which are its last children and so paint last
+     among the z-index:auto boxes. The node's own z-index:1 cannot do this: the
+     scroll-driven fade below makes .job a stacking context, trapping the node
+     inside it, and the bar then draws straight through the ring. */
+  z-index: 1;
 }
 .job:last-child {
   padding-bottom: 6px;
+}
+/* Terminus: a crossbar wider than the rail, so the line arrives at a mark
+   instead of being chopped. Placed from the same three numbers the rail's end is
+   measured from, so the two cannot drift apart. It lights with the fill like the
+   nodes do — left track-coloured it read as unfinished, a live line ending on a
+   dead mark. --hue at rest, so a fully revealed fallback spine gets a lit cap. */
+.job:last-child::after {
+  content: "";
+  position: absolute;
+  left: var(--rail-x);
+  top: calc(var(--node-y) + var(--node-d) / 2 + var(--runout));
+  width: 10px;
+  margin-left: -5px;
+  height: var(--bar-w);
+  border-radius: var(--bar-w);
+  --lit: var(--hue);
+  background: var(--lit);
 }
 
 .job > .node {
   position: absolute;
   left: var(--rail-x);
   margin-left: calc(var(--node-d) / -2);
-  top: 5px;
+  top: var(--node-y);
   width: var(--node-d);
   height: var(--node-d);
   border-radius: 999px;
   background: var(--paper);
-  border: 2px solid var(--hue);
+  /* Ring, dot and halo all read the one animated colour, so the node cannot end
+     up half-lit — a grey ring around a live violet dot was the state the head of
+     the spine sat in until the reader had scrolled past it. Registered in
+     02-base.css so it interpolates as a colour; --hue is the resting value, and
+     the light-up animation drives it from --rule-strong. */
+  --lit: var(--hue);
+  border: 2px solid var(--lit);
   display: grid;
   place-items: center;
   z-index: 1;
 }
 .job > .node::after {
   content: "";
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
   border-radius: 999px;
-  background: var(--hue);
+  background: var(--lit);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 .job.current > .node::after {
   opacity: 1;
+}
+/* The live end of the timeline, marked as such. */
+.job.current > .node {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--lit) 15%, transparent);
 }
 
 .job-head {
@@ -627,6 +679,28 @@ section.exp .sect-note {
       animation: fill linear both;
       animation-timeline: scroll(root block);
       animation-range: var(--fill-from, 0px) var(--fill-to, 100%);
+    }
+
+    /* Rings earn their colour as the fill reaches them, so grey means unread on
+       the whole spine rather than on the bar alone. Timed off the node's own
+       view() progress, not the job's: the node is 14px, so its progress is
+       simply where it sits down the viewport, and 50% is the line the colour
+       boundary holds. --lit-a/--lit-b come from READ_LINE_RATIO in cv.ts, which
+       stays the one place that constant lives. The lit state is also the
+       declared default above, so anything without scroll timelines — or with
+       reduced motion — keeps every ring coloured. */
+    .job > .node,
+    .job:last-child::after {
+      animation: node-lit linear both;
+      animation-timeline: view();
+      animation-range: cover var(--lit-a, 47%) cover var(--lit-b, 53%);
+    }
+    /* No pop, and a range that ends on the reading line instead of straddling
+       it: the cap sits exactly at the rail's end, so the line is the moment the
+       fill arrives on it, not a moment it passes through. */
+    .job:last-child::after {
+      animation-name: cap-lit;
+      animation-range: cover var(--cap-a, 44%) cover var(--cap-b, 50%);
     }
 
     /* Opacity only, never translate: .job carries the node, and the spine lives
@@ -871,9 +945,11 @@ section.exp .sect-note {
     margin-bottom: 9pt;
   }
 
-  /* No spine on paper: hide the rail and the rings, and reclaim the indent. */
+  /* No spine on paper: hide the rail, its terminus and the rings, and reclaim
+     the indent. */
   .tl::before,
-  .tl::after {
+  .tl::after,
+  .job:last-child::after {
     display: none;
   }
   .job > .node {
