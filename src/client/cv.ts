@@ -10,9 +10,11 @@ const BLEND = 190; // total px of cross-fade at each colour boundary
 const SETTLE = 40; // px of scroll still to spare once the spine is full
 const READ_LINE_RATIO = 0.5; // where down the viewport the colour boundary sits
 const LIT_SPAN = 3; // half-width, in % of view progress, of a node's light-up
+const RAIL_RAMP = 80; // px of scroll a project rail takes to light or unlight
 
 const timeline = document.querySelector<HTMLElement>(".tl");
 const jobs = Array.from(document.querySelectorAll<HTMLElement>(".job"));
+const projects = Array.from(document.querySelectorAll<HTMLElement>(".proj"));
 const toc = document.querySelector<HTMLElement>(".toc");
 const strip = document.querySelector<HTMLElement>(".toc-in");
 const chips = Array.from(
@@ -108,6 +110,44 @@ function layoutSpine(): void {
   timeline.style.setProperty("--fill-to", `${to}px`);
 }
 
+/**
+ * Where in each project block's own scroll range its rail lights and unlights.
+ *
+ * A rail is lit while the fill front — which holds a fixed line down the
+ * viewport, see layoutSpine — is between the block's top and bottom edges, with
+ * a ramp either side so the light comes up and goes down instead of switching.
+ * The four offsets have to be measured per block because a `view()` range is a
+ * share of viewport + block height: one percentage would mean a different number
+ * of scroll pixels for a two-line project than for a twenty-line one, so tall
+ * blocks would light lazily and short ones would snap. In px they are all the
+ * same gesture.
+ *
+ * Heights are read in one pass and written in another: interleaving them makes
+ * each write invalidate the style the next read forces back.
+ */
+function primeProjRails(): void {
+  // Scroll travelled between the block's top edge entering at the foot of the
+  // viewport and that same edge reaching the reading line.
+  const arrive = innerHeight * (1 - READ_LINE_RATIO);
+  const heights = projects.map((proj) => proj.offsetHeight);
+
+  projects.forEach((proj, i) => {
+    const height = heights[i] as number;
+    const range = innerHeight + height;
+    const at = (px: number): string =>
+      `${Math.min(100, Math.max(0, (px / range) * 100)).toFixed(2)}%`;
+
+    // Full brightness exactly as the front lands on the top edge, and out a ramp
+    // after it has cleared the bottom one — the front arrives on a block, so the
+    // ramp ends on the line rather than straddling it, the same timing the
+    // spine's end-cap uses.
+    proj.style.setProperty("--on-a", at(arrive - RAIL_RAMP));
+    proj.style.setProperty("--on-b", at(arrive));
+    proj.style.setProperty("--off-a", at(arrive + height));
+    proj.style.setProperty("--off-b", at(arrive + height + RAIL_RAMP));
+  });
+}
+
 /** Shows a fade + chevron on whichever side still has chips hidden. */
 function paintEdges(): void {
   if (!toc || !strip) return;
@@ -159,6 +199,7 @@ function trackActive(): void {
 
 function relayout(): void {
   layoutSpine();
+  primeProjRails();
   trackActive();
   paintEdges();
 }

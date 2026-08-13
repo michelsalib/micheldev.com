@@ -340,6 +340,29 @@ footer {
   initial-value: #0000;
 }
 
+/* A CV project rail's light, as two one-way ramps whose product is its opacity:
+   --proj-in rises as the spine's fill arrives on the block, --proj-out falls as
+   it leaves. Two properties rather than one because a single scroll-driven
+   animation cannot hold a value between two ranges — filled both ways it would
+   claim the whole timeline, so the arriving ramp and the leaving one have to be
+   separate animations, and multiplying is how they combine without either
+   needing to know about the other. Inherited, because the rail is a
+   pseudo-element of the block the animation runs on: a non-inherited registered
+   property leaves ::before on the initial value, which is the trap --lit above
+   documents for the node's dot. Resting at 0 × 1 = unlit, so anything without
+   scroll timelines keeps the plain grey rail rather than lighting every block
+   at once. */
+@property --proj-in {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --proj-out {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @keyframes rise {
     from {
@@ -393,6 +416,24 @@ footer {
     }
     to {
       --lit: var(--hue);
+    }
+  }
+  /* Paired with the ranges primeProjRails hands each block — see .proj in
+     04-cv.css. */
+  @keyframes proj-on {
+    from {
+      --proj-in: 0;
+    }
+    to {
+      --proj-in: 1;
+    }
+  }
+  @keyframes proj-off {
+    from {
+      --proj-out: 1;
+    }
+    to {
+      --proj-out: 0;
     }
   }
 }
