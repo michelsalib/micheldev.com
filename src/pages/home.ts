@@ -11,6 +11,8 @@ import {
   featured,
   hueClass,
   isCurrent,
+  liveServices,
+  metricValue,
   t,
   tl,
   totalStars,
@@ -242,9 +244,7 @@ function heroPanels(content: Content): Renderable {
     ...tl(project?.points, LOCALE).slice(-2),
   ].slice(0, 3);
 
-  const liveCount = projects.active
-    .filter((p) => p.live)
-    .reduce((sum, p) => sum + (p.subdomains?.length ?? 1), 0);
+  const liveCount = liveServices(projects);
 
   return html`<div class="panels">
     <div
@@ -341,7 +341,7 @@ export function homePage(content: Content, assets: Assets): string {
               <ul class="facts in">
                 ${(cv.metrics ?? []).map(
                   (metric) => html`<li>
-                    <span class="n">${metric.value}</span
+                    <span class="n">${metricValue(metric, content)}</span
                     ><span class="l">${t(metric.label, LOCALE)}</span>
                   </li>`,
                 )}

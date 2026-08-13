@@ -1,17 +1,11 @@
 # yaml-language-server: $schema=./site.schema.json
-# ─────────────────────────────────────────────────────────────────────────────
-# Site-level configuration. The homepage copy lives here; the career content
-# comes from cv.yaml so it can never disagree with the CV.
-# ─────────────────────────────────────────────────────────────────────────────
 
-# The canonical origin. michelsalib.com 301-redirects here — see `hosts`.
 origin: https://micheldev.com
+
+repo: https://github.com/michelsalib/micheldev.com
 
 hosts:
   canonical: micheldev.com
-  # Anything reaching the service on one of these gets a 301 to the canonical
-  # host, same path. Keeps one URL in the index and one story in analytics
-  # nobody is collecting.
   redirect:
     - www.micheldev.com
     - michelsalib.com
@@ -19,38 +13,24 @@ hosts:
 
 meta:
   title: Michel Salib — web lead developer, Paris
-  # Present-first, same as the hero. Matchem lands around character 85, well
-  # inside the ~160 a search engine actually renders — the former employers
-  # carry the search volume, but the current one has to survive the truncation.
   description: >-
-    Michel Salib, web lead developer in Paris. Realtime data platforms — horse
-    racing at Matchem, fifteen years of financial news at London Stock Exchange,
-    Refinitiv and Thomson Reuters. Open source, 510 GitHub stars.
+    Michel Salib, web lead developer in Paris. I build the platforms a business
+    runs on, and I run them — horse racing data at Matchem, fifteen years of
+    financial news at London Stock Exchange, Refinitiv and Thomson Reuters.
+    Open source, 510 GitHub stars.
   locale: en
 
 hero:
   eyebrow: Paris, France
-  # The through-line, not a job list: the domain changed from financial news to
-  # horse racing, the problem shape did not. Present tense first, because the
-  # panel beside this opens on "Currently — Matchem", and a paragraph that
-  # starts at Thomson Reuters reads as out of date next to it.
-  #
-  # Every employer is named here, current one included, so the paragraph stands
-  # on its own — it is the first thing read, and it also gets lifted out of
-  # context by anything quoting the page. The panel beside it says "Matchem"
-  # too; that repetition is accepted, not an oversight.
-  #
-  # The old numbers (150k+, 10M+, twenty developers) are deliberately gone from
-  # the prose: the facts strip directly below the paragraph already renders them
-  # verbatim from cv.yaml `metrics`.
   role_html: >-
-    I build <em>realtime data platforms</em>, and lead the teams that run them.
+    I build the systems a business runs on — <em>and I run them</em>.
   thesis_html: >-
-    Right now: a horse-racing data platform at <strong>Matchem</strong>, rebuilt
-    from scratch — stack, architecture, practices. The fifteen years before
-    that: financial news at <strong>Thomson Reuters</strong>, Refinitiv and the
-    <strong>London Stock Exchange</strong>, the same problem with more people
-    watching. Before any of it, founder and CTO of my own company.
+    Right now: the data platform behind <strong>Matchem</strong>'s horse-racing
+    products, rebuilt from scratch — stack, architecture, practices — and mine
+    to keep running. A media business, not a tech business. The fifteen years
+    before that: financial news at <strong>Thomson Reuters</strong>, Refinitiv
+    and the <strong>London Stock Exchange</strong>, the same problem with more
+    people watching. Before any of it, founder and CTO of my own company.
 
 sections:
   projects:
@@ -63,9 +43,9 @@ sections:
       to use them.
     heading: What I build when nobody is paying me
     lede_html: >-
-      Day job is realtime finance at scale. These are the opposite: small,
-      finished, and running on infrastructure I pay for myself — six services
-      under this domain, one repository, one deploy.
+      Day job is a platform a business depends on. These are the opposite:
+      small, finished, and running on infrastructure I pay for myself — six
+      services under this domain, one repository, one deploy.
   work:
     path: /work
     hue: work
@@ -73,16 +53,11 @@ sections:
       Summary here.
       Detail on the
       <a href="/cv">CV page</a>.
-    # "Financial news" was accurate until Matchem, which is horse racing, sat at
-    # the top of this timeline. And the count was hardcoded at four while the
-    # timeline renders six — so it is gone rather than corrected, because the
-    # next hire would break it again.
-    heading: Realtime data, at the scale where it breaks
+    heading: Built it, and stayed to run it
     lede_html: >-
       Different industries, one problem shape: move a lot of data to a lot of
-      people, fast, without going down. Full detail — projects, numbers, stacks
-      — lives on the <a href="/cv">CV page</a>, generated from the same file as
-      this timeline.
+      people, fast, without going down — and be accountable when it does. Full
+      detail — projects, numbers, stacks — lives on the <a href="/cv">CV page</a>.
   elsewhere:
     path: /elsewhere
     hue: elsewhere

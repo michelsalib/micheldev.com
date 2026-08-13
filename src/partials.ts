@@ -137,12 +137,26 @@ export function topBarCv(locale: Locale, pdf: string): Renderable {
   </header>`;
 }
 
-export function footer(site: Site, extra?: Renderable): Renderable {
+const SOURCE_LABEL: Record<Locale, string> = {
+  en: "Source on GitHub",
+  fr: "Code source sur GitHub",
+};
+
+/**
+ * Identical on every page.
+ *
+ * It used to take an `extra` slot so /cv could substitute its own note, which
+ * meant the home and 404 footers advertised "michelsalib.com redirects here" —
+ * a fact about DNS that no reader of a footer needs — while /cv advertised the
+ * name of a YAML file. Both are now one link to the repository, which is the
+ * only thing in that slot a visitor might actually want to open.
+ */
+export function footer(site: Site, locale: Locale = "en"): Renderable {
   return html`<footer>
       <div class="foot-in">
         <span>micheldev.com</span>
         <span>&middot;</span>
-        ${extra ?? html`<span>michelsalib.com redirects here</span>`}
+        <a href="${site.repo}">${SOURCE_LABEL[locale]}</a>
         <span class="sp">${site.footer.note}</span>
       </div>
     </footer>

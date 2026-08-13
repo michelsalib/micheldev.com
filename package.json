@@ -6,6 +6,11 @@
   "private": true,
   "author": "michelsalib@gmail.com",
   "license": "MIT",
+  "homepage": "https://micheldev.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/michelsalib/micheldev.com.git"
+  },
   "scripts": {
     "build": "bun run src/build.ts",
     "dev": "bun run src/dev.ts",

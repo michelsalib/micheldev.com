@@ -305,16 +305,21 @@
       "$ref": "#/$defs/textList"
     },
     "metrics": {
-      "description": "Headline numbers for the homepage hero. Each must trace to a line in experience.",
+      "description": "Headline numbers for the homepage hero and the CV masthead. Each must trace to a line in experience. Give either a literal `value` or a `derive` key, never both — anything countable from this file should be derived so it cannot go stale.",
       "type": "array",
       "maxItems": 4,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["value", "label"],
+        "required": ["label"],
+        "oneOf": [{ "required": ["value"] }, { "required": ["derive"] }],
         "properties": {
           "value": {
             "type": "string"
+          },
+          "derive": {
+            "description": "Counted at render time. years: this year minus the earliest `from`. employers: experience.length. projects: every project across every role. live_services: live entries in projects.yaml, counting subdomains.",
+            "enum": ["years", "employers", "projects", "live_services"]
           },
           "label": {
             "$ref": "#/$defs/text"

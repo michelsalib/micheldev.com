@@ -5,10 +5,12 @@
 
 import {
   type Content,
+  careerYears,
   type Employment,
   hueClass,
   isCurrent,
   type Locale,
+  metricValue,
   type Project,
   t,
   tl,
@@ -31,7 +33,6 @@ const COPY = {
     privacy:
       "Email and phone are in the PDF only — this page is crawlable, so they stay off it.",
     note: (n: number, e: number) => `${n} years · ${e} employers · Paris`,
-    generated: "Generated from content/cv.yaml",
   },
   fr: {
     eyebrow: "Curriculum vitae",
@@ -46,7 +47,6 @@ const COPY = {
     privacy:
       "L'e-mail et le téléphone ne figurent que dans le PDF — cette page est indexable.",
     note: (n: number, e: number) => `${n} ans · ${e} employeurs · Paris`,
-    generated: "Généré depuis content/cv.yaml",
   },
 } as const;
 
@@ -69,12 +69,32 @@ function shortYears(job: Employment, locale: Locale): string {
   return `${from}–${to}`;
 }
 
+/**
+ * Order is deliberate: name, one-line lead, then the magnitude, then the
+ * detail. `facts` sits above the bullets because it is the only part of the
+ * block that is scannable — a reader who reads nothing else should still leave
+ * with the numbers. Which also means the numbers belong here and nowhere else:
+ * `lead` states what was done, the chips state how big it was, and `scale` is
+ * only ever the transition sentence into `points_extra` (see cv.schema.json).
+ */
 function projectBlock(project: Project, locale: Locale): Renderable {
   const points = tl(project.points, locale);
   const extra = tl(project.points_extra, locale);
   return html`<div class="proj">
     <p class="pn">${t(project.name, locale)}</p>
     ${project.lead ? html`<p class="pl">${t(project.lead, locale)}</p>` : ""}
+    ${
+      project.facts?.length
+        ? html`<div class="pf">
+          ${project.facts.map(
+            (fact) => html`<span class="kv"
+              ><span class="v">${String(fact.value)}</span
+              ><span class="k">${t(fact.label, locale)}</span></span
+            >`,
+          )}
+        </div>`
+        : ""
+    }
     ${
       points.length
         ? html`<ul>
@@ -88,18 +108,6 @@ function projectBlock(project: Project, locale: Locale): Renderable {
         ? html`<ul>
           ${extra.map((point) => html`<li>${point}</li>`)}
         </ul>`
-        : ""
-    }
-    ${
-      project.facts?.length
-        ? html`<div class="pf">
-          ${project.facts.map(
-            (fact) => html`<span class="kv"
-              ><span class="v">${String(fact.value)}</span
-              ><span class="k">${t(fact.label, locale)}</span></span
-            >`,
-          )}
-        </div>`
         : ""
     }
     ${
@@ -267,9 +275,7 @@ export function cvPage(
   const { cv, site } = content;
   const copy = COPY[locale];
   const path = locale === "en" ? "/cv" : "/cv/fr";
-  const spanYears =
-    new Date().getFullYear() -
-    Math.min(...cv.experience.map((job) => job.from));
+  const spanYears = careerYears(cv);
 
   return String(
     html`${documentHead({
@@ -325,7 +331,7 @@ export function cvPage(
           <ul class="metrics">
             ${(cv.metrics ?? []).map(
               (metric) => html`<li>
-                <span class="n">${metric.value}</span
+                <span class="n">${metricValue(metric, content)}</span
                 ><span class="l">${t(metric.label, locale)}</span>
               </li>`,
             )}
@@ -343,6 +349,6 @@ export function cvPage(
         </div>
       </div>
     </main>
-    ${footer(site, html`<span>${copy.generated}</span>`)}`,
+    ${footer(site, locale)}`,
   );
 }

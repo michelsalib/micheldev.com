@@ -1,13 +1,5 @@
 # yaml-language-server: $schema=./projects.schema.json
-# ─────────────────────────────────────────────────────────────────────────────
-# Projects, links, and the open-source archive. Edit → commit → push.
-#
-# `services` are the deployed apps under *.micheldev.com. Their subdomains are
-# rendered from `subdomains` so the list on the page can never drift from what
-# is actually mapped in Terraform.
-# ─────────────────────────────────────────────────────────────────────────────
 
-# Shown in the hero's second panel and at the top of /projects.
 active:
   - name: Notion connectors
     url: https://notion-tmdb.micheldev.com
@@ -55,8 +47,6 @@ active:
     tags: [typescript, windows]
     blurb: Update checking and installation for Windows desktop applications.
 
-# The Symfony2-era open source. `BCC` is Best Comparator, the company in the
-# 2011–2013 slot on the CV — the same chapter, and the page says so.
 archive:
   heading: Open source · the Best Comparator years
   lede: >-
@@ -64,9 +54,6 @@ archive:
     carry its initials. Archived now, but real teams installed them.
   total_repos: 50
   repos:
-    # Block mappings with quoted values. These were flow mappings ({ ... }) and
-    # the commas inside the descriptions were read as entry separators, so three
-    # rows silently lost half their text to phantom null keys.
     - name: BCCCronManagerBundle
       what: "Cron table manager for Symfony2"
       lang: PHP
@@ -96,7 +83,6 @@ archive:
       lang: JS
       stars: 20
 
-# /elsewhere
 links:
   - name: Curriculum vitae
     url: /cv

@@ -31,6 +31,13 @@ export function tl(value: TextList | undefined, locale: Locale): string[] {
 
 export type Fact = { label: Text; value: string | number };
 
+/**
+ * A masthead/hero figure. Either a literal `value`, or a `derive` key counted at
+ * render time — see `metricValue`.
+ */
+export type MetricSource = "years" | "employers" | "projects" | "live_services";
+export type Metric = { value?: string; derive?: MetricSource; label: Text };
+
 export type Project = {
   name: Text;
   lead?: Text;
@@ -73,7 +80,7 @@ export type Cv = {
   skills_current?: { label?: Text; items: string[] };
   languages?: { name: Text; level: Text }[];
   interests?: TextList;
-  metrics?: { value: string; label: Text }[];
+  metrics?: Metric[];
 };
 
 // ── site.yaml ────────────────────────────────────────────────────────────────
@@ -88,6 +95,7 @@ export type SectionConfig = {
 
 export type Site = {
   origin: string;
+  repo: string;
   hosts: { canonical: string; redirect: string[] };
   meta: { title: string; description: string; locale: string };
   hero: { eyebrow: string; role_html: string; thesis_html: string };
@@ -198,6 +206,50 @@ export function hueVar(job: Employment, index: number): string {
 /** Total stars across the archive, so the figure on the page is never stale. */
 export function totalStars(projects: Projects): number {
   return projects.archive.repos.reduce((sum, r) => sum + r.stars, 0);
+}
+
+/** Years since the earliest `from`. Rolls over on 1 January by itself. */
+export function careerYears(cv: Cv): number {
+  return (
+    new Date().getFullYear() - Math.min(...cv.experience.map((j) => j.from))
+  );
+}
+
+/** Every project across every role, in file order. */
+export function allProjects(cv: Cv): Project[] {
+  return cv.experience.flatMap((job) => job.roles.flatMap((r) => r.projects));
+}
+
+/** Live services under this domain. A project with subdomains counts as each. */
+export function liveServices(projects: Projects): number {
+  return projects.active
+    .filter((p) => p.live)
+    .reduce((sum, p) => sum + (p.subdomains?.length ?? 1), 0);
+}
+
+/**
+ * The figure to print for one metric.
+ *
+ * `15 years shipping` used to be the literal string "15", which was correct on
+ * the day it was written and silently wrong every 1 January after. Anything
+ * countable from content/ is now counted here instead — same reasoning as
+ * `totalStars`. Only figures that genuinely cannot be derived (peak throughput,
+ * team sizes, outage counts) stay as literals in the YAML.
+ */
+export function metricValue(metric: Metric, content: Content): string {
+  if (metric.value !== undefined) return metric.value;
+  switch (metric.derive) {
+    case "years":
+      return String(careerYears(content.cv));
+    case "employers":
+      return String(content.cv.experience.length);
+    case "projects":
+      return String(allProjects(content.cv).length);
+    case "live_services":
+      return String(liveServices(content.projects));
+    default:
+      return "";
+  }
 }
 
 /** The employer to feature in the homepage hero panel. */

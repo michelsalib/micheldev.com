@@ -629,11 +629,13 @@ section.exp .sect-note {
   font-weight: 500;
 }
 
+/* Sits between the lead and the bullets, so it takes the bullet list's own
+   top margin and keeps the block on one rhythm. */
 .proj .pf {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin: 10px 0 0;
+  margin: 9px 0 0;
 }
 .pf .kv {
   display: flex;

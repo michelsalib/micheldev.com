@@ -4,7 +4,7 @@
   "description": "Homepage copy, section headings, and the canonical/redirect hosts.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["origin", "hosts", "meta", "hero", "sections", "footer"],
+  "required": ["origin", "repo", "hosts", "meta", "hero", "sections", "footer"],
   "$defs": {
     "hostname": {
       "type": "string",
@@ -44,6 +44,11 @@
       "type": "string",
       "pattern": "^https://[^/]+$",
       "description": "Canonical origin, no trailing slash. Used for canonical URLs and the sitemap."
+    },
+    "repo": {
+      "type": "string",
+      "pattern": "^https://github\\.com/[^/]+/[^/]+$",
+      "description": "This site's own source repository. Linked from the /cv footer. Not in cv.person.links, because the CV sidebar renders every entry of that map and the repo does not belong in \"Elsewhere\"."
     },
     "hosts": {
       "type": "object",
