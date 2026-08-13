@@ -141,6 +141,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
   await rm(OUT, { recursive: true, force: true });
   await rm(PRINT_OUT, { recursive: true, force: true });
   await mkdir(`${OUT}/assets/fonts`, { recursive: true });
+  await mkdir(`${OUT}/assets/img`, { recursive: true });
 
   const content = await loadContent();
   const { site } = content;
@@ -159,6 +160,12 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
   // Fonts are already subset and hashed by content only in the sense that they
   // never change; keep the readable names and rely on immutable caching.
   await cp("src/fonts", `${OUT}/assets/fonts`, { recursive: true });
+
+  // The hero portrait, at the two widths the layout can ask for. Copied rather
+  // than generated: there is no image tooling in this repo and adding an
+  // encoder to build a file that changes once every few years is not a trade
+  // worth making. Both are already re-encoded, resized and stripped of EXIF.
+  await cp("src/images", `${OUT}/assets/img`, { recursive: true });
 
   const pdfHref = (locale: Locale) => `/michel-salib-cv-${locale}.pdf`;
 

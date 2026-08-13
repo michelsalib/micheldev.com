@@ -1,7 +1,70 @@
-/* ── Masthead ────────────────────────────────────────────────────────────── */
+/* ── Masthead band ─────────────────────────────────────────────────────────
+   This page is the one that is actually about him, so it is the one that opens
+   on a plate: a dark band carrying the name, the portrait and the four figures.
+   One geometric rule governs it — a 45° cut of --cut, taken out of the plate's
+   lower-right corner and out of the portrait's upper-left, plus a fixed 24px
+   off the bottom-right of every tile. The paper wedge the corner cut reveals is
+   the scroll cue.
+
+   The plate carries its own palette rather than the page tokens, so the band
+   reads the same whichever way the theme is set. Print undoes all of it — see
+   the @media print block, which puts the portrait on white.                   */
+.band {
+  --cut: 108px;
+  position: relative;
+}
+
+.plate {
+  --p-ground: #14111f;
+  --p-ink: #f3f1fa;
+  --p-ink-2: #a9a3c2;
+  --p-ink-3: #7b7495;
+  --p-rule: #2e2743;
+  --p-accent: #a08cff;
+
+  /* Read by the tiles as well as the portrait, so the seam the tiles straddle
+     and the tiles themselves can never drift apart. */
+  --portrait-w: clamp(280px, 37%, 450px);
+  /* Where the tile block's left edge falls, measured in from the plate's right
+     edge: the block is two tiles and a gap wide (274px) and is pushed 66px onto
+     the portrait. The masthead reads it to know where it has to stop. */
+  --tiles-in: calc(var(--portrait-w) + 208px);
+
+  position: relative;
+  background: var(--p-ground);
+  color: var(--p-ink);
+  padding: 0 0 clamp(34px, 4vw, 52px);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut)),
+    calc(100% - var(--cut)) 100%,
+    0 100%
+  );
+  overflow: hidden;
+}
+
+.plate > .wrap {
+  position: relative;
+  z-index: 2;
+  padding-top: clamp(28px, 3.4vw, 42px);
+}
+
+/* The masthead must stop short of the tile block, and the two are pinned to
+   different boxes: the tiles to the plate, which is full-bleed, and the mast to
+   the wrap, which stops growing at --max and then centres. So the gap between
+   them narrows from both directions and is tightest around --max — which is
+   where the summary used to run under the tiles.
+   Each calc is that gap, less the wrap's 28px padding and a 44px gutter. The
+   first governs while the wrap still fills the viewport, the second once it is
+   centred and the mast starts drifting right at half the rate the tiles do. */
 .mast {
-  padding: clamp(40px, 6vw, 68px) 0 30px;
-  border-bottom: 1px solid var(--rule);
+  max-width: min(
+    480px,
+    calc(100vw - var(--tiles-in) - 72px),
+    calc(50vw - var(--tiles-in) + var(--max) / 2 - 72px)
+  );
+  min-height: 340px;
 }
 
 .mast .eyebrow {
@@ -9,13 +72,14 @@
   font-size: 11.5px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--ink-3);
+  color: var(--p-ink-3);
   margin: 0;
 }
 .mast h1 {
-  font-size: clamp(36px, 5.4vw, 58px);
+  font-size: clamp(34px, 5vw, 58px);
   line-height: 1.02;
   margin: 14px 0 0;
+  color: var(--p-ink);
 }
 .mast .headline {
   font-family: var(--f-display);
@@ -23,19 +87,116 @@
   font-weight: 500;
   font-size: clamp(17px, 2.1vw, 22px);
   letter-spacing: -0.014em;
-  color: var(--h-work);
+  color: var(--p-accent);
   margin: 10px 0 0;
 }
 .mast .summary {
   margin: 20px 0 0;
-  max-width: 62ch;
-  font-size: 16.5px;
-  color: var(--ink-2);
+  font-size: 16px;
+  color: var(--p-ink-2);
 }
 
-/* The metrics strip itself is a shared component — see 02-base.css. What stays
-   in this sheet is only what the CV adds to it: the scroll-driven `rise`, its
-   reduced-motion reset, and the print sizes further down. */
+/* At full width the tiles and the portrait are each positioned against the
+   plate, so their wrapper gets out of the way entirely. It becomes a box only
+   when the narrow layout needs a row — see the 880px breakpoint. */
+.plate-lower {
+  display: contents;
+}
+
+.portrait {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: var(--portrait-w);
+  height: 88%;
+  clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut));
+}
+.portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 15%;
+  display: block;
+  /* A phone snap against a warm light wall. Grading it down and dissolving the
+     top edge is what stops it reading as a photograph pasted onto the plate. */
+  filter: grayscale(0.28) contrast(1.06) brightness(0.78) saturate(0.85);
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgb(0 0 0 / 0.4) 10%,
+    #000 30%
+  );
+}
+/* `color` would flatten him to a violet silhouette. soft-light over a
+   violet-to-teal sweep keeps the face readable and still pulls the wall behind
+   him into the palette. */
+.portrait .tint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    200deg,
+    rgb(91 52 232 / 0.62) 0%,
+    rgb(10 118 134 / 0.42) 62%,
+    rgb(20 17 31 / 0.3) 100%
+  );
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+.portrait .sink {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--p-ground) 0%,
+    transparent 34%,
+    transparent 74%,
+    rgb(20 17 31 / 0.55) 100%
+  );
+  pointer-events: none;
+}
+
+/* The tile is a shared component — see 02-base.css. All the plate does is hand
+   it a palette and put the block on the portrait's edge, so two of the four
+   are punched into the picture. */
+.plate .tiles {
+  --tile-bg: #1b1730;
+  --tile-ring: #463d66;
+  --tile-n: var(--p-ink);
+  --tile-l: var(--p-ink-3);
+  --tile-accent: var(--p-accent);
+
+  position: absolute;
+  right: calc(var(--portrait-w) - 66px);
+  bottom: 120px;
+  z-index: 3;
+}
+
+/* The label in the wedge the corner cut opens. Paper-coloured tokens: it sits
+   on the page, not on the plate. */
+.notch {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: var(--cut);
+  height: var(--cut);
+  display: grid;
+  place-items: end end;
+  padding: 0 3px 5px 0;
+  font-family: var(--f-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  z-index: 2;
+}
+.notch span {
+  writing-mode: vertical-rl;
+}
+
+/* The metrics strip and the figure tiles are both shared components — see
+   02-base.css. What stays in this sheet is only what the CV adds: the plate
+   palette above, the scroll-driven `rise`, its reduced-motion reset, and the
+   print sizes further down. */
 
 /* ── Language switch + download ──────────────────────────────────────────── */
 .lang-switch {
@@ -306,6 +467,23 @@ aside {
   gap: 5px;
 }
 
+/* Seven one-word tool names, one per line, is the sparsest possible use of a
+   narrow column — and it costs the same run of empty space in the PDF. Two
+   columns instead. Multi-column rather than a two-track grid because it
+   balances whatever number of items the YAML holds, rather than spilling into
+   a third column the day an eighth is added. */
+.blk .plain.two-up {
+  display: block;
+  columns: 2;
+  column-gap: 14px;
+}
+.blk .plain.two-up li {
+  /* `gap` belongs to the grid this is no longer, and a name split across the
+     column break would read as two entries. */
+  break-inside: avoid;
+  margin-bottom: 5px;
+}
+
 .blk .links-list {
   display: grid;
   gap: 6px;
@@ -361,13 +539,15 @@ section.exp .sect-note {
   --node-d: 14px;
   --node-y: 5px;
 
-  /* How far the rail runs past the last node before its end-cap. The rail used
-     to run to the foot of the last employer's text, which put its tail ~360px
-     below the last node and only ~170px above the end of the document: there
-     was no scroll left for the fill to reach it at the reading line, so the
-     spine could only complete on the final pixel of the page and in practice
-     never looked finished. Ending on a run-out makes the tail reachable and
-     reads as a deliberate terminus. Also consumed by layoutSpine in cv.ts. */
+  /* How far the rail runs past the last node before its end-cap. Measured by
+     layoutSpine in cv.ts — the foot of the last project's rail, so the spine and
+     that block's own vertical end on one line — and written back here, because
+     the end-cap is positioned from this same number and the two must not drift.
+     72px is what a reader with no JS gets.
+     That puts the tail a few hundred px below the last node, close to the foot
+     of the document, which used to mean the fill could only complete on the
+     final pixel of the page. The SETTLE clamp in layoutSpine is what makes it
+     reachable now: the spine fills a little before the last scroll position. */
   --runout: 72px;
 }
 
@@ -683,12 +863,17 @@ section.exp .sect-note {
       animation-timeline: view();
       animation-range: cover var(--lit-a, 47%) cover var(--lit-b, 53%);
     }
-    /* No pop, and a range that ends on the reading line instead of straddling
-       it: the cap sits exactly at the rail's end, so the line is the moment the
-       fill arrives on it, not a moment it passes through. */
+    /* The cap is the one mark the fill stops on rather than passes through, so
+       it lights off the fill's own scroll range and finishes exactly where the
+       fill does. It used to run off the last job's view() progress like the
+       nodes, which cannot work for the last job: it sits at the foot of the
+       document with only the footer below it, so it never travels far enough up
+       the viewport to complete its range — the taller the viewport, the further
+       short it stopped, and the spine ended on a dead grey tick. */
     .job:last-child::after {
       animation-name: cap-lit;
-      animation-range: cover var(--cap-a, 44%) cover var(--cap-b, 50%);
+      animation-timeline: scroll(root block);
+      animation-range: var(--cap-from, 0px) var(--fill-to, 100%);
     }
 
     /* Opacity only, never translate: .job carries the node, and the spine lives
@@ -721,11 +906,6 @@ section.exp .sect-note {
         cover var(--on-a, 41%) cover var(--on-b, 47%),
         cover var(--off-a, 53%) cover var(--off-b, 59%);
     }
-    .metrics li {
-      animation: rise linear both;
-      animation-timeline: view();
-      animation-range: entry 2% cover 20%;
-    }
     .blk {
       animation: rise linear both;
       animation-timeline: view();
@@ -748,10 +928,73 @@ section.exp .sect-note {
   .mast .in:nth-child(4) {
     animation-delay: 0.2s;
   }
+  /* The tiles land after the copy, in reading order. The portrait does not
+     animate: it is the largest thing on the page and moving it reads as the
+     page still loading. */
+  .plate .tile {
+    animation: rise 0.5s cubic-bezier(0.22, 0.68, 0.32, 1) both;
+  }
+  .plate .tile:nth-child(1) {
+    animation-delay: 0.24s;
+  }
+  .plate .tile:nth-child(2) {
+    animation-delay: 0.3s;
+  }
+  .plate .tile:nth-child(3) {
+    animation-delay: 0.36s;
+  }
+  .plate .tile:nth-child(4) {
+    animation-delay: 0.42s;
+  }
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 880px) {
+  /* No room left for a seam to straddle, so the tiles come out from under the
+     portrait and stand beside it as one column. The cut scales down with them,
+     which moves the plate corner, the portrait corner and the notch together. */
+  .band {
+    --cut: 88px;
+  }
+  .mast {
+    max-width: none;
+    min-height: 0;
+  }
+  .plate-lower {
+    display: flex;
+    align-items: stretch;
+    padding-left: 28px;
+    /* Cancels the plate's bottom padding so the portrait still runs into the
+       notch, exactly as it does at full width. */
+    margin: 28px 0 calc(-1 * clamp(34px, 4vw, 52px));
+  }
+  .plate .tiles {
+    position: relative;
+    inset: auto;
+    flex: none;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: var(--tile-w);
+  }
+  /* Fills whatever the tile column leaves, up to 520. A percentage would open a
+     hole between the two columns on a tablet; no cap at all would balloon the
+     head as the viewport approaches the breakpoint. */
+  .portrait {
+    position: relative;
+    inset: auto;
+    flex: 1 1 auto;
+    width: auto;
+    max-width: 520px;
+    height: auto;
+    margin-left: auto;
+  }
+  /* The source is square, so an in-flow <img> would make the box as tall as it
+     is wide and drag the whole row with it. Out of flow, the tile column is the
+     only thing setting the row height. */
+  .portrait img {
+    position: absolute;
+    inset: 0;
+  }
   .cols {
     grid-template-columns: minmax(0, 1fr);
     gap: 32px;
@@ -816,7 +1059,7 @@ section.exp .sect-note {
      break if the motion rules are ever moved after this block. */
   .job,
   .proj,
-  .metrics li,
+  .tile,
   .blk,
   .mast .in,
   .tl::after {
@@ -845,38 +1088,120 @@ section.exp .sect-note {
     padding: 0;
   }
 
+  /* The plate does not print. A CV gets forwarded and printed, and a full-bleed
+     near-black header is a great deal of toner for no information — so on paper
+     the band is white, the type goes back to ink, and what survives is the
+     portrait and the 45° cut that frames it. */
+  .band {
+    --cut: 6mm;
+  }
+  .plate {
+    position: relative;
+    background: none;
+    color: var(--ink);
+    padding: 0 0 6pt;
+    clip-path: none;
+    overflow: visible;
+    border-bottom: 1px solid var(--rule);
+  }
+  .plate > .wrap {
+    padding-top: 0;
+  }
+  .notch {
+    display: none;
+  }
+
   .mast {
-    padding: 0 0 9pt;
+    max-width: none;
+    min-height: 0;
+    /* Clears the portrait, which is pinned to the top-right corner. */
+    padding: 0 28mm 0 0;
   }
   .mast .eyebrow {
     font-size: 7.5pt;
+    color: var(--ink-3);
   }
   .mast h1 {
     font-size: 20pt;
     margin-top: 3pt;
+    color: var(--ink);
   }
   .mast .headline {
     font-size: 11pt;
     margin-top: 3pt;
+    color: var(--w1);
   }
   .mast .summary {
     font-size: 9pt;
-    margin-top: 5pt;
-    max-width: none;
+    margin-top: 4pt;
+    color: var(--ink-2);
   }
-  .metrics {
-    margin-top: 9pt;
+
+  /* Every declaration here undoes one from the max-width:880px block above,
+     which applies while printing because A4 is narrower than 880 CSS px. */
+  .plate-lower {
+    display: block;
+    padding-left: 0;
+    margin: 0;
   }
-  .metrics li {
-    padding: 5pt 11pt 5pt 0;
-    margin-right: 11pt;
+  .portrait {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24mm;
+    height: 24mm;
+    /* The same corner cut as on screen, at print scale. */
+    clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut));
   }
-  .metrics .n {
-    font-size: 14pt;
+  .portrait img {
+    /* Undone: on paper the duotone is a grey smear and the dissolve leaves a
+       ghost. A plain, slightly flattened photograph prints. */
+    filter: contrast(1.04) saturate(0.9);
+    mask-image: none;
   }
-  .metrics .l {
-    font-size: 7pt;
-    margin-top: 2pt;
+  .portrait .tint,
+  .portrait .sink {
+    display: none;
+  }
+
+  .plate .tiles {
+    --tile-bg: #ffffff;
+    --tile-ring: var(--rule-strong);
+    --tile-n: var(--ink);
+    --tile-l: var(--ink-3);
+    --tile-accent: var(--w1);
+    --tile-w: 29mm;
+    --tile-h: 10.5mm;
+    --tile-cut: 3mm;
+    --tile-gap: 2.5mm;
+
+    position: static;
+    /* One row of four on paper: the sheet is wider than the screen column, and
+       a 2 x 2 would spend a third of the header on white space. `flex-direction`
+       is here to undo the column the 880 block stands the tiles up in. */
+    flex-direction: row;
+    width: auto;
+    flex-wrap: nowrap;
+    margin-top: 6pt;
+  }
+  /* The ring and the fill are backgrounds, and Chrome drops backgrounds when it
+     prints. Without this the tiles come out as four invisible boxes — and what
+     it actually costs is a 1px grey outline, not a block of toner. */
+  .tile,
+  .tile::before {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    transition: none;
+  }
+  .tile {
+    padding: 2mm 2.5mm;
+  }
+  .tile .n {
+    font-size: 11.5pt;
+  }
+  .tile .l {
+    font-size: 5.5pt;
+    margin-top: 1mm;
   }
 
   /* Chrome fragments a two-column grid badly across pages — the aside ended up
@@ -927,6 +1252,9 @@ section.exp .sect-note {
   .blk .plain {
     font-size: 9pt;
     gap: 2pt;
+  }
+  .blk .plain.two-up li {
+    margin-bottom: 2pt;
   }
   .blk .links-list a {
     font-size: 8.2pt;

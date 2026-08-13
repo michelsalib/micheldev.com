@@ -2,10 +2,65 @@
  * Shared chrome: document head, top bar, footer.
  */
 
-import type { Locale, Site } from "./content.ts";
+import {
+  type Content,
+  type Locale,
+  metricValue,
+  type Site,
+  t,
+} from "./content.ts";
 import { html, type Renderable, raw } from "./html.ts";
 
 export type Assets = { css: string; theme: string; cv: string };
+
+/**
+ * The headline figures as tiles, from `cv.metrics`.
+ *
+ * Four of them, because the block is two tiles wide and a fifth would wrap to a
+ * lonely third row. Rendered on the homepage beside the hero copy and on the CV
+ * masthead plate; only the palette differs, and that is set in CSS.
+ */
+export function figureTiles(content: Content, locale: Locale): Renderable {
+  const metrics = (content.cv.metrics ?? []).slice(0, 4);
+  return html`<ul class="tiles">
+    ${metrics.map(
+      (metric, i) => html`<li class="tile${raw(i === 0 ? " hue" : "")}">
+        <span class="n">${metricValue(metric, content)}</span
+        ><span class="l">${t(metric.label, locale)}</span>
+      </li>`,
+    )}
+  </ul>`;
+}
+
+/**
+ * The portrait on the CV masthead — bleeding off the right of the plate, cut on
+ * its upper-left by the same 45° as the plate itself, and running into the
+ * corner notch.
+ *
+ * Two widths and no `<picture>`: the source is one square image and the only
+ * variable is how many of its pixels the display wants. `sizes` mirrors the CSS
+ * — capped at 520 under the breakpoint, `min(37vw, 450px)` above it.
+ */
+export const PORTRAIT_SIZES = "(max-width: 900px) 520px, min(37vw, 450px)";
+export const PORTRAIT_SRCSET =
+  "/assets/img/portrait-560.webp 560w, /assets/img/portrait-1040.webp 1040w";
+
+export function portrait(alt: string): Renderable {
+  return html`<div class="portrait">
+    <img
+      src="/assets/img/portrait-1040.webp"
+      srcset="${PORTRAIT_SRCSET}"
+      sizes="${PORTRAIT_SIZES}"
+      width="1040"
+      height="1040"
+      alt="${alt}"
+      fetchpriority="high"
+      decoding="async"
+    />
+    <span class="tint" aria-hidden="true"></span>
+    <span class="sink" aria-hidden="true"></span>
+  </div>`;
+}
 
 /**
  * The theme-restore snippet. Deliberately inline and deliberately first: a
@@ -40,6 +95,12 @@ export type HeadOptions = {
   /** Page-specific scripts, in addition to the theme toggle. */
   scripts?: string[];
   robots?: string;
+  /**
+   * Preloads the masthead portrait. /cv only — it is the largest paint on that
+   * page, and without this the browser cannot discover it until the stylesheet
+   * has arrived and laid the plate out.
+   */
+  preloadPortrait?: boolean;
 };
 
 export function documentHead(o: HeadOptions): Renderable {
@@ -92,6 +153,19 @@ export function documentHead(o: HeadOptions): Renderable {
       type="font/woff2"
       crossorigin="anonymous"
     />
+    ${
+      o.preloadPortrait
+        ? html`<link
+            rel="preload"
+            href="/assets/img/portrait-1040.webp"
+            as="image"
+            type="image/webp"
+            imagesrcset="${PORTRAIT_SRCSET}"
+            imagesizes="${PORTRAIT_SIZES}"
+            fetchpriority="high"
+          />`
+        : ""
+    }
     <link rel="stylesheet" href="${o.assets.css}" />
     ${(o.scripts ?? []).map((src) => html`<script src="${src}" defer></script>`)}
   </head>

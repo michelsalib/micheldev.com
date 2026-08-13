@@ -229,64 +229,133 @@ h3,
   background: color-mix(in srgb, var(--live) 9%, transparent);
 }
 
-/* ── Metrics strip ───────────────────────────────────────────────────────── */
-/* The row of headline figures under the name, rendered from cv.yaml `metrics` on
-   both the homepage hero and the CV masthead.
+/* ── Figure tiles ────────────────────────────────────────────────────────────
+   The headline figures from cv.metrics, one per tile, each with a 45° cut off
+   its bottom-right corner. The homepage puts four of them beside the hero copy;
+   the CV puts the same four on its masthead plate, straddling the portrait's
+   edge, and prints them as a single row.
 
-   It lived twice: as `.facts` in 03-home.css and as `.metrics` in 04-cv.css, two
-   byte-identical rule sets under two names for one component fed by one array.
-   `.facts` was the more misleading of the two even before `facts` stopped being a
-   field name — nothing in the markup it styled had ever been called that.
+   This replaced a flat four-across strip that lived on both pages. Shared here
+   because both pages still want it, and token-driven because the two grounds
+   could not be further apart — a page changes the palette by setting --tile-*,
+   and nothing below reads a page colour directly.
 
-   Base and small-screen rules are here because both pages want them. 04-cv.css
-   keeps only what is genuinely CV-only: the scroll-driven `rise`, its
-   reduced-motion reset, and the print sizes in pt. Those come later in the cv
-   bundle, so they still win. */
-.metrics {
-  margin: 26px 0 0;
+   The border is a 1px ring rather than a `border`: clip-path cuts the corner
+   off the border box too, so a declared border loses its diagonal. The tile
+   paints the ring colour and ::before covers all but 1px of it. Shifting a 45°
+   line 1px inward moves it √2 along each axis, so the inner cut is
+   C + √2 - 2 ≈ C - 0.6 — which is why that constant is there.                 */
+.tiles {
+  --tile-bg: var(--surface);
+  --tile-ring: var(--rule-strong);
+  --tile-n: var(--ink);
+  --tile-l: var(--ink-3);
+  --tile-accent: var(--h-work);
+  --tile-w: 132px;
+  --tile-h: 92px;
+  --tile-cut: 24px;
+  --tile-gap: 10px;
+
+  margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-wrap: wrap;
-  border-top: 1px solid var(--rule);
+  gap: var(--tile-gap);
+  /* Exactly two tiles wide, so the four wrap to a 2 × 2 — and wrap again to a
+     single column on their own, without a breakpoint, when the column holding
+     them is narrower than two tiles. */
+  width: calc(var(--tile-w) * 2 + var(--tile-gap));
+  max-width: 100%;
 }
-.metrics li {
-  padding: 13px 22px 13px 0;
-  margin-right: 22px;
-  border-right: 1px solid var(--rule);
+
+.tile {
+  position: relative;
+  flex: none;
+  width: var(--tile-w);
+  height: var(--tile-h);
+  padding: 15px 14px;
+  background: var(--tile-ring);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--tile-cut)),
+    calc(100% - var(--tile-cut)) 100%,
+    0 100%
+  );
 }
-.metrics li:last-child {
-  border-right: 0;
-  margin-right: 0;
-  padding-right: 0;
+.tile::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background: var(--tile-bg);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--tile-cut) + 0.6px),
+    calc(100% - var(--tile-cut) + 0.6px) 100%,
+    0 100%
+  );
 }
-.metrics .n {
+.tile .n {
+  position: relative;
+  display: block;
   font-family: var(--f-display);
   font-stretch: 100%;
   font-weight: 700;
-  font-size: 27px;
+  font-size: 22px;
   line-height: 1;
   letter-spacing: -0.025em;
-  display: block;
   font-variant-numeric: tabular-nums;
+  color: var(--tile-n);
 }
-.metrics .l {
+.tile .l {
+  position: relative;
+  display: block;
+  margin-top: 7px;
   font-family: var(--f-mono);
-  font-size: 11px;
+  font-size: 8.5px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--ink-3);
-  display: block;
-  margin-top: 6px;
+  color: var(--tile-l);
+}
+/* The first figure in cv.metrics takes the accent, the same way the first tag
+   in every list on this site does. Reordering the YAML moves it. */
+.tile.hue .n {
+  color: var(--tile-accent);
 }
 
-@media (max-width: 560px) {
-  .metrics li {
-    padding-right: 15px;
-    margin-right: 15px;
+/* Nothing here is clickable, so hover is not a promise of anything — it is the
+   plate catching the light. The ring and the figure take the accent; the lift
+   is the only moving part, and it goes away with reduced motion. */
+.tile,
+.tile::before,
+.tile .n {
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+@media (hover: hover) {
+  .tile:hover {
+    background: var(--tile-accent);
   }
-  .metrics .n {
-    font-size: 23px;
+  .tile:hover .n {
+    color: var(--tile-accent);
+  }
+  .tile:hover::before {
+    background: color-mix(in srgb, var(--tile-accent) 7%, var(--tile-bg));
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .tile {
+    transition:
+      background 0.18s ease,
+      transform 0.18s cubic-bezier(0.22, 0.68, 0.32, 1);
+  }
+  @media (hover: hover) {
+    .tile:hover {
+      transform: translateY(-2px);
+    }
   }
 }
 

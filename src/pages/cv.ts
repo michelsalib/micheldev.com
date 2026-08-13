@@ -10,14 +10,20 @@ import {
   hueClass,
   isCurrent,
   type Locale,
-  metricValue,
   type Project,
   t,
   tl,
   years,
 } from "../content.ts";
 import { html, type Renderable, raw } from "../html.ts";
-import { type Assets, documentHead, footer, topBarCv } from "../partials.ts";
+import {
+  type Assets,
+  documentHead,
+  figureTiles,
+  footer,
+  portrait,
+  topBarCv,
+} from "../partials.ts";
 
 const COPY = {
   en: {
@@ -192,7 +198,10 @@ function sidebar(content: Content, locale: Locale): Renderable {
       cv.skills_current
         ? html`<div class="blk">
           <span class="h">${t(cv.skills_current.label, locale)}</span>
-          <ul class="plain">
+          <!-- Two-up: short tool names, and one per line leaves the block mostly
+               white space. Interests stays a single column — those are phrases,
+               not names, and they wrap. -->
+          <ul class="plain two-up">
             ${cv.skills_current.items.map((item) => html`<li>${item}</li>`)}
           </ul>
         </div>`
@@ -281,6 +290,13 @@ export function cvPage(
   const copy = COPY[locale];
   const path = locale === "en" ? "/cv" : "/cv/fr";
   const spanYears = careerYears(cv);
+  // No location here: the eyebrow above already carries it, and printing it
+  // twice in the same masthead is just noise. Empty when CV_EMAIL and CV_PHONE
+  // are both unset — a local build with no secrets, which prints no line at all
+  // rather than an empty one.
+  const contactLine = contact
+    ? [cv.person.email, cv.person.phone].filter(Boolean).join("  ·  ")
+    : "";
 
   return String(
     html`${documentHead({
@@ -292,6 +308,7 @@ export function cvPage(
       locale,
       alternates: { en: "/cv", fr: "/cv/fr" },
       scripts: [assets.theme, assets.cv],
+      preloadPortrait: true,
     })}
     ${topBarCv(locale, pdfHref)}
     <nav class="toc" aria-label="${copy.jumpTo}">
@@ -308,40 +325,36 @@ export function cvPage(
       </div>
     </nav>
     <main id="main">
-      <div class="wrap">
-        <div class="mast">
-          <p class="eyebrow in">
-            ${copy.eyebrow}${
-              cv.person.location ? ` · ${t(cv.person.location, locale)}` : ""
-            }
-          </p>
-          <h1 class="in">${cv.person.name}</h1>
-          <p class="headline in">${t(cv.headline, locale)}</p>
-          <p class="summary in">${t(cv.summary, locale)}</p>
-          <!-- Absent entirely unless this is the copy being printed to PDF.
-               Not hidden with CSS: hidden text is still in the HTML. -->
-          ${
-            contact
-              ? html`<p class="print-contact">
-                  ${[
-                    cv.person.email,
-                    cv.person.phone,
-                    cv.person.location ? t(cv.person.location, locale) : "",
-                  ]
-                    .filter(Boolean)
-                    .join("  ·  ")}
-                </p>`
-              : ""
-          }
-          <ul class="metrics">
-            ${(cv.metrics ?? []).map(
-              (metric) => html`<li>
-                <span class="n">${metricValue(metric, content)}</span
-                ><span class="l">${t(metric.label, locale)}</span>
-              </li>`,
-            )}
-          </ul>
+      <section class="band">
+        <div class="plate">
+          <div class="wrap">
+            <div class="mast">
+              <p class="eyebrow in">
+                ${copy.eyebrow}${
+                  cv.person.location
+                    ? ` · ${t(cv.person.location, locale)}`
+                    : ""
+                }
+              </p>
+              <h1 class="in">${cv.person.name}</h1>
+              <p class="headline in">${t(cv.headline, locale)}</p>
+              <p class="summary in">${t(cv.summary, locale)}</p>
+              <!-- Absent entirely unless this is the copy being printed to PDF.
+                   Not hidden with CSS: hidden text is still in the HTML. -->
+              ${
+                contactLine
+                  ? html`<p class="print-contact">${contactLine}</p>`
+                  : ""
+              }
+            </div>
+          </div>
+          <div class="plate-lower">
+            ${figureTiles(content, locale)} ${portrait(cv.person.name)}
+          </div>
         </div>
+        <p class="notch"><span>scroll</span></p>
+      </section>
+      <div class="wrap">
         <div class="cols">
           <section class="exp">
             <h2>${copy.experience}</h2>

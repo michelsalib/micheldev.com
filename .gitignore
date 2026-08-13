@@ -16,6 +16,10 @@ infra/terraform.tfvars
 infra/tfplan
 infra/*.tfplan
 
+# Local contact details for the PDF — CV_EMAIL and CV_PHONE. The whole reason
+# they live in the environment is that this repository is public.
+.env
+
 # Source CVs — the exported originals, kept locally only. content/cv.yaml is
 # the version that ships.
 CV - *.pdf

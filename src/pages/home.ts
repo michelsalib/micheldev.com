@@ -19,7 +19,13 @@ import {
   years,
 } from "../content.ts";
 import { html, htmlLines, join, type Renderable, raw } from "../html.ts";
-import { type Assets, documentHead, footer, topBarHome } from "../partials.ts";
+import {
+  type Assets,
+  documentHead,
+  figureTiles,
+  footer,
+  topBarHome,
+} from "../partials.ts";
 
 const LOCALE = "en" as const;
 
@@ -338,17 +344,10 @@ export function homePage(content: Content, assets: Assets): string {
               <h1 class="in">${cv.person.name}</h1>
               <p class="role in">${raw(site.hero.role_html)}</p>
               <p class="thesis in">${raw(site.hero.thesis_html)}</p>
-              <ul class="metrics in">
-                ${(cv.metrics ?? []).map(
-                  (metric) => html`<li>
-                    <span class="n">${metricValue(metric, content)}</span
-                    ><span class="l">${t(metric.label, LOCALE)}</span>
-                  </li>`,
-                )}
-              </ul>
             </div>
-            ${heroPanels(content)}
+            ${figureTiles(content, LOCALE)}
           </div>
+          ${heroPanels(content)}
         </div>
       </section>
       ${projectsSection(content)} ${workSection(content)}

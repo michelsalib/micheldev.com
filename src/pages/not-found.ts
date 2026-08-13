@@ -18,7 +18,7 @@ export function notFoundPage(content: Content, assets: Assets): string {
     ${topBarHome()}
     <main id="main">
       <div class="wrap">
-        <section class="hero">
+        <section class="miss">
           <p class="eyebrow">404</p>
           <h1>Nothing here</h1>
           <p class="thesis">

@@ -253,13 +253,24 @@ describe("content is rendered, not invented", () => {
   test("the PDF source copies do carry the contact line", async () => {
     // The other half of the requirement: the details must still reach the PDF.
     // These live outside dist/, so they are never served or containerised.
+    //
+    // CV_EMAIL and CV_PHONE are optional by design — a clone with no .env and
+    // no secrets still builds, and then there is no line to carry. Asserting
+    // one exists unconditionally fails on exactly that supported case, so the
+    // empty environment gets the opposite assertion: no empty <p> either.
     const { cv } = await loadContent();
+    const details = [cv.person.email, cv.person.phone].filter(
+      (detail): detail is string => Boolean(detail),
+    );
     for (const path of [".print/cv/index.html", ".print/cv/fr/index.html"]) {
       expect(await Bun.file(path).exists()).toBe(true);
       const page = await Bun.file(path).text();
+      if (details.length === 0) {
+        expect(page).not.toContain("print-contact");
+        continue;
+      }
       expect(page).toContain("print-contact");
-      if (cv.person.email) expect(page).toContain(cv.person.email);
-      if (cv.person.phone) expect(page).toContain(cv.person.phone);
+      for (const detail of details) expect(page).toContain(detail);
     }
   });
 

@@ -1,4 +1,7 @@
-/* ── Hero ────────────────────────────────────────────────────────────────── */
+/* ── Hero ──────────────────────────────────────────────────────────────────
+   Copy on the left, the four headline figures as tiles on the right. The tile
+   itself is a shared component — see 02-base.css — so the homepage sets only
+   where the block sits; the CV masthead reuses the same one on its plate.     */
 .hero {
   position: relative;
   padding: clamp(48px, 7vw, 88px) 0 clamp(40px, 5vw, 64px);
@@ -25,9 +28,19 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 372px);
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: clamp(30px, 4.5vw, 60px);
-  align-items: start;
+  align-items: center;
+}
+
+/* Used by the 404, which is a heading and a paragraph on paper. */
+.miss {
+  padding: clamp(48px, 7vw, 88px) 0 clamp(40px, 5vw, 64px);
+}
+.miss h1 {
+  font-size: clamp(30px, 4.4vw, 44px);
+  line-height: 1.05;
+  margin: 14px 0 0;
 }
 
 .eyebrow {
@@ -46,12 +59,6 @@
   height: 1px;
   flex: 1;
   background: var(--rule);
-}
-
-.hero h1 {
-  font-size: clamp(38px, 5.6vw, 62px);
-  line-height: 1.02;
-  margin: 16px 0 0;
 }
 
 .role {
@@ -82,14 +89,19 @@
   font-weight: 600;
 }
 
-/* The metrics strip is a shared component — see 02-base.css. */
+/* The metrics strip and the figure tiles are both shared components — see
+   02-base.css. The homepage renders the tiles; the CV masthead renders both. */
 
-/* ── Hero panels ─────────────────────────────────────────────────────────── */
-/* Two stacked panels: the open source running right now, and the professional
-   record. Each takes its hue from the section it points into, via --ph. */
+/* ── Panels ──────────────────────────────────────────────────────────────────
+   The open source running right now, and the professional record. Each takes
+   its hue from the section it points into, via --ph. They used to be stacked in
+   the hero's 372px right column, which is why they read as a sidebar; the tiles
+   took that column, so they are now a two-up row directly under the hero.     */
 .panels {
   display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
+  margin-top: clamp(30px, 4vw, 46px);
 }
 
 .panel {
@@ -689,8 +701,21 @@ table.archive tfoot td.num {
   .hero .in:nth-child(4) {
     animation-delay: 0.2s;
   }
-  .hero .in:nth-child(5) {
+  /* The tiles land after the copy, in reading order. */
+  .hero .tile {
+    animation: rise 0.5s cubic-bezier(0.22, 0.68, 0.32, 1) both;
+  }
+  .hero .tile:nth-child(1) {
     animation-delay: 0.26s;
+  }
+  .hero .tile:nth-child(2) {
+    animation-delay: 0.32s;
+  }
+  .hero .tile:nth-child(3) {
+    animation-delay: 0.38s;
+  }
+  .hero .tile:nth-child(4) {
+    animation-delay: 0.44s;
   }
   .panels .panel {
     animation: rise 0.68s cubic-bezier(0.22, 0.68, 0.32, 1) both;
@@ -706,6 +731,20 @@ table.archive tfoot td.num {
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
   .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+  /* The block sits under the copy now instead of beside it, so it takes the
+     whole measure and the four tiles share it two-up. At its intrinsic width it
+     would hug the left and leave a third of the row empty. */
+  .hero .tiles {
+    width: 100%;
+  }
+  .hero .tile {
+    flex: 1 1 calc(50% - var(--tile-gap));
+    width: auto;
+  }
+  .panels {
     grid-template-columns: minmax(0, 1fr);
   }
   .zone-grid {

@@ -11,6 +11,7 @@ const SETTLE = 40; // px of scroll still to spare once the spine is full
 const READ_LINE_RATIO = 0.5; // where down the viewport the colour boundary sits
 const LIT_SPAN = 3; // half-width, in % of view progress, of a node's light-up
 const RAIL_RAMP = 80; // px of scroll a project rail takes to light or unlight
+const CAP_RAMP = 120; // px of scroll the spine's end-cap takes to light
 
 const timeline = document.querySelector<HTMLElement>(".tl");
 const jobs = Array.from(document.querySelectorAll<HTMLElement>(".job"));
@@ -40,14 +41,23 @@ function layoutSpine(): void {
   const centres = jobs.map(nodeCentre);
   const head = centres[0] as number;
 
-  // The rail ends a short run-out past the last node rather than at the foot of
-  // its text — see --runout in 04-cv.css for why. Read from CSS so the run-out
-  // and the end-cap that marks it stay one number.
-  const runout =
-    Number.parseFloat(
-      getComputedStyle(timeline).getPropertyValue("--runout"),
-    ) || 0;
-  const end = (centres[centres.length - 1] as number) + runout;
+  // The rail ends level with the foot of the last project's own rail, so the
+  // timeline's vertical and the block's vertical stop on one line instead of the
+  // spine giving up half a screen early. Written back to --runout rather than
+  // used directly: the end-cap is placed from that number in CSS, so measuring
+  // it here keeps the rail and the mark on its end a single value.
+  const lastJob = jobs[jobs.length - 1] as HTMLElement;
+  const rails = lastJob.querySelectorAll<HTMLElement>(".proj");
+  const tail = rails[rails.length - 1] ?? lastJob;
+  const lastCentre = centres[centres.length - 1] as number;
+  const runout = Math.round(
+    tail.getBoundingClientRect().bottom -
+      timeline.getBoundingClientRect().top -
+      lastCentre,
+  );
+  timeline.style.setProperty("--runout", `${runout}px`);
+
+  const end = lastCentre + runout;
   const span = end - head;
 
   // Pull the bar's start down to the first node, so the ring is not pierced.
@@ -108,6 +118,13 @@ function layoutSpine(): void {
 
   timeline.style.setProperty("--fill-from", `${from}px`);
   timeline.style.setProperty("--fill-to", `${to}px`);
+  // The end-cap lights over the last stretch of that same range, so it finishes
+  // on the pixel the fill does instead of on a view() progress the last job
+  // never completes. Clamped to `from` for a document too short to hold a ramp.
+  timeline.style.setProperty(
+    "--cap-from",
+    `${Math.max(from, to - CAP_RAMP)}px`,
+  );
 }
 
 /**
@@ -220,15 +237,11 @@ function primeLitRange(): void {
     timeline?.style.setProperty(name, `${value.toFixed(1)}%`) as undefined;
 
   // A node lights as the front sweeps through it, so its range straddles the
-  // line.
+  // line. The end-cap is not here: it is where the front stops rather than
+  // something it passes, so it runs off the fill's scroll range instead — see
+  // --cap-from in layoutSpine.
   set("--lit-a", mid - LIT_SPAN);
   set("--lit-b", mid + LIT_SPAN);
-
-  // The end-cap is where the front stops rather than something it passes, so its
-  // range ends on the line: it is finished the moment the fill lands on it,
-  // instead of being caught half-lit with the spine already full.
-  set("--cap-a", mid - 2 * LIT_SPAN);
-  set("--cap-b", mid);
 }
 
 primeLitRange();
