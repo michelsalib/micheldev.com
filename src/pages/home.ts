@@ -338,7 +338,7 @@ export function homePage(content: Content, assets: Assets): string {
               <h1 class="in">${cv.person.name}</h1>
               <p class="role in">${raw(site.hero.role_html)}</p>
               <p class="thesis in">${raw(site.hero.thesis_html)}</p>
-              <ul class="facts in">
+              <ul class="metrics in">
                 ${(cv.metrics ?? []).map(
                   (metric) => html`<li>
                     <span class="n">${metricValue(metric, content)}</span

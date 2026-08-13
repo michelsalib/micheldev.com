@@ -33,43 +33,9 @@
   color: var(--ink-2);
 }
 
-.metrics {
-  margin: 26px 0 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  border-top: 1px solid var(--rule);
-}
-.metrics li {
-  padding: 13px 22px 13px 0;
-  margin-right: 22px;
-  border-right: 1px solid var(--rule);
-}
-.metrics li:last-child {
-  border-right: 0;
-  margin-right: 0;
-  padding-right: 0;
-}
-.metrics .n {
-  font-family: var(--f-display);
-  font-stretch: 100%;
-  font-weight: 700;
-  font-size: 27px;
-  line-height: 1;
-  letter-spacing: -0.025em;
-  display: block;
-  font-variant-numeric: tabular-nums;
-}
-.metrics .l {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  display: block;
-  margin-top: 6px;
-}
+/* The metrics strip itself is a shared component — see 02-base.css. What stays
+   in this sheet is only what the CV adds to it: the scroll-driven `rise`, its
+   reduced-motion reset, and the print sizes further down. */
 
 /* ── Language switch + download ──────────────────────────────────────────── */
 .lang-switch {
@@ -768,13 +734,6 @@ section.exp .sect-note {
 }
 
 @media (max-width: 560px) {
-  .metrics li {
-    padding-right: 15px;
-    margin-right: 15px;
-  }
-  .metrics .n {
-    font-size: 23px;
-  }
   .dl span.t {
     display: none;
   }

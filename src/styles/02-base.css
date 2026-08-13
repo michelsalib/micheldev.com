@@ -229,6 +229,67 @@ h3,
   background: color-mix(in srgb, var(--live) 9%, transparent);
 }
 
+/* ── Metrics strip ───────────────────────────────────────────────────────── */
+/* The row of headline figures under the name, rendered from cv.yaml `metrics` on
+   both the homepage hero and the CV masthead.
+
+   It lived twice: as `.facts` in 03-home.css and as `.metrics` in 04-cv.css, two
+   byte-identical rule sets under two names for one component fed by one array.
+   `.facts` was the more misleading of the two even before `facts` stopped being a
+   field name — nothing in the markup it styled had ever been called that.
+
+   Base and small-screen rules are here because both pages want them. 04-cv.css
+   keeps only what is genuinely CV-only: the scroll-driven `rise`, its
+   reduced-motion reset, and the print sizes in pt. Those come later in the cv
+   bundle, so they still win. */
+.metrics {
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--rule);
+}
+.metrics li {
+  padding: 13px 22px 13px 0;
+  margin-right: 22px;
+  border-right: 1px solid var(--rule);
+}
+.metrics li:last-child {
+  border-right: 0;
+  margin-right: 0;
+  padding-right: 0;
+}
+.metrics .n {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 27px;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+.metrics .l {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  display: block;
+  margin-top: 6px;
+}
+
+@media (max-width: 560px) {
+  .metrics li {
+    padding-right: 15px;
+    margin-right: 15px;
+  }
+  .metrics .n {
+    font-size: 23px;
+  }
+}
+
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 footer {
   margin-top: clamp(56px, 7vw, 96px);

@@ -82,43 +82,7 @@
   font-weight: 600;
 }
 
-.facts {
-  margin: 26px 0 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  border-top: 1px solid var(--rule);
-}
-.facts li {
-  padding: 13px 22px 13px 0;
-  margin-right: 22px;
-  border-right: 1px solid var(--rule);
-}
-.facts li:last-child {
-  border-right: 0;
-  margin-right: 0;
-  padding-right: 0;
-}
-.facts .n {
-  font-family: var(--f-display);
-  font-stretch: 100%;
-  font-weight: 700;
-  font-size: 27px;
-  line-height: 1;
-  letter-spacing: -0.025em;
-  display: block;
-  font-variant-numeric: tabular-nums;
-}
-.facts .l {
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  display: block;
-  margin-top: 6px;
-}
+/* The metrics strip is a shared component — see 02-base.css. */
 
 /* ── Hero panels ─────────────────────────────────────────────────────────── */
 /* Two stacked panels: the open source running right now, and the professional
@@ -774,13 +738,6 @@ table.archive tfoot td.num {
 }
 
 @media (max-width: 560px) {
-  .facts li {
-    padding-right: 15px;
-    margin-right: 15px;
-  }
-  .facts .n {
-    font-size: 23px;
-  }
   .links {
     grid-template-columns: minmax(0, 1fr);
   }
