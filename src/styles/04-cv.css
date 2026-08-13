@@ -622,7 +622,7 @@ section.exp .sect-note {
   transform: translateY(-2px);
 }
 
-.proj .scale {
+.proj .extra-lead {
   margin: 10px 0 0;
   font-size: 13.5px;
   color: var(--ink);
@@ -1031,7 +1031,7 @@ section.exp .sect-note {
   .proj ul li {
     font-size: 8.5pt;
   }
-  .proj .scale {
+  .proj .extra-lead {
     font-size: 8.5pt;
     margin-top: 4pt;
   }

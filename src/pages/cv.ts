@@ -70,26 +70,27 @@ function shortYears(job: Employment, locale: Locale): string {
 }
 
 /**
- * Order is deliberate: name, one-line lead, then the magnitude, then the
- * detail. `facts` sits above the bullets because it is the only part of the
+ * Order is deliberate: name, one-line lead, then the magnitudes, then the
+ * detail. `figures` sits above the bullets because it is the only part of the
  * block that is scannable — a reader who reads nothing else should still leave
- * with the numbers. Which also means the numbers belong here and nowhere else:
- * `lead` states what was done, the chips state how big it was, and `scale` is
- * only ever the transition sentence into `points_extra` (see cv.schema.json).
+ * with the numbers. Which also means the numbers belong there and nowhere else:
+ * `lead` states what was done and the chips state how big it was.
+ *
+ * `extra` closes the block with a second list behind its own lead-in sentence.
  */
 function projectBlock(project: Project, locale: Locale): Renderable {
   const points = tl(project.points, locale);
-  const extra = tl(project.points_extra, locale);
+  const extra = tl(project.extra?.points, locale);
   return html`<div class="proj">
     <p class="pn">${t(project.name, locale)}</p>
     ${project.lead ? html`<p class="pl">${t(project.lead, locale)}</p>` : ""}
     ${
-      project.facts?.length
+      project.figures?.length
         ? html`<div class="pf">
-          ${project.facts.map(
-            (fact) => html`<span class="kv"
-              ><span class="v">${String(fact.value)}</span
-              ><span class="k">${t(fact.label, locale)}</span></span
+          ${project.figures.map(
+            (figure) => html`<span class="kv"
+              ><span class="v">${String(figure.value)}</span
+              ><span class="k">${t(figure.label, locale)}</span></span
             >`,
           )}
         </div>`
@@ -102,7 +103,11 @@ function projectBlock(project: Project, locale: Locale): Renderable {
         </ul>`
         : ""
     }
-    ${project.scale ? html`<p class="scale">${t(project.scale, locale)}</p>` : ""}
+    ${
+      project.extra
+        ? html`<p class="extra-lead">${t(project.extra.lead, locale)}</p>`
+        : ""
+    }
     ${
       extra.length
         ? html`<ul>

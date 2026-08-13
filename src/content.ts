@@ -29,7 +29,8 @@ export function tl(value: TextList | undefined, locale: Locale): string[] {
 
 // ── cv.yaml ──────────────────────────────────────────────────────────────────
 
-export type Fact = { label: Text; value: string | number };
+/** One chip in a project's `figures` row: a magnitude and what it measures. */
+export type Figure = { label: Text; value: string | number };
 
 /**
  * A masthead/hero figure. Either a literal `value`, or a `derive` key counted at
@@ -38,13 +39,20 @@ export type Fact = { label: Text; value: string | number };
 export type MetricSource = "years" | "employers" | "projects" | "live_services";
 export type Metric = { value?: string; derive?: MetricSource; label: Text };
 
+/**
+ * Field order matches render order: name, lead, figures, points, extra, stack.
+ *
+ * `extra` is a second bullet list with its own lead-in sentence, nested rather
+ * than two flat siblings. As `scale` + `points_extra` the pairing was invisible
+ * and unenforceable, and four of six employers ended up with a lead-in and no
+ * list after it — a colon pointing at nothing. Both keys are required together.
+ */
 export type Project = {
   name: Text;
   lead?: Text;
+  figures?: Figure[];
   points?: TextList;
-  scale?: Text;
-  points_extra?: TextList;
-  facts?: Fact[];
+  extra?: { lead: Text; points: TextList };
   stack?: string[];
 };
 

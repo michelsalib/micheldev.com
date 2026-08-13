@@ -69,19 +69,6 @@
         }
       ]
     },
-    "fact": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["label", "value"],
-      "properties": {
-        "label": {
-          "$ref": "#/$defs/text"
-        },
-        "value": {
-          "type": ["string", "integer"]
-        }
-      }
-    },
     "project": {
       "type": "object",
       "additionalProperties": false,
@@ -92,22 +79,31 @@
         },
         "lead": {
           "$ref": "#/$defs/text",
-          "description": "The one-line summary."
+          "description": "The one-line summary. Says what was done; carries no figures."
+        },
+        "figures": {
+          "type": "array",
+          "description": "The chip row, rendered above the bullets. Every magnitude for this project lives here and nowhere else.",
+          "items": {
+            "$ref": "#/$defs/figure"
+          }
         },
         "points": {
           "$ref": "#/$defs/textList"
         },
-        "scale": {
-          "$ref": "#/$defs/text",
-          "description": "The transition line before points_extra."
-        },
-        "points_extra": {
-          "$ref": "#/$defs/textList"
-        },
-        "facts": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/fact"
+        "extra": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "A second bullet list with its own lead-in sentence. Both keys are required: a lead-in with nothing after it to introduce is the bug this nesting exists to prevent.",
+          "required": ["lead", "points"],
+          "properties": {
+            "lead": {
+              "$ref": "#/$defs/text",
+              "description": "Ends with a colon — it introduces `points` below."
+            },
+            "points": {
+              "$ref": "#/$defs/textList"
+            }
           }
         },
         "stack": {
@@ -131,6 +127,19 @@
           "items": {
             "type": "string"
           }
+        }
+      }
+    },
+    "figure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "value"],
+      "properties": {
+        "label": {
+          "$ref": "#/$defs/text"
+        },
+        "value": {
+          "type": ["string", "integer"]
         }
       }
     }
@@ -312,7 +321,14 @@
         "type": "object",
         "additionalProperties": false,
         "required": ["label"],
-        "oneOf": [{ "required": ["value"] }, { "required": ["derive"] }],
+        "oneOf": [
+          {
+            "required": ["value"]
+          },
+          {
+            "required": ["derive"]
+          }
+        ],
         "properties": {
           "value": {
             "type": "string"

@@ -50,7 +50,7 @@ experience:
                 Refonte complète du backend d'agrégation, de stockage et de
                 distribution des données hippiques — et exploitation en
                 production depuis.
-            facts:
+            figures:
               - { label: { en: daily users, fr: visiteurs quotidiens }, value: "10k" }
               - { label: { en: B2B customers, fr: clients B2B }, value: 10 }
               - { label: { en: developers, fr: développeurs }, value: 4 }
@@ -64,16 +64,17 @@ experience:
                 - Conception de l'architecture de bout en bout, du pipeline d'événements à l'API publique
                 - Bascule de l'activité hors de l'ancienne stack, puis décommissionnement
                 - Accompagnement des équipes d'intégration, mobile et web qui la consomment
-            scale:
-              en: "One year to retire the old stack, and to put in place:"
-              fr: "Un an pour retirer l'ancienne stack, et pour mettre en place :"
-            points_extra:
-              en:
-                - Ownership of the platform held in-house, rather than by external freelancers
-                - A development practice where there was none — code review, CI, automated releases
-              fr:
-                - Maîtrise de la plateforme ramenée en interne, et non plus confiée à des freelances
-                - Une pratique de développement là où il n'y en avait pas — revue de code, CI, livraisons automatisées
+            extra:
+              lead:
+                en: "One year to retire the old stack, and to put in place:"
+                fr: "Un an pour retirer l'ancienne stack, et pour mettre en place :"
+              points:
+                en:
+                  - Ownership of the platform held in-house, rather than by external freelancers
+                  - A development practice where there was none — code review, CI, automated releases
+                fr:
+                  - Maîtrise de la plateforme ramenée en interne, et non plus confiée à des freelances
+                  - Une pratique de développement là où il n'y en avait pas — revue de code, CI, livraisons automatisées
             stack: [TypeScript, Bun, GCP, Pub/Sub, MongoDB, OpenAPI, SSE]
 
   - employer: London Stock Exchange
@@ -96,7 +97,7 @@ experience:
                 Responsable de News de bout en bout — applications,
                 WebComponents, APIs et Cloud — pour le texte, les images, la
                 vidéo et le temps réel.
-            facts:
+            figures:
               - { label: { en: monthly users, fr: utilisateurs mensuels }, value: "150k+" }
               - { label: { en: developers led, fr: développeurs encadrés }, value: 20 }
               - { label: { en: repositories owned, fr: repositories }, value: "20+" }
@@ -131,7 +132,7 @@ experience:
               fr: >-
                 Migration de la plateforme de News du cloud privé à AWS,
                 permettant de distribuer les données par API aux partenaires.
-            facts:
+            figures:
               - { label: { en: developers led, fr: développeurs encadrés }, value: "16+" }
               - { label: { en: downtime at migration, fr: arrêt à la migration }, value: 0 }
             points:
@@ -166,7 +167,7 @@ experience:
               fr: >-
                 Reconstruction de la couche de distribution des données temps
                 réel, et sortie du C++.
-            facts:
+            figures:
               - { label: { en: users, fr: utilisateurs }, value: "150k+" }
               - { label: { en: events / sec, fr: évènements / s }, value: "100s" }
             points:
@@ -176,18 +177,19 @@ experience:
               fr:
                 - Établissement de la stack technique, de l'architecture, de la QA et du plan de migration
                 - Travail sur les algorithmes servant à résoudre les données temps réel et historiques
-            scale:
-              en: "Migrated over a few months with no incident:"
-              fr: "Migration en quelques mois sans incident :"
-            points_extra:
-              en:
-                - Moved a 10-person team from a C++ stack to JavaScript/TypeScript
-                - Built new development and support tooling
-                - Replaced a C++ layer with a JS Electron module
-              fr:
-                - Accompagnement d'une équipe de 10 personnes d'une stack C++ à JavaScript/TypeScript
-                - Développement de nouveaux outils de dev et de support
-                - Remplacement d'une couche C++ par un module JS Electron
+            extra:
+              lead:
+                en: "Migrated over a few months with no incident:"
+                fr: "Migration en quelques mois sans incident :"
+              points:
+                en:
+                  - Moved a 10-person team from a C++ stack to JavaScript/TypeScript
+                  - Built new development and support tooling
+                  - Replaced a C++ layer with a JS Electron module
+                fr:
+                  - Accompagnement d'une équipe de 10 personnes d'une stack C++ à JavaScript/TypeScript
+                  - Développement de nouveaux outils de dev et de support
+                  - Remplacement d'une couche C++ par un module JS Electron
             stack: [TypeScript, WebSocket, Electron, TDD]
 
       - title: Lead Developer
@@ -200,7 +202,7 @@ experience:
               fr: >-
                 Reconstruction de l'application pour que les news multimédia
                 soient à la pointe.
-            facts:
+            figures:
               - { label: { en: weekly users, fr: utilisateurs hebdo }, value: "30k" }
               - { label: { en: fullstack team, fr: équipe fullstack }, value: 12 }
             points:
@@ -210,14 +212,15 @@ experience:
               fr:
                 - Travail avec les journalistes de Reuters pour définir les meilleurs workflows
                 - Intégration de l'UX et du design system dans la méthodologie agile, avec une release automatisée toutes les deux semaines
-            scale:
-              en: "Shipped within 6 months:"
-              fr: "Livré en 6 mois :"
-            points_extra:
-              en:
-                - "Integrated modern web behaviours: offline, notifications, responsiveness, live updates"
-              fr:
-                - "Intégration des comportements web modernes : hors-ligne, notifications, responsive, mises à jour en direct"
+            extra:
+              lead:
+                en: "Shipped within 6 months:"
+                fr: "Livré en 6 mois :"
+              points:
+                en:
+                  - "Integrated modern web behaviours: offline, notifications, responsiveness, live updates"
+                fr:
+                  - "Intégration des comportements web modernes : hors-ligne, notifications, responsive, mises à jour en direct"
             stack: [Angular, TypeScript, Node.js]
 
           - name: News Web Services
@@ -227,7 +230,7 @@ experience:
               fr: >-
                 Développement de l'API JSON pour distribuer les news au sein
                 d'Eikon.
-            facts:
+            figures:
               - { label: { en: requests / day, fr: requêtes / jour }, value: "10M+" }
               - { label: { en: team moved to Node, fr: équipe migrée vers Node }, value: 8 }
             points:
@@ -259,7 +262,7 @@ experience:
             lead:
               en: Built a recommendation API, sold as SaaS.
               fr: Développement d'une API SaaS de recommandation.
-            facts:
+            figures:
               - { label: { en: months to pivot, fr: mois pour pivoter }, value: 3 }
             points:
               en:
@@ -280,7 +283,7 @@ experience:
               fr: >-
                 Développement d'un site web de comparaison de produits, avec un
                 accent sur l'IA et le social graph.
-            facts:
+            figures:
               - { label: { en: merchant partners, fr: commerçants partenaires }, value: "10+" }
               - { label: { en: product categories, fr: catégories produits }, value: "50+" }
             points:
@@ -314,7 +317,7 @@ experience:
             lead:
               en: Lecturer for the Java course, across the full year group.
               fr: Cours magistraux de Java, pour toute la promotion.
-            facts:
+            figures:
               - { label: { en: students, fr: étudiants }, value: 150 }
             points:
               en:
