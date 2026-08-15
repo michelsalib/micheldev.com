@@ -36,7 +36,14 @@ export type Figure = { label: Text; value: string | number };
  * A masthead/hero figure. Either a literal `value`, or a `derive` key counted at
  * render time — see `metricValue`.
  */
-export type MetricSource = "years" | "employers" | "projects" | "live_services";
+export type MetricSource =
+  | "years"
+  | "employers"
+  | "projects"
+  | "live_services"
+  | "stars"
+  | "repos"
+  | "oss_years";
 export type Metric = { value?: string; derive?: MetricSource; label: Text };
 
 /**
@@ -107,7 +114,7 @@ export type Site = {
   hosts: { canonical: string; redirect: string[] };
   meta: { title: string; description: string; locale: string };
   hero: { eyebrow: string; role_html: string; thesis_html: string };
-  sections: Record<"work" | "projects" | "elsewhere", SectionConfig>;
+  sections: Record<"projects" | "elsewhere", SectionConfig>;
   footer: { note: string };
 };
 
@@ -118,14 +125,16 @@ export type ActiveProject = {
   url: string;
   repo?: string;
   live?: boolean;
-  meta: string;
   tags: string[];
   blurb: string;
-  hero_blurb?: string;
   subdomains?: string[];
 };
 
 export type Projects = {
+  /** Year of the first public repository. Only `oss_years` reads it. */
+  since: number;
+  /** The four hero tiles. */
+  metrics: Metric[];
   active: ActiveProject[];
   archive: {
     heading: string;
@@ -255,12 +264,13 @@ export function metricValue(metric: Metric, content: Content): string {
       return String(allProjects(content.cv).length);
     case "live_services":
       return String(liveServices(content.projects));
+    case "stars":
+      return String(totalStars(content.projects));
+    case "repos":
+      return String(content.projects.archive.total_repos);
+    case "oss_years":
+      return String(new Date().getFullYear() - content.projects.since);
     default:
       return "";
   }
-}
-
-/** The employer to feature in the homepage hero panel. */
-export function featured(cv: Cv): Employment {
-  return cv.experience.find(isCurrent) ?? (cv.experience[0] as Employment);
 }

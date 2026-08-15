@@ -22,12 +22,12 @@
           "description": "Rendered as the label in the section's margin rail."
         },
         "hue": {
-          "enum": ["work", "projects", "elsewhere"],
+          "enum": ["projects", "elsewhere"],
           "description": "Which --h-* token the section paints with."
         },
         "note_html": {
           "type": "string",
-          "description": "Short marginal note. Line breaks are honoured as authored. May contain markup — the _html suffix marks it as bypassing escaping, so a note can link (the /work one links to the CV page)."
+          "description": "Short marginal note. Line breaks are honoured as authored. May contain markup — the _html suffix marks it as bypassing escaping, so a note can link."
         },
         "heading": {
           "type": "string"
@@ -109,11 +109,8 @@
     "sections": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["work", "projects", "elsewhere"],
+      "required": ["projects", "elsewhere"],
       "properties": {
-        "work": {
-          "$ref": "#/$defs/section"
-        },
         "projects": {
           "$ref": "#/$defs/section"
         },

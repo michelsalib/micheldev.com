@@ -1,19 +1,25 @@
 # yaml-language-server: $schema=./projects.schema.json
 
+since: 2011
+
+# The homepage hero tiles. The CV masthead has its own set in cv.yaml — this
+# page is about the open source, so its headline numbers are too.
+metrics:
+  - { derive: stars, label: { en: GitHub stars } }
+  - { derive: repos, label: { en: public repos } }
+  - { derive: live_services, label: { en: services live } }
+  - { derive: oss_years, label: { en: years publishing } }
+
 active:
   - name: Notion connectors
     url: https://notion-tmdb.micheldev.com
     repo: https://github.com/michelsalib/notion-tmdb
     live: true
-    meta: bun · gcp
     tags: [typescript, bun, gcp]
     blurb: >-
       Turns a plain Notion database into a self-updating tracker — type a title,
       the connector fills in the rest. Four sources plus two scheduled backup
       jobs.
-    hero_blurb: >-
-      6 services on *.micheldev.com — films, books, games, theatre, and two
-      backup jobs.
     subdomains:
       - notion-tmdb
       - notion-gbook
@@ -25,7 +31,6 @@ active:
   - name: media-cast
     url: https://github.com/michelsalib/media-cast
     live: false
-    meta: typescript · win
     tags: [typescript, chromecast]
     blurb: >-
       Streams local media straight to a Chromecast, without uploading it
@@ -34,7 +39,6 @@ active:
   - name: audio-tray
     url: https://github.com/michelsalib/audio-tray
     live: false
-    meta: rust · win
     tags: [rust, desktop]
     blurb: >-
       A tray app for switching audio devices — and my excuse to write Rust in
@@ -43,7 +47,6 @@ active:
   - name: updater
     url: https://github.com/michelsalib/updater
     live: false
-    meta: typescript · win
     tags: [typescript, windows]
     blurb: Update checking and installation for Windows desktop applications.
 

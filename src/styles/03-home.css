@@ -88,195 +88,21 @@
   color: var(--ink);
   font-weight: 600;
 }
+/* The hero's one prose link, the hand-off to the CV. Base CSS strips colour and
+   underline from every `a`, so the markup alone would render it as plain text. */
+.thesis a {
+  color: var(--ink);
+  border-bottom: 1px solid color-mix(in srgb, var(--h-work) 55%, transparent);
+  transition:
+    color 0.16s ease,
+    border-color 0.16s ease;
+}
+.thesis a:hover {
+  border-bottom-color: var(--h-work);
+}
 
 /* The metrics strip and the figure tiles are both shared components — see
    02-base.css. The homepage renders the tiles; the CV masthead renders both. */
-
-/* ── Panels ──────────────────────────────────────────────────────────────────
-   The open source running right now, and the professional record. Each takes
-   its hue from the section it points into, via --ph. They used to be stacked in
-   the hero's 372px right column, which is why they read as a sidebar; the tiles
-   took that column, so they are now a two-up row directly under the hero.     */
-.panels {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-top: clamp(30px, 4vw, 46px);
-}
-
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-
-.panel-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 17px;
-  border-bottom: 1px solid var(--rule);
-  font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-}
-
-/* The record panel's dot is the section hue, not the green live token: that
-   role has an end date, and a live dot would claim something untrue. The
-   projects panel does get the live token — those services are actually up. */
-.panel-head .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--ph);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ph) 18%, transparent);
-  flex: none;
-}
-.panel-head .dot.is-live {
-  background: var(--live);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 20%, transparent);
-}
-.panel-head .yrs {
-  margin-left: auto;
-  font-variant-numeric: tabular-nums;
-}
-
-.panel-body {
-  padding: 15px 17px 17px;
-}
-
-.panel .co {
-  font-family: var(--f-display);
-  font-stretch: 100%;
-  font-weight: 700;
-  font-size: 18px;
-  letter-spacing: -0.018em;
-  line-height: 1.2;
-  margin: 0;
-}
-.panel .ti {
-  font-family: var(--f-mono);
-  font-size: 11.5px;
-  color: var(--ph);
-  font-weight: 600;
-  margin: 5px 0 0;
-}
-.panel .cx {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  color: var(--ink-3);
-  margin: 7px 0 0;
-  line-height: 1.6;
-}
-
-.panel ul.hi {
-  margin: 13px 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--ink-2);
-}
-.panel ul.hi li {
-  display: flex;
-  gap: 9px;
-  align-items: baseline;
-}
-.panel ul.hi li::before {
-  content: "";
-  flex: none;
-  width: 4px;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--ph);
-  transform: translateY(-2px);
-}
-.panel ul.hi b {
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.panel ul.oss {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-}
-.panel ul.oss li {
-  border-top: 1px solid var(--rule);
-}
-.panel ul.oss li:first-child {
-  border-top: 0;
-}
-.panel ul.oss a {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: baseline;
-  padding: 9px 0;
-  transition: color 0.15s ease;
-}
-.panel ul.oss .n {
-  font-family: var(--f-display);
-  font-stretch: 100%;
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: -0.01em;
-  display: flex;
-  align-items: baseline;
-  gap: 7px;
-}
-.panel ul.oss a:hover .n {
-  color: var(--ph);
-}
-.panel ul.oss .n .ld {
-  width: 5px;
-  height: 5px;
-  border-radius: 999px;
-  background: var(--live);
-  flex: none;
-  transform: translateY(-3px);
-}
-.panel ul.oss .m {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  color: var(--ink-3);
-  white-space: nowrap;
-}
-.panel ul.oss .d {
-  font-family: var(--f-mono);
-  font-size: 10.5px;
-  color: var(--ink-3);
-  grid-column: 1 / -1;
-  margin-top: -4px;
-  line-height: 1.55;
-}
-
-.panel-foot {
-  border-top: 1px solid var(--rule);
-  padding: 10px 17px;
-  background: var(--surface-2);
-  font-family: var(--f-mono);
-  font-size: 11.5px;
-}
-.panel-foot a {
-  color: var(--ph);
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-.panel-foot a .ar {
-  transition: transform 0.18s ease;
-}
-.panel-foot a:hover .ar {
-  transform: translateX(3px);
-}
 
 /* ── Sections ────────────────────────────────────────────────────────────── */
 section.zone {
@@ -312,23 +138,6 @@ section.zone {
   font-size: 11px;
   line-height: 1.65;
   color: var(--ink-3);
-}
-
-/* The /work note links to the CV page, and base CSS sets `a { color: inherit;
-   text-decoration: none }` — so without this the link is clickable and looks
-   exactly like the prose around it, which defeats the point of linking it.
-   Quieter than `.lede a` on purpose: this is 11px mono sitting in the margin, so
-   full --ink weight with a solid hue rule would pull the eye off the heading. */
-.rail .note a {
-  color: var(--ink-2);
-  border-bottom: 1px solid color-mix(in srgb, var(--hue) 55%, transparent);
-  transition:
-    color 0.16s ease,
-    border-color 0.16s ease;
-}
-.rail .note a:hover {
-  color: var(--ink);
-  border-bottom-color: var(--hue);
 }
 
 .zone h2 {
@@ -368,105 +177,6 @@ section.zone {
   height: 1px;
   flex: 1;
   background: var(--rule);
-}
-
-/* ── Work timeline ───────────────────────────────────────────────────────── */
-.tl {
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
-
-  /* One axis for the rail and the dots, on whole pixels, so they cannot drift
-     apart or straddle a device row. Same scheme as the CV page. */
-  --rail-x: 4px;
-  --bar-w: 2px;
-  --dot-d: 8px;
-  --dot-top: 8px;
-}
-
-.tl > li {
-  position: relative;
-  padding: 0 0 26px 30px;
-}
-.tl > li:last-child {
-  padding-bottom: 2px;
-}
-
-/* Each entry draws the rail segment from its own dot down to the next one.
-   height:100% of the entry is exactly the distance between two dot centres, so
-   the rail starts at the first dot and stops at the last — no stub above the
-   first bullet and nothing dangling past the last. */
-.tl > li::after {
-  content: "";
-  position: absolute;
-  left: var(--rail-x);
-  margin-left: calc(var(--bar-w) / -2);
-  top: calc(var(--dot-top) + var(--dot-d) / 2);
-  width: var(--bar-w);
-  height: 100%;
-  background: var(--rule-strong);
-}
-.tl > li:last-child::after {
-  display: none;
-}
-
-.tl > li::before {
-  content: "";
-  position: absolute;
-  left: var(--rail-x);
-  margin-left: calc(var(--dot-d) / -2);
-  top: var(--dot-top);
-  width: var(--dot-d);
-  height: var(--dot-d);
-  border-radius: 999px;
-  background: var(--paper);
-  border: 2px solid var(--hue);
-  z-index: 1; /* the dot sits on top of the rail, not under it */
-}
-.tl > li.now::before {
-  background: var(--hue);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--hue) 16%, transparent);
-}
-
-.tl .when {
-  font-family: var(--f-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.05em;
-  color: var(--hue);
-  font-weight: 600;
-  display: block;
-  font-variant-numeric: tabular-nums;
-}
-.tl .who {
-  font-family: var(--f-display);
-  font-stretch: 100%;
-  font-weight: 700;
-  font-size: 19px;
-  letter-spacing: -0.018em;
-  margin: 4px 0 0;
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.tl .who .t {
-  font-family: var(--f-mono);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--ink-2);
-  letter-spacing: 0;
-}
-.tl p.b {
-  margin: 7px 0 0;
-  color: var(--ink-2);
-  font-size: 14.5px;
-  max-width: 60ch;
-}
-.tl .stack {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 10px;
 }
 
 /* ── Project rows ────────────────────────────────────────────────────────── */
@@ -717,15 +427,6 @@ table.archive tfoot td.num {
   .hero .tile:nth-child(4) {
     animation-delay: 0.44s;
   }
-  .panels .panel {
-    animation: rise 0.68s cubic-bezier(0.22, 0.68, 0.32, 1) both;
-  }
-  .panels .panel:nth-child(1) {
-    animation-delay: 0.18s;
-  }
-  .panels .panel:nth-child(2) {
-    animation-delay: 0.27s;
-  }
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
@@ -743,9 +444,6 @@ table.archive tfoot td.num {
   .hero .tile {
     flex: 1 1 calc(50% - var(--tile-gap));
     width: auto;
-  }
-  .panels {
-    grid-template-columns: minmax(0, 1fr);
   }
   .zone-grid {
     grid-template-columns: minmax(0, 1fr);

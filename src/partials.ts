@@ -5,6 +5,7 @@
 import {
   type Content,
   type Locale,
+  type Metric,
   metricValue,
   type Site,
   t,
@@ -14,14 +15,22 @@ import { html, type Renderable, raw } from "./html.ts";
 export type Assets = { css: string; theme: string; cv: string };
 
 /**
- * The headline figures as tiles, from `cv.metrics`.
+ * The headline figures as tiles.
  *
  * Four of them, because the block is two tiles wide and a fifth would wrap to a
  * lonely third row. Rendered on the homepage beside the hero copy and on the CV
  * masthead plate; only the palette differs, and that is set in CSS.
+ *
+ * Which four is the caller's business, because the two pages are about
+ * different things: the CV leads with the career (`cv.metrics`), the homepage
+ * with the open source (`projects.metrics`).
  */
-export function figureTiles(content: Content, locale: Locale): Renderable {
-  const metrics = (content.cv.metrics ?? []).slice(0, 4);
+export function figureTiles(
+  content: Content,
+  locale: Locale,
+  source: Metric[],
+): Renderable {
+  const metrics = source.slice(0, 4);
   return html`<ul class="tiles">
     ${metrics.map(
       (metric, i) => html`<li class="tile${raw(i === 0 ? " hue" : "")}">
@@ -179,7 +188,6 @@ export function topBarHome(): Renderable {
       <a class="wordmark" href="/"><b>micheldev</b><span>.com</span></a>
       <nav>
         <a href="#projects" class="nav-link hide-s">projects</a>
-        <a href="#work" class="nav-link hide-s">work</a>
         <a href="#elsewhere" class="nav-link hide-s">elsewhere</a>
         <a href="/cv" class="nav-link cv">cv&nbsp;&rarr;</a>
         ${themeToggle()}

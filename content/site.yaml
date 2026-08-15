@@ -26,11 +26,9 @@ hero:
     I build the systems a business runs on — <em>and I run them</em>.
   thesis_html: >-
     Right now: the data platform behind <strong>Matchem</strong>'s horse-racing
-    products, rebuilt from scratch — stack, architecture, practices — and mine
-    to keep running. A media business, not a tech business. The fifteen years
-    before that: financial news at <strong>Thomson Reuters</strong>, Refinitiv
-    and the <strong>London Stock Exchange</strong>, the same problem with more
-    people watching. Before any of it, founder and CTO of my own company.
+    products, rebuilt from scratch and mine to keep running. Fifteen years of
+    financial news before that. The <a href="/cv">CV</a> has the detail; this
+    page is for what I build on my own time.
 
 sections:
   projects:
@@ -46,18 +44,6 @@ sections:
       Day job is a platform a business depends on. These are the opposite:
       small, finished, and running on infrastructure I pay for myself — six
       services under this domain, one repository, one deploy.
-  work:
-    path: /work
-    hue: work
-    note_html: |
-      Summary here.
-      Detail on the
-      <a href="/cv">CV page</a>.
-    heading: Built it, and stayed to run it
-    lede_html: >-
-      Different industries, one problem shape: move a lot of data to a lot of
-      people, fast, without going down — and be accountable when it does. Full
-      detail — projects, numbers, stacks — lives on the <a href="/cv">CV page</a>.
   elsewhere:
     path: /elsewhere
     hue: elsewhere

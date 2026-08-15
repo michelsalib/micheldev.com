@@ -69,10 +69,9 @@ export function join(items: Renderable[], separator = ""): Raw {
  *
  * Used for the short marginal notes in the section rails, where the line breaks
  * are a typographic choice made in the content file rather than a wrapping
- * accident. The `/work` note links to the CV page, so the field carries markup —
- * and every note key is `note_html` rather than only that one, because a content
- * file edited a few times a year is better off with one rule than with two keys
- * that look the same and behave differently.
+ * accident. A note may also carry markup — a link, say — which is why the key is
+ * `note_html`: a content file edited a few times a year is better off with one
+ * rule than with two keys that look the same and behave differently.
  *
  * The `Html` in the name is the contract: only `*_html` YAML keys reach this, so
  * every place markup can enter a page is still one grep away.

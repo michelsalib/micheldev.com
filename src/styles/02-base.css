@@ -532,20 +532,9 @@ footer {
   --hue: var(--w6);
 }
 
-.hue-work {
-  --hue: var(--h-work);
-}
 .hue-projects {
   --hue: var(--h-projects);
 }
 .hue-elsewhere {
   --hue: var(--h-elsewhere);
-}
-
-/* Panel hue, for the two hero cards. */
-.ph-work {
-  --ph: var(--h-work);
-}
-.ph-projects {
-  --ph: var(--h-projects);
 }

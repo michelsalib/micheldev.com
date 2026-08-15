@@ -4,17 +4,51 @@
   "description": "Drives the /projects section, the open-source archive table, and /elsewhere.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["active", "archive", "links"],
+  "required": ["since", "metrics", "active", "archive", "links"],
 
   "properties": {
-    "active": {
+    "since": {
+      "type": "integer",
+      "minimum": 2000,
+      "description": "Year of the first public repository. Read only by the `oss_years` metric, so the tile rolls over on 1 January rather than going quietly stale."
+    },
+
+    "metrics": {
+      "description": "The four headline numbers on the homepage hero. Each must trace to something on this page. Give either a literal `value` or a `derive` key, never both — anything countable from content/ should be derived so it cannot go stale. The CV masthead has its own set, in cv.yaml.",
       "type": "array",
-      "minItems": 1,
-      "description": "Current projects. Shown in the hero's second panel and under 'Running now'.",
+      "maxItems": 4,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["name", "url", "meta", "tags", "blurb"],
+        "required": ["label"],
+        "oneOf": [{ "required": ["value"] }, { "required": ["derive"] }],
+        "properties": {
+          "value": { "type": "string" },
+          "derive": {
+            "description": "Counted at render time. stars: summed over archive.repos. repos: archive.total_repos. live_services: live entries, counting subdomains. oss_years: this year minus `since`.",
+            "enum": ["stars", "repos", "live_services", "oss_years"]
+          },
+          "label": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["en"],
+            "properties": {
+              "en": { "type": "string" },
+              "fr": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "active": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Current projects. Listed under 'Running now'.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "url", "tags", "blurb"],
         "properties": {
           "name": { "type": "string" },
           "url": {
@@ -27,10 +61,6 @@
             "type": "boolean",
             "description": "Deployed and reachable. Grants the green live dot, which must not be claimed otherwise."
           },
-          "meta": {
-            "type": "string",
-            "description": "Short right-aligned label in the hero panel, e.g. 'bun · gcp'."
-          },
           "tags": {
             "type": "array",
             "minItems": 1,
@@ -38,10 +68,6 @@
             "description": "The first tag is painted in the section hue."
           },
           "blurb": { "type": "string" },
-          "hero_blurb": {
-            "type": "string",
-            "description": "Optional shorter line, used only in the hero panel."
-          },
           "subdomains": {
             "type": "array",
             "items": {

@@ -1,23 +1,12 @@
 /**
- * The homepage: a hub index. Projects lead, career follows, links close.
+ * The homepage: a hub index. Projects lead, links close.
  *
- * The work timeline and the hero metrics come from cv.yaml, so the homepage can
- * never disagree with the CV.
+ * The career is the CV's job, not this page's — the hero states it in a
+ * sentence and links out. Everything the page counts is open source, and it
+ * counts it from projects.yaml rather than repeating a number.
  */
 
-import {
-  type Content,
-  type Employment,
-  featured,
-  hueClass,
-  isCurrent,
-  liveServices,
-  metricValue,
-  t,
-  tl,
-  totalStars,
-  years,
-} from "../content.ts";
+import { type Content, totalStars } from "../content.ts";
 import { html, htmlLines, join, type Renderable, raw } from "../html.ts";
 import {
   type Assets,
@@ -28,84 +17,6 @@ import {
 } from "../partials.ts";
 
 const LOCALE = "en" as const;
-
-/** One-line summary of an employer for the homepage timeline. */
-function summarise(job: Employment): string {
-  const parts: string[] = [];
-  for (const role of job.roles) {
-    for (const project of role.projects) {
-      const lead = t(project.lead, LOCALE).trim();
-      if (lead) parts.push(lead);
-    }
-  }
-  return parts.join(" ");
-}
-
-/** Every technology named across an employer's projects, de-duplicated. */
-function stackOf(job: Employment): string[] {
-  const seen = new Set<string>();
-  for (const role of job.roles) {
-    for (const project of role.projects) {
-      for (const item of project.stack ?? []) seen.add(item);
-    }
-  }
-  return [...seen];
-}
-
-function roleTitles(job: Employment): string {
-  const titles = job.roles.map((r) => t(r.title, LOCALE));
-  if (titles.length <= 1) return titles[0] ?? "";
-  // Reverse-chronological in the data; read as a progression on the page.
-  return [...titles].reverse().join(" → ");
-}
-
-function workSection({ cv, site }: Content): Renderable {
-  const section = site.sections.work;
-  return html`<section class="zone hue-work" id="work">
-    <div class="wrap">
-      <div class="zone-grid">
-        <div class="rail">
-          <span class="path">${section.path}</span>
-          <div class="rule"></div>
-          <p class="note">${htmlLines(section.note_html)}</p>
-        </div>
-        <div>
-          <div class="reveal">
-            <h2>${section.heading}</h2>
-            <p class="lede">${raw(section.lede_html)}</p>
-          </div>
-          <ul class="tl">
-            ${cv.experience.map(
-              (job, i) => html`<li
-                class="reveal ${hueClass(job, i)}${raw(
-                  i === 0 || isCurrent(job) ? " now" : "",
-                )}"
-              >
-                <span class="when"
-                  >${years(job, LOCALE)}${
-                    job.location ? ` · ${job.location.toUpperCase()}` : ""
-                  }</span
-                >
-                <p class="who">
-                  ${job.employer} <span class="t">${roleTitles(job)}</span>
-                </p>
-                <p class="b">${summarise(job)}</p>
-                <div class="stack">
-                  ${stackOf(job).map(
-                    (item, n) =>
-                      html`<span class="tag${raw(n === 0 ? " hue" : "")}"
-                        >${item.toLowerCase()}</span
-                      >`,
-                  )}
-                </div>
-              </li>`,
-            )}
-          </ul>
-        </div>
-      </div>
-    </div>
-  </section>`;
-}
 
 function projectsSection({ site, projects }: Content): Renderable {
   const section = site.sections.projects;
@@ -237,91 +148,8 @@ function elsewhereSection({ site, projects }: Content): Renderable {
   </section>`;
 }
 
-function heroPanels(content: Content): Renderable {
-  const { cv, projects } = content;
-  const job = featured(cv);
-  const current = isCurrent(job);
-  const role = job.roles[0];
-  const project = role?.projects[0];
-
-  // Up to three highlights, from the featured role's first project.
-  const highlights = [
-    ...(project?.lead ? [t(project.lead, LOCALE)] : []),
-    ...tl(project?.points, LOCALE).slice(-2),
-  ].slice(0, 3);
-
-  const liveCount = liveServices(projects);
-
-  return html`<div class="panels">
-    <div
-      class="panel ph-projects"
-      aria-label="Open source running now"
-    >
-      <div class="panel-head">
-        <span class="dot is-live" aria-hidden="true"></span>
-        <span>Open source, live</span>
-        <span class="yrs">${liveCount} up</span>
-      </div>
-      <div class="panel-body">
-        <ul class="oss">
-          ${projects.active.map(
-            (project) => html`<li>
-              <a href="${project.url}">
-                <span class="n"
-                  >${
-                    project.live
-                      ? html`<span class="ld" aria-hidden="true"></span>`
-                      : ""
-                  }${project.name}</span
-                >
-                <span class="m">${project.meta}</span>
-                ${
-                  project.hero_blurb
-                    ? html`<span class="d">${project.hero_blurb}</span>`
-                    : ""
-                }
-              </a>
-            </li>`,
-          )}
-        </ul>
-      </div>
-      <div class="panel-foot">
-        <a href="#projects"
-          >All projects — ${totalStars(projects)} stars
-          <span class="ar">&rarr;</span></a
-        >
-      </div>
-    </div>
-
-    <div
-      class="panel ph-work"
-      aria-label="${current ? "Current role" : "Most recent role"}"
-    >
-      <div class="panel-head">
-        <span
-          class="dot${raw(current ? " is-live" : "")}"
-          aria-hidden="true"
-        ></span>
-        <span>${current ? "Currently" : "Most recent"}</span>
-        <span class="yrs">${years(job, LOCALE)}</span>
-      </div>
-      <div class="panel-body">
-        <p class="co">${t(job.employer_full, LOCALE) || job.employer}</p>
-        <p class="ti">${t(role?.title, LOCALE)}</p>
-        ${job.context ? html`<p class="cx">${t(job.context, LOCALE)}</p>` : ""}
-        <ul class="hi">
-          ${highlights.map((item) => html`<li><span>${item}</span></li>`)}
-        </ul>
-      </div>
-      <div class="panel-foot">
-        <a href="/cv">Full CV — page and PDF <span class="ar">&rarr;</span></a>
-      </div>
-    </div>
-  </div>`;
-}
-
 export function homePage(content: Content, assets: Assets): string {
-  const { cv, site } = content;
+  const { cv, site, projects } = content;
 
   return String(
     html`${documentHead({
@@ -345,13 +173,11 @@ export function homePage(content: Content, assets: Assets): string {
               <p class="role in">${raw(site.hero.role_html)}</p>
               <p class="thesis in">${raw(site.hero.thesis_html)}</p>
             </div>
-            ${figureTiles(content, LOCALE)}
+            ${figureTiles(content, LOCALE, projects.metrics)}
           </div>
-          ${heroPanels(content)}
         </div>
       </section>
-      ${projectsSection(content)} ${workSection(content)}
-      ${elsewhereSection(content)}
+      ${projectsSection(content)} ${elsewhereSection(content)}
     </main>
     ${footer(site)}`,
   );

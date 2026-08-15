@@ -349,7 +349,7 @@ export function cvPage(
             </div>
           </div>
           <div class="plate-lower">
-            ${figureTiles(content, locale)} ${portrait(cv.person.name)}
+            ${figureTiles(content, locale, cv.metrics ?? [])} ${portrait(cv.person.name)}
           </div>
         </div>
         <p class="notch"><span>scroll</span></p>

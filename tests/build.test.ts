@@ -1,11 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { build } from "../src/build.ts";
-import {
-  featured,
-  isCurrent,
-  loadContent,
-  totalStars,
-} from "../src/content.ts";
+import { loadContent, metricValue, t, totalStars } from "../src/content.ts";
 import { escapeHtml, html, htmlLines, raw } from "../src/html.ts";
 
 let home = "";
@@ -37,7 +32,7 @@ describe("html helpers", () => {
 
   test("htmlLines() keeps authored breaks and passes markup through", () => {
     // Unescaped by contract — it only ever receives *_html fields, which is what
-    // lets the /work marginal note carry a link to the CV page.
+    // lets a marginal note carry a link.
     expect(String(htmlLines('a\n<a href="/cv">b</a>'))).toBe(
       'a<br><a href="/cv">b</a>',
     );
@@ -132,29 +127,52 @@ describe("content is rendered, not invented", () => {
     }
   });
 
-  test("the current role drives the hero panel label and live dot", async () => {
-    const { cv } = await loadContent();
-    const job = featured(cv);
-    if (isCurrent(job)) {
-      expect(home).toContain("<span>Currently</span>");
-      expect(home).toContain('class="dot is-live"');
-      expect(home).toContain(`${job.from} — now`);
-    } else {
-      expect(home).toContain("<span>Most recent</span>");
+  // The homepage hero counts open source; the CV masthead counts the career.
+  // Same component, two sources — assert each page renders its own set, or a
+  // swapped argument would silently put career figures back on the homepage.
+  test("each page's hero tiles come from its own metrics", async () => {
+    const content = await loadContent();
+    const { cv, projects } = content;
+
+    for (const metric of projects.metrics) {
+      expect(home).toContain(`<span class="l">${t(metric.label, "en")}</span>`);
+      expect(home).toContain(
+        `<span class="n">${metricValue(metric, content)}</span`,
+      );
     }
-    expect(home).toContain(job.employer);
+    for (const metric of cv.metrics ?? []) {
+      expect(cvEn).toContain(`<span class="l">${t(metric.label, "en")}</span>`);
+      expect(home).not.toContain(t(metric.label, "en"));
+    }
   });
 
-  test("the /work marginal note links to the CV, and is styled as a link", async () => {
-    // The note is a *_html field so it can carry this anchor. Base CSS strips
+  test("the hero hands off to the CV, and the link is styled as one", async () => {
+    // The thesis is a *_html field so it can carry this anchor. Base CSS strips
     // colour and underline from every `a`, so the markup alone would render a
-    // link that looks exactly like the prose beside it — assert both halves.
-    expect(home).toContain('<a href="/cv">CV page</a>');
+    // link that looks exactly like the prose around it — assert both halves.
+    expect(home).toContain('<a href="/cv">CV</a>');
 
     const href = home.match(/\/assets\/home\.[0-9a-z]{8}\.css/)?.[0];
     const css = await Bun.file(`dist${href}`).text();
-    expect(css).toMatch(/\.rail \.note a\{[^}]*color:var\(--ink-2\)/);
-    expect(css).toMatch(/\.rail \.note a\{[^}]*border-bottom:/);
+    expect(css).toMatch(/\.thesis a\{[^}]*color:var\(--ink\)/);
+    expect(css).toMatch(/\.thesis a\{[^}]*border-bottom:/);
+  });
+
+  // The career belongs to /cv. The homepage names the current employer in one
+  // sentence of hero copy and links out — no timeline, no cards, no job titles.
+  // Employer names alone are not the test: the OSS archive is legitimately
+  // filed under the company I ran at the time.
+  test("the homepage does not restate the career", async () => {
+    const { cv } = await loadContent();
+    const body = home.slice(home.indexOf("<body>"));
+    expect(body).not.toContain('id="work"');
+    expect(body).not.toContain('class="tl"');
+    expect(body).not.toContain('class="panels"');
+
+    for (const job of cv.experience) {
+      for (const role of job.roles)
+        expect(body).not.toContain(t(role.title, "en"));
+    }
   });
 
   test("star total is summed from the data, never hardcoded", async () => {
