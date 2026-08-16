@@ -263,6 +263,13 @@
   align-items: center;
   gap: 8px;
   overflow-x: auto;
+  /* Declared rather than left to compute. With only overflow-x set, the other
+     axis is promoted off `visible` to `auto`, which registers the strip as a
+     two-axis scroll node even though the chips never overflow it vertically —
+     there are 9px of slack above and below them. Nothing here paints into that
+     slack that clipping would cut: the focus ring needs 5px (2px outline at 3px
+     offset) and the active pip's glow 3px. */
+  overflow-y: hidden;
   scrollbar-width: none;
   scroll-behavior: smooth;
 }
@@ -320,6 +327,20 @@
   padding-right: 4px;
 }
 
+/* The row of chips has to fit the strip's content box — --max less its 28px
+   padding, so 1024px — or the strip becomes a live horizontal scroll container.
+   That costs more than the scrollbar it hides: a sticky 46px bar spanning the
+   window for the whole length of the CV is a scroll node sitting under the
+   pointer, and a trackpad gesture that begins over it latches there for the
+   duration, which reads to the reader as the page freezing until they move the
+   pointer off. At 11px of side padding the six chips came to 1035.5px in English
+   and 1041.4px in French — over by 11.5 and 17.4 — so the strip scrolled on a
+   1600px display, and the right-hand chevron below advertised those 11px as
+   hidden content. 9px brings both locales inside the box.
+   The margin is thin: another employer adds roughly 180px and puts it back. If
+   that happens, the chips have to wrap rather than scroll — which costs 35px of
+   sticky height and means retuning `aside`'s top, `.job`'s scroll-margin, and
+   the reading line in trackActive. */
 .toc a {
   flex: none;
   display: flex;
@@ -330,7 +351,7 @@
   color: var(--ink-2);
   border: 1px solid var(--rule-strong);
   border-radius: 999px;
-  padding: 4px 11px;
+  padding: 4px 9px;
   transition:
     color 0.18s ease,
     border-color 0.18s ease,
