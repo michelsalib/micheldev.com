@@ -10,6 +10,9 @@ metrics:
   - { derive: live_services, label: { en: services live } }
   - { derive: oss_years, label: { en: years publishing } }
 
+# The first entry leads the section: it gets the plate, and its subdomains are
+# listed one per row. Reordering this list moves that treatment, the same way
+# reordering `metrics` moves the accent tile.
 active:
   - name: Notion connectors
     url: https://notion-tmdb.micheldev.com
@@ -20,13 +23,21 @@ active:
       Turns a plain Notion database into a self-updating tracker — type a title,
       the connector fills in the rest. Four sources plus two scheduled backup
       jobs.
+    # Block style, not flow mappings: a comma inside `{ }` is the mistake that
+    # already truncated three archive descriptions once.
     subdomains:
-      - notion-tmdb
-      - notion-gbook
-      - notion-igdb
-      - notion-billetreduc
-      - notion-backup
-      - bitwarden-backup
+      - host: notion-tmdb
+        what: Films and TV
+      - host: notion-gbook
+        what: Books
+      - host: notion-igdb
+        what: Games
+      - host: notion-billetreduc
+        what: Theatre
+      - host: notion-backup
+        what: Scheduled backup
+      - host: bitwarden-backup
+        what: Scheduled backup
 
   - name: media-cast
     url: https://github.com/michelsalib/media-cast

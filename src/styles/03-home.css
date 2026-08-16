@@ -178,75 +178,291 @@ section.zone {
   flex: 1;
   background: var(--rule);
 }
-
-/* ── Project rows ────────────────────────────────────────────────────────── */
-.rows {
-  margin: 10px 0 0;
+.sub-h .count {
+  color: var(--hue);
 }
 
-.row {
+/* ── The lead project ────────────────────────────────────────────────────────
+   A plate carrying the same 45° corner cut as the figure tiles, and drawn the
+   same way: the element paints the ring, ::before covers all but 1px of it,
+   because clip-path cuts a real `border` off with the corner. Same constant in
+   the inner polygon, same reason — see .tile in 02-base.css.
+
+   The ring is mixed toward the section hue rather than taking it outright: at
+   full strength a magenta box that size stops being a plate and starts being an
+   alert.                                                                      */
+.lead {
+  --cut: 30px;
+  position: relative;
+  margin: 16px 0 0;
+  padding: 26px 28px 24px;
+  background: color-mix(in srgb, var(--hue) 38%, var(--rule-strong));
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut)),
+    calc(100% - var(--cut)) 100%,
+    0 100%
+  );
+}
+.lead::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  background: var(--surface);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--cut) + 0.6px),
+    calc(100% - var(--cut) + 0.6px) 100%,
+    0 100%
+  );
+}
+/* Above ::before, which would otherwise paint over the whole plate. */
+.lead-grid {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.4fr) auto;
-  gap: 20px;
-  align-items: baseline;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--rule);
-  transition: background 0.16s ease;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: clamp(24px, 3.4vw, 44px);
+  align-items: start;
 }
-.row:hover {
-  background: var(--surface-2);
-}
-.row .name {
-  font-family: var(--f-display);
-  font-stretch: 100%;
-  font-weight: 700;
-  font-size: 17px;
-  letter-spacing: -0.015em;
+.lead .flag {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hue);
+  margin: 0 0 10px;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
 }
-.row .name .arrow {
+.lead .flag::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: color-mix(in srgb, var(--hue) 30%, transparent);
+}
+.lead h3 {
+  margin: 0;
+  font-size: clamp(21px, 2.5vw, 27px);
+  line-height: 1.12;
+}
+.lead h3 a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.lead h3 .arrow {
   font-family: var(--f-mono);
-  font-size: 12.5px;
+  font-size: 15px;
   color: var(--hue);
-  opacity: 0;
-  transform: translateX(-4px);
-  transition:
-    opacity 0.18s ease,
-    transform 0.18s ease;
+  transition: transform 0.18s ease;
 }
-.row:hover .name .arrow {
-  opacity: 1;
-  transform: none;
-}
-.row:hover .name {
+.lead h3 a:hover {
   color: var(--hue);
 }
-.row .desc {
+.lead h3 a:hover .arrow {
+  transform: translate(3px, -3px);
+}
+.lead .blurb {
+  margin: 12px 0 0;
   color: var(--ink-2);
-  font-size: 14.5px;
-  line-height: 1.5;
+  font-size: 15px;
+  max-width: 42ch;
 }
-.row .desc .subs {
-  display: block;
-  margin-top: 6px;
-  font-family: var(--f-mono);
-  font-size: 11px;
-  color: var(--ink-3);
-  line-height: 1.6;
-}
-.row .tags {
+.lead .meta {
+  margin: 16px 0 0;
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  justify-content: flex-end;
+}
+.lead .repo-line {
+  margin: 16px 0 0;
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.lead .repo-line a {
+  color: var(--ink-2);
+  border-bottom: 1px solid var(--rule-strong);
+}
+.lead .repo-line a:hover {
+  color: var(--hue);
+  border-bottom-color: var(--hue);
+}
+
+/* The services, listed as what they are: running endpoints, one row each. They
+   were a grey comma list at 11px under the blurb — six deployments rendered as
+   punctuation. The dot is the same green the `live` tag uses. */
+.svcs {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
+}
+.svc {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 9px 2px 9px 0;
+  border-bottom: 1px solid var(--rule);
+  transition: background 0.16s ease;
+}
+.svc:hover {
+  background: var(--surface-2);
+}
+.svc .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--live);
+  align-self: center;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--live) 16%, transparent);
+}
+.svc .host {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.svc .host .tld {
+  color: var(--ink-3);
+}
+.svc:hover .host {
+  color: var(--hue);
+}
+.svc .what {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  text-align: right;
+  white-space: nowrap;
+}
+.svcs-cap {
+  margin: 10px 0 0;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* ── The rest of the active work ─────────────────────────────────────────────
+   Cards, sharing the hairline-grid construction with /elsewhere below: one rule
+   colour showing through 1px gaps, so no card owns a border and none of them
+   double up where they meet.                                                  */
+.cards {
+  margin: 14px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+}
+.card {
+  background: var(--surface);
+  padding: 18px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  transition: background 0.16s ease;
+}
+.card:hover {
+  background: var(--surface-2);
+}
+.card .h {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 16.5px;
+  letter-spacing: -0.015em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card:hover .h {
+  color: var(--hue);
+}
+.card .h .ext {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink-3);
+  margin-left: auto;
+  transition:
+    transform 0.18s ease,
+    color 0.18s ease;
+}
+.card:hover .h .ext {
+  color: var(--hue);
+  transform: translate(2px, -2px);
+}
+.card .b {
+  margin: 0;
+  flex: 1;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.card .meta {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* ── Archive, folded ─────────────────────────────────────────────────────── */
+.fold {
+  margin: 12px 0 0;
+  border-top: 1px solid var(--rule);
+}
+/* `display: grid` on the summary suppresses the default marker on its own, but
+   both opt-outs are here anyway: Safari's marker is a shadow pseudo-element that
+   ignores list-style, and neither is the chevron this row draws for itself. */
+.fold > summary {
+  cursor: pointer;
+  padding: 14px 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: baseline;
+  border-bottom: 1px solid var(--rule);
+  list-style: none;
+}
+.fold > summary::-webkit-details-marker {
+  display: none;
+}
+.fold > summary .chev {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--hue);
+  transition: transform 0.2s ease;
+}
+.fold[open] > summary .chev {
+  transform: rotate(90deg);
+}
+.fold > summary .t {
+  font-family: var(--f-display);
+  font-stretch: 100%;
+  font-weight: 700;
+  font-size: 15.5px;
+  letter-spacing: -0.015em;
+}
+.fold > summary:hover .t {
+  color: var(--hue);
+}
+.fold > summary .d {
+  font-family: var(--f-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 11.5px;
+  color: var(--ink-3);
 }
 
 /* ── Archive table ───────────────────────────────────────────────────────── */
 .archive-scroll {
   overflow-x: auto;
-  margin: 10px 0 0;
+  margin: 12px 0 0;
 }
 table.archive {
   width: 100%;
@@ -462,12 +678,10 @@ table.archive tfoot td.num {
   .rail .note {
     display: none;
   }
-  .row {
+  /* The services move under the copy rather than beside it. */
+  .lead-grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 7px;
-  }
-  .row .tags {
-    justify-content: flex-start;
+    gap: 22px;
   }
   .bar nav a.hide-s {
     display: none;
@@ -477,6 +691,24 @@ table.archive tfoot td.num {
 @media (max-width: 560px) {
   .links {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .lead {
+    padding: 22px 18px 20px;
+  }
+  /* The host is the row; its label is the first thing that can go, rather than
+     letting a nowrap pair fight over 320px. */
+  .svc {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .svc .what {
+    display: none;
+  }
+  .fold > summary {
+    grid-template-columns: auto minmax(0, 1fr);
+    row-gap: 4px;
+  }
+  .fold > summary .d {
+    grid-column: 2;
   }
 }
 

@@ -182,12 +182,21 @@ export function documentHead(o: HeadOptions): Renderable {
     <a class="skip" href="#main">Skip to content</a>`;
 }
 
-export function topBarHome(): Renderable {
+/**
+ * @param live How many services are running, counted by `liveServices`. The
+ * homepage passes it so the page's strongest fact is on screen before any
+ * scroll; the 404 omits it, having nothing below to back the claim up.
+ */
+export function topBarHome(live?: number): Renderable {
   return html`<header class="bar">
     <div class="bar-in">
       <a class="wordmark" href="/"><b>micheldev</b><span>.com</span></a>
       <nav>
-        <a href="#projects" class="nav-link hide-s">projects</a>
+        <a href="#projects" class="nav-link hide-s"
+          >projects${
+            live ? html`<span class="live-n">${live} live</span>` : ""
+          }</a
+        >
         <a href="#elsewhere" class="nav-link hide-s">elsewhere</a>
         <a href="/cv" class="nav-link cv">cv&nbsp;&rarr;</a>
         ${themeToggle()}

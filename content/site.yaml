@@ -25,10 +25,11 @@ hero:
   role_html: >-
     I build the systems a business runs on — <em>and I run them</em>.
   thesis_html: >-
-    Right now: the data platform behind <strong>Matchem</strong>'s horse-racing
-    products, rebuilt from scratch and mine to keep running. Fifteen years of
-    financial news before that. The <a href="/cv">CV</a> has the detail; this
-    page is for what I build on my own time.
+    By day, the data platform behind <strong>Matchem</strong>'s horse-racing
+    products; fifteen years of financial news before that — the
+    <a href="/cv">CV</a> has that story. Below is the other one: the
+    <strong>services I wrote, deployed and still pay for</strong>, running under
+    this domain as you read this.
 
 sections:
   projects:

@@ -120,6 +120,17 @@ export type Site = {
 
 // ── projects.yaml ────────────────────────────────────────────────────────────
 
+/**
+ * One running service under the apex.
+ *
+ * `host` is the bare label; the apex is added at render time from
+ * `site.hosts.canonical`, so a domain move is one line in site.yaml rather than
+ * six strings here. `what` is what the endpoint tracks — these are listed a row
+ * each on the lead plate, and a host with nothing beside it is a URL, not a
+ * service.
+ */
+export type Subdomain = { host: string; what: string };
+
 export type ActiveProject = {
   name: string;
   url: string;
@@ -127,7 +138,7 @@ export type ActiveProject = {
   live?: boolean;
   tags: string[];
   blurb: string;
-  subdomains?: string[];
+  subdomains?: Subdomain[];
 };
 
 export type Projects = {

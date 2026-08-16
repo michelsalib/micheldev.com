@@ -1,6 +1,12 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { build } from "../src/build.ts";
-import { loadContent, metricValue, t, totalStars } from "../src/content.ts";
+import {
+  liveServices,
+  loadContent,
+  metricValue,
+  t,
+  totalStars,
+} from "../src/content.ts";
 import { escapeHtml, html, htmlLines, raw } from "../src/html.ts";
 
 let home = "";
@@ -178,6 +184,40 @@ describe("content is rendered, not invented", () => {
   test("star total is summed from the data, never hardcoded", async () => {
     const { projects } = await loadContent();
     expect(home).toContain(String(totalStars(projects)));
+  });
+
+  // The whole point of the lead plate. Six deployments used to render as a
+  // comma-joined list of bare labels under the blurb — unclickable, and not
+  // even whole hostnames. Assert each one is a link to its own service, with
+  // the apex taken from site.yaml rather than written out six times.
+  test("every live service is listed and linked at its own host", async () => {
+    const { site, projects } = await loadContent();
+    const [lead] = projects.active;
+    for (const service of lead?.subdomains ?? []) {
+      const url = `https://${service.host}.${site.hosts.canonical}`;
+      expect(home).toContain(`<a class="svc" href="${url}">`);
+      expect(home).toContain(`<span class="what">${service.what}</span>`);
+    }
+    expect(liveServices(projects)).toBeGreaterThan(0);
+    expect(home).toContain(`<span class="live-n">${liveServices(projects)}`);
+  });
+
+  // The reason the section was reorganised: the archive is seven repositories
+  // last touched in 2016, and it used to take more of the page than everything
+  // still running. It stays on the page, inside a fold that starts closed.
+  test("the archive is folded, and the running work is above it", async () => {
+    const body = home.slice(home.indexOf("<body>"));
+    expect(body).toContain('<details class="fold reveal">');
+    expect(body).not.toContain("<details open");
+    expect(body.indexOf('class="lead reveal"')).toBeLessThan(
+      body.indexOf('<details class="fold'),
+    );
+    expect(body.indexOf('class="cards reveal"')).toBeLessThan(
+      body.indexOf('<details class="fold'),
+    );
+    // The table itself is unchanged — assert it did not escape the fold.
+    const fold = body.slice(body.indexOf('<details class="fold'));
+    expect(fold).toContain('<table class="archive">');
   });
 
   test("each employer gets its own timeline hue", async () => {

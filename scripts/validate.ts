@@ -30,7 +30,11 @@ type CvDoc = {
 };
 
 type ProjectsDoc = {
-  active: { name: string; live?: boolean; subdomains?: string[] }[];
+  active: {
+    name: string;
+    live?: boolean;
+    subdomains?: { host: string; what: string }[];
+  }[];
   archive: { total_repos: number; repos: { name: string; stars: number }[] };
 };
 
@@ -113,6 +117,13 @@ if (listed > projects.archive.total_repos) {
 for (const project of projects.active) {
   if (project.subdomains && !project.live) {
     problems.push(`${project.name}: has subdomains but is not marked live`);
+  }
+  // `uniqueItems` compares whole objects, so it stopped catching a repeated
+  // host the moment a subdomain gained a `what` beside it. Two rows pointing at
+  // one service is exactly the kind of thing the live count must not inflate.
+  const hosts = (project.subdomains ?? []).map((sub) => sub.host);
+  if (new Set(hosts).size !== hosts.length) {
+    problems.push(`${project.name}: lists the same subdomain twice`);
   }
 }
 

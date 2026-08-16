@@ -71,12 +71,24 @@
           "subdomains": {
             "type": "array",
             "items": {
-              "type": "string",
-              "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
-              "description": "Bare label only — the apex is added when rendering."
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["host", "what"],
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$",
+                  "description": "Bare label only — the apex is added when rendering."
+                },
+                "what": {
+                  "type": "string",
+                  "maxLength": 24,
+                  "description": "What this endpoint tracks, in two or three words. Printed at the end of its row, so anything longer wraps the host."
+                }
+              }
             },
             "uniqueItems": true,
-            "description": "Must match the subdomains actually mapped in Terraform."
+            "description": "One entry per running service, listed on the lead plate. Must match the subdomains actually mapped in Terraform."
           }
         },
         "dependentRequired": {

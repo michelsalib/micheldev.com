@@ -53,9 +53,28 @@ stack: [TypeScript, Node.js, AWS]
 ### Marking the current role
 
 Set `to: present` on one `experience` entry. That single switch makes the
-renderer label it **Currently**, give it the green live dot, print `2025 — now`,
-and promote it into the homepage hero panel. Every other entry gets a closed year
-range and a neutral dot. `bun run validate` fails if two entries claim it.
+renderer label it **Currently**, give it the green live dot and print
+`2025 — now`. Every other entry gets a closed year range and a neutral dot.
+`bun run validate` fails if two entries claim it.
+
+### The lead project
+
+The first entry in `active` leads the homepage: it gets the plate with the 45°
+cut, and its `subdomains` are listed a row each — host, status dot, and what
+that endpoint tracks. Everything after it is a card. Reordering the list moves
+that treatment, the same way reordering `metrics` moves the accent tile; there
+is no `featured` flag to keep in sync with the order.
+
+```yaml
+subdomains:
+  - host: notion-tmdb
+    what: Films and TV
+```
+
+The apex is added at render time from `hosts.canonical`, so these stay bare
+labels and a domain move is one line in `site.yaml`. They must match what
+Terraform actually maps — `live_services` counts them, and that number is on the
+hero tile and in the top bar.
 
 ## Commands
 
