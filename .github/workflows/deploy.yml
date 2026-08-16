@@ -136,6 +136,22 @@ jobs:
           # useless without IAM — but it is a financial identifier and there is no
           # reason to publish it.
           TF_VAR_billing_account: ${{ secrets.BILLING_ACCOUNT }}
+          # Credentials for /stats.json. All empty unless configured, and empty
+          # means the secret, the IAM binding and the container's environment
+          # variable are none of them created — see main.tf. The two tokens
+          # share one Secret Manager secret, as a JSON object.
+          #
+          # The zone id is a secret rather than a variable for the same reason
+          # the billing account is: it is not a credential, but this repository
+          # is public and GitHub prints unmasked variables in every run's env
+          # block, so there is no reason to publish it.
+          TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+          TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          # Not GITHUB_TOKEN: Actions reserves that name for the token it injects
+          # into every run, and refuses to create a secret starting with GITHUB_.
+          # This is a separate fine-grained token with no permissions, and the
+          # injected one would not do — it expires with the job.
+          TF_VAR_github_token: ${{ secrets.GH_STATS_TOKEN }}
         run: terraform apply -auto-approve
 
       - name: Smoke test the new revision
@@ -148,6 +164,13 @@ jobs:
             echo "  ${path} -> ${code}"
             [ "${code}" = "200" ] || exit 1
           done
+          # The live counters must answer, and must answer as JSON — but not
+          # necessarily with figures in them. A registry being down is a case
+          # the page is built to survive, so asserting on the numbers here would
+          # fail deploys for somebody else's outage.
+          stats="$(curl -s "${URL}/stats.json")"
+          echo "  /stats.json -> ${stats}"
+          echo "${stats}" | grep -q '"at"' || exit 1
           # A 404 must actually 404, not silently serve the homepage.
           code="$(curl -s -o /dev/null -w '%{http_code}' "${URL}/definitely-not-a-page")"
           echo "  /definitely-not-a-page -> ${code}"

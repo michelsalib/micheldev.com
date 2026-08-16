@@ -2,13 +2,46 @@
 
 since: 2011
 
+# Where the live counters come from.
+#
+# Read at runtime by /stats.json, not at build time: the build copies this block
+# to dist/.stats-sources.json — the same trick site.hosts uses for .hosts.json —
+# so the server can count these without a YAML parser it does not ship.
+stats:
+  github_user: michelsalib
+  # Which projects get counted is not listed here: it is every entry in `active`
+  # that carries a `repo`, so a project named on the page is measured by
+  # construction and there is no second list to keep in step with this one.
+  npm: [chai-shallow-deep-equal]
+  # First full year on npm. The history is walked from here, a year per request.
+  npm_since: 2015
+  packagist:
+    - bcc/resque-bundle
+    - bcc/auto-mapper-bundle
+    - bcc/cron-manager-bundle
+    - bcc/extra-tools-bundle
+    - bcc/enumerable-utility
+    - bcc/myrrix
+    - bcc/myrrix-bundle
+    - bcc/myrrix-edition
+  # What the downloads tile shows before /stats.json answers — and what it keeps
+  # showing for a reader without JS, or if every registry is down at once.
+  #
+  # A floor, deliberately: rounded down from 22,655,165 measured on 2026-08-16
+  # (npm 21,140,308 · Packagist 1,514,629 · GitHub release assets 228), so the
+  # number on the page can only ever understate the real one as it drifts.
+  downloads_floor: 22000000
+
 # The homepage hero tiles. The CV masthead has its own set in cv.yaml — this
 # page is about the open source, so its headline numbers are too.
+#
+# Three of the four are replaced in the browser with live figures; `oss_years`
+# is still a valid derive, it just lost its slot to the strongest number here.
 metrics:
+  - { derive: downloads, label: { en: downloads } }
   - { derive: stars, label: { en: GitHub stars } }
   - { derive: repos, label: { en: public repos } }
   - { derive: live_services, label: { en: services live } }
-  - { derive: oss_years, label: { en: years publishing } }
 
 # The first entry leads the section: it gets the plate, and its subdomains are
 # listed one per row. Reordering this list moves that treatment, the same way
@@ -41,6 +74,7 @@ active:
 
   - name: media-cast
     url: https://github.com/michelsalib/media-cast
+    repo: https://github.com/michelsalib/media-cast
     live: false
     tags: [typescript, chromecast]
     blurb: >-
@@ -49,6 +83,7 @@ active:
 
   - name: audio-tray
     url: https://github.com/michelsalib/audio-tray
+    repo: https://github.com/michelsalib/audio-tray
     live: false
     tags: [rust, desktop]
     blurb: >-
@@ -57,6 +92,7 @@ active:
 
   - name: updater
     url: https://github.com/michelsalib/updater
+    repo: https://github.com/michelsalib/updater
     live: false
     tags: [typescript, windows]
     blurb: Update checking and installation for Windows desktop applications.

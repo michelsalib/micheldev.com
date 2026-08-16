@@ -102,7 +102,48 @@
 }
 
 /* The metrics strip and the figure tiles are both shared components — see
-   02-base.css. The homepage renders the tiles; the CV masthead renders both. */
+   02-base.css. The homepage renders the tiles; the CV masthead renders both.
+
+   .figures wraps the tiles here only so the visit count can sit under them: the
+   hero grid's second track is `auto`, so a bare sibling would become a third
+   column rather than a second row.                                            */
+.figures {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+}
+
+/* One project's live line: version and date on the cards, traffic on the lead
+   plate. Hidden in the markup and revealed by the client, so a project with
+   nothing to report simply has no line rather than an empty one. Monospace
+   because these are figures, and it matches the rails and the tile labels. */
+.live-stat {
+  margin: 12px 0 0;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+/* On a card it is the last child of a flex column whose blurb carries `flex: 1`,
+   so it already sits on the floor of the box under the tags, and the column's
+   own 9px gap already spaces it. Its own margin would be added to that, not
+   instead of it. */
+.card .live-stat {
+  margin: 0;
+}
+
+/* The visit count. Hidden in the markup and revealed by the client only when
+   Cloudflare is configured and answers, so on a zone without a token this is
+   markup that never paints. */
+.pulse {
+  margin: 0;
+  max-width: calc(var(--tile-w, 132px) * 2 + var(--tile-gap, 10px));
+  font-family: var(--f-mono);
+  font-size: 11px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+}
 
 /* ── Sections ────────────────────────────────────────────────────────────── */
 section.zone {
@@ -180,6 +221,15 @@ section.zone {
 }
 .sub-h .count {
   color: var(--hue);
+}
+/* Written by src/client/stats.ts, and `hidden` in the markup until it is — so
+   this never reserves space for a figure that may not arrive. `hidden` needs no
+   help from here; it is the UA default and nothing above overrides display. */
+.sub-h .ship {
+  color: var(--ink-3);
+  /* The rule after it is a flex child that eats the remaining width; without
+     this the ship line is the one thing that gets squeezed on a narrow column. */
+  flex: none;
 }
 
 /* ── The lead project ────────────────────────────────────────────────────────

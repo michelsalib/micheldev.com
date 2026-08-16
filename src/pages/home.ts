@@ -10,6 +10,7 @@ import {
   type ActiveProject,
   type Content,
   liveServices,
+  repoSlug,
   totalStars,
 } from "../content.ts";
 import { html, htmlLines, type Renderable, raw } from "../html.ts";
@@ -88,6 +89,15 @@ function leadPlate(project: ActiveProject, apex: string): Renderable {
                 )}
               </ul>
               <p class="svcs-cap">Free to use, no install, no account</p>
+              <!-- Traffic across all six hosts, as one figure. It lives in this
+                   column because it is what these services served, and this
+                   column only exists when there are services to have served
+                   it. -->
+              <p
+                class="live-stat"
+                data-project="${repoSlug(project) ?? ""}"
+                hidden
+              ></p>
             </div>`
           : ""
       }
@@ -95,8 +105,17 @@ function leadPlate(project: ActiveProject, apex: string): Renderable {
   </div>`;
 }
 
-/** Every other active project: name, blurb, tags, one destination. */
+/**
+ * Every other active project: name, blurb, tags, one destination.
+ *
+ * The last line is the released version, how long ago it shipped and how many
+ * times it has been downloaded — written by src/client/stats.ts and hidden
+ * until it is. These three are desktop applications, so a version and a date
+ * are what they have to say for themselves; the lead is a hosted service, and
+ * says it in traffic instead.
+ */
 function projectCard(project: ActiveProject): Renderable {
+  const repo = repoSlug(project);
   return html`<a class="card" href="${project.url}">
     <span class="h">${project.name} <span class="ext">&nearr;</span></span>
     <p class="b">${project.blurb}</p>
@@ -106,6 +125,7 @@ function projectCard(project: ActiveProject): Renderable {
           html`<span class="tag${raw(n === 0 ? " hue" : "")}">${tag}</span>`,
       )}
     </div>
+    ${repo ? html`<p class="live-stat" data-project="${repo}" hidden></p>` : ""}
   </a>`;
 }
 
@@ -130,9 +150,13 @@ function projectsSection({ site, projects }: Content): Renderable {
             <p class="lede">${raw(section.lede_html)}</p>
           </div>
 
+          <!-- The ship line is filled by src/client/stats.ts and hidden until
+               it is: there is no build-time equivalent to fall back to, and an
+               empty slot promising a date is worse than no slot. -->
           <p class="sub-h reveal">
             Running now
             <span class="count">· ${projects.active.length} projects</span>
+            <time class="count ship" data-ship hidden></time>
           </p>
           ${
             // `active` is minItems: 1 in the schema, but that guarantee does
@@ -238,7 +262,7 @@ export function homePage(content: Content, assets: Assets): string {
       description: site.meta.description,
       path: "/",
       locale: LOCALE,
-      scripts: [assets.theme],
+      scripts: [assets.theme, assets.stats],
     })}
     ${topBarHome(liveServices(projects))}
     <main id="main">
@@ -252,7 +276,11 @@ export function homePage(content: Content, assets: Assets): string {
               <p class="role in">${raw(site.hero.role_html)}</p>
               <p class="thesis in">${raw(site.hero.thesis_html)}</p>
             </div>
-            ${figureTiles(content, LOCALE, projects.metrics)}
+            <div class="figures">
+              ${figureTiles(content, LOCALE, projects.metrics)}
+              <!-- Dormant until the zone token is configured; see stats.ts. -->
+              <p class="pulse" data-visits hidden></p>
+            </div>
           </div>
         </div>
       </section>

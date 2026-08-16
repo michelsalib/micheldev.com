@@ -31,7 +31,7 @@ provider "google" {
 # `terraform apply`; bootstrap.sh covers that. These are safe to manage
 # declaratively from here on.
 resource "google_project_service" "apis" {
-  for_each = toset([
+  for_each = toset(concat([
     "run.googleapis.com",
     "artifactregistry.googleapis.com",
     "cloudbilling.googleapis.com",
@@ -39,7 +39,8 @@ resource "google_project_service" "apis" {
     # are two different APIs, and only the former was enabled, so the budget in
     # budget.tf failed to create on the first apply.
     "billingbudgets.googleapis.com",
-  ])
+    # Only when there is a credential to store — see the block below.
+  ], local.has_credentials ? ["secretmanager.googleapis.com"] : []))
   service                    = each.key
   disable_dependent_services = false
   disable_on_destroy         = false
@@ -48,9 +49,61 @@ resource "google_project_service" "apis" {
 # ── Service account ──────────────────────────────────────────────────────────
 # The site reads nothing and writes nothing, so this identity holds no roles at
 # all. It exists only so the service does not run as the default compute SA.
+#
+# The one exception is opt-in and off by default: setting cloudflare_api_token
+# grants it accessor on that single secret, below. Everything else /stats.json
+# counts — npm, Packagist, GitHub — is public and unauthenticated, and needs no
+# identity of any kind.
 resource "google_service_account" "runtime" {
   account_id   = "micheldev-www-runtime"
   display_name = "Cloud Run runtime identity (micheldev.com)"
+}
+
+# ── Runtime credentials ──────────────────────────────────────────────────────
+# One secret, holding a JSON object, rather than one secret per credential.
+#
+# Cloud Run projects a secret as a single environment variable, so a secret per
+# credential is also a version per credential and an IAM binding per credential,
+# on an identity that is meant to hold as little as possible. Packing them means
+# one of each no matter how many there are, and a third credential later is a
+# key in this map rather than another block of Terraform.
+#
+# Every key is independently optional, and the whole thing collapses to nothing
+# when none is supplied: no secret, no binding, no environment variable, and a
+# runtime service account still holding no roles at all.
+locals {
+  cf_analytics = var.cloudflare_api_token != "" && var.cloudflare_zone_id != ""
+
+  runtime_credentials = merge(
+    var.github_token != "" ? { github_token = var.github_token } : {},
+    local.cf_analytics ? { cloudflare_api_token = var.cloudflare_api_token } : {},
+  )
+  has_credentials = length(local.runtime_credentials) > 0
+}
+
+resource "google_secret_manager_secret" "runtime" {
+  count     = local.has_credentials ? 1 : 0
+  secret_id = "micheldev-www-runtime-credentials"
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.apis]
+}
+
+resource "google_secret_manager_secret_version" "runtime" {
+  count       = local.has_credentials ? 1 : 0
+  secret      = google_secret_manager_secret.runtime[0].id
+  secret_data = jsonencode(local.runtime_credentials)
+}
+
+# Scoped to this one secret rather than granted project-wide.
+resource "google_secret_manager_secret_iam_member" "runtime" {
+  count     = local.has_credentials ? 1 : 0
+  secret_id = google_secret_manager_secret.runtime[0].secret_id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.runtime.email}"
 }
 
 # ── Artifact Registry ────────────────────────────────────────────────────────
@@ -111,6 +164,32 @@ resource "google_cloud_run_v2_service" "site" {
 
     containers {
       image = var.image
+
+      # A plain variable, not part of the secret: an identifier rather than a
+      # credential, so the secret holds only what would matter if it leaked.
+      dynamic "env" {
+        for_each = local.cf_analytics ? [1] : []
+        content {
+          name  = "CF_ZONE_ID"
+          value = var.cloudflare_zone_id
+        }
+      }
+
+      # Both tokens, as one JSON object. Absent by default, and the server treats
+      # absence as "those figures are unavailable" rather than as an error — the
+      # same arrangement CV_EMAIL uses.
+      dynamic "env" {
+        for_each = local.has_credentials ? [1] : []
+        content {
+          name = "STATS_CREDENTIALS"
+          value_source {
+            secret_key_ref {
+              secret  = google_secret_manager_secret.runtime[0].secret_id
+              version = "latest"
+            }
+          }
+        }
+      }
 
       resources {
         # Billed only while a request is in flight.

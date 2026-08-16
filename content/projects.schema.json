@@ -4,13 +4,44 @@
   "description": "Drives the /projects section, the open-source archive table, and /elsewhere.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["since", "metrics", "active", "archive", "links"],
+  "required": ["since", "stats", "metrics", "active", "archive", "links"],
 
   "properties": {
     "since": {
       "type": "integer",
       "minimum": 2000,
       "description": "Year of the first public repository. Read only by the `oss_years` metric, so the tile rolls over on 1 January rather than going quietly stale."
+    },
+
+    "stats": {
+      "description": "What /stats.json counts at runtime. Emitted to dist/.stats-sources.json by the build, because the runtime image ships no YAML parser.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "github_user",
+        "npm",
+        "npm_since",
+        "packagist",
+        "downloads_floor"
+      ],
+      "properties": {
+        "github_user": { "type": "string" },
+        "npm": { "type": "array", "items": { "type": "string" } },
+        "npm_since": {
+          "description": "First year to walk npm's history from. Its range endpoint caps a query at 18 months, so lifetime totals are summed a year at a time.",
+          "type": "integer",
+          "minimum": 2015
+        },
+        "packagist": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[^/]+/[^/]+$" }
+        },
+        "downloads_floor": {
+          "description": "What the downloads tile shows until the live figure arrives, and for readers without JS. Round it DOWN from a measured total so the page can only understate.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
     },
 
     "metrics": {
@@ -25,8 +56,14 @@
         "properties": {
           "value": { "type": "string" },
           "derive": {
-            "description": "Counted at render time. stars: summed over archive.repos. repos: archive.total_repos. live_services: live entries, counting subdomains. oss_years: this year minus `since`.",
-            "enum": ["stars", "repos", "live_services", "oss_years"]
+            "description": "Counted at render time. stars: summed over archive.repos. repos: archive.total_repos. live_services: live entries, counting subdomains. oss_years: this year minus `since`. downloads: stats.downloads_floor. stars, repos and downloads are then replaced in the browser with the live figures from /stats.json.",
+            "enum": [
+              "downloads",
+              "stars",
+              "repos",
+              "live_services",
+              "oss_years"
+            ]
           },
           "label": {
             "type": "object",

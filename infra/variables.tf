@@ -55,6 +55,48 @@ variable "github_repo" {
   type        = string
 }
 
+variable "cloudflare_zone_id" {
+  description = <<-EOT
+    Zone id for the analytics query behind the visit count on /stats.json.
+
+    Empty — the default — leaves the whole feature dormant: no secret, no IAM
+    binding, and the server omits the figure, which the page is built to survive.
+    Setting it is only half the switch; the token below is the other half.
+  EOT
+  type        = string
+  default     = ""
+}
+
+variable "cloudflare_api_token" {
+  description = <<-EOT
+    A Cloudflare API token scoped to Zone > Analytics > Read on that one zone.
+    Not the Global API Key, which would put full account control in a container.
+
+    Pass it via TF_VAR_ from a CI secret; never commit it to a tfvars file.
+  EOT
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "github_token" {
+  description = <<-EOT
+    Raises the GitHub API limit the stats route works against from 60 requests
+    an hour to 5,000. Optional: unset, the route calls GitHub anonymously and
+    the figures it cannot refresh keep their last good values.
+
+    Everything counted is public, so a fine-grained token with no permissions at
+    all is the right one — it authenticates and grants nothing.
+
+    This and cloudflare_api_token share a single Secret Manager secret as a JSON
+    object; supplying either is what first gives the runtime service account a
+    role, and until then it holds none at all.
+  EOT
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
 variable "billing_account" {
   description = "Billing account id, for the budget alert. Empty disables the budget."
   type        = string
