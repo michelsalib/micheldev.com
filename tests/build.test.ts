@@ -142,9 +142,15 @@ describe("content is rendered, not invented", () => {
 
     for (const metric of projects.metrics) {
       expect(home).toContain(`<span class="l">${t(metric.label, "en")}</span>`);
-      expect(home).toContain(
-        `<span class="n">${metricValue(metric, content)}</span`,
+      // `[^>]*` because a tile the client can refresh also carries data-stat.
+      // Matched rather than compared whole so this keeps testing what it was
+      // written to test — that the figure is rendered — and not the attribute
+      // list, which tests/stats.test.ts asserts on its own.
+      const figure = metricValue(metric, content).replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&",
       );
+      expect(home).toMatch(new RegExp(`<span class="n"[^>]*>${figure}</span`));
     }
     for (const metric of cv.metrics ?? []) {
       expect(cvEn).toContain(`<span class="l">${t(metric.label, "en")}</span>`);

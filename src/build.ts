@@ -7,7 +7,13 @@
  */
 
 import { cp, mkdir, rm } from "node:fs/promises";
-import { type Content, LOCALES, type Locale, loadContent } from "./content.ts";
+import {
+  type Content,
+  LOCALES,
+  type Locale,
+  loadContent,
+  statsSources,
+} from "./content.ts";
 import { cvPage } from "./pages/cv.ts";
 import { homePage } from "./pages/home.ts";
 import { notFoundPage } from "./pages/not-found.ts";
@@ -146,16 +152,17 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
   const content = await loadContent();
   const { site } = content;
 
-  const [cssHome, cssCv, theme, cv] = await Promise.all([
+  const [cssHome, cssCv, theme, cv, stats] = await Promise.all([
     buildCss("home"),
     buildCss("cv"),
     buildScript("src/client/theme.ts", "theme"),
     buildScript("src/client/cv.ts", "cv"),
+    buildScript("src/client/stats.ts", "stats"),
   ]);
 
   // Same scripts, different stylesheet: each page links only its own.
-  const homeAssets: Assets = { css: cssHome, theme, cv };
-  const cvAssets: Assets = { css: cssCv, theme, cv };
+  const homeAssets: Assets = { css: cssHome, theme, cv, stats };
+  const cvAssets: Assets = { css: cssCv, theme, cv, stats };
 
   // Fonts are already subset and hashed by content only in the sense that they
   // never change; keep the readable names and rely on immutable caching.
@@ -184,6 +191,10 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     // Read by the server at boot. Dot-prefixed so it is never served, which the
     // server enforces by refusing any path segment starting with a dot.
     await write(".hosts.json", JSON.stringify(site.hosts)),
+    // Same arrangement, for the same reason: /stats.json needs to know what to
+    // count, that belongs in content/ with everything else, and the runtime
+    // image has no YAML parser to read it with.
+    await write(".stats-sources.json", JSON.stringify(statsSources(content))),
     await write("sitemap.xml", sitemap(site, ["/", "/cv", "/cv/fr"])),
     await write(
       "robots.txt",

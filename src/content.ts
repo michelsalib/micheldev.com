@@ -7,6 +7,8 @@
  */
 
 import { parse } from "yaml";
+import { formatCount } from "./format.ts";
+import type { StatsSources } from "./stats.ts";
 
 export const LOCALES = ["en", "fr"] as const;
 export type Locale = (typeof LOCALES)[number];
@@ -43,8 +45,23 @@ export type MetricSource =
   | "live_services"
   | "stars"
   | "repos"
-  | "oss_years";
+  | "oss_years"
+  | "downloads";
 export type Metric = { value?: string; derive?: MetricSource; label: Text };
+
+/**
+ * The derive keys that /stats.json can improve on.
+ *
+ * A tile built from one of these carries a `data-stat` attribute, which is the
+ * only handle the client script has — so this set is what decides whether a
+ * figure is live or fixed, and the CV's career metrics are absent from it on
+ * purpose. See src/client/stats.ts.
+ */
+export const LIVE_METRICS = new Set<MetricSource>([
+  "stars",
+  "repos",
+  "downloads",
+]);
 
 /**
  * Field order matches render order: name, lead, figures, points, extra, stack.
@@ -144,6 +161,11 @@ export type ActiveProject = {
 export type Projects = {
   /** Year of the first public repository. Only `oss_years` reads it. */
   since: number;
+  /**
+   * What the runtime counts, plus the floor the build renders until it answers.
+   * `statsSources` turns this and `active` into dist/.stats-sources.json.
+   */
+  stats: Omit<StatsSources, "projects"> & { downloads_floor: number };
   /** The four hero tiles. */
   metrics: Metric[];
   active: ActiveProject[];
@@ -231,6 +253,42 @@ export function hueVar(job: Employment, index: number): string {
   return `var(--w${n})`;
 }
 
+/**
+ * The repository slug a project's live figures come back under, or undefined for
+ * one with no repository to measure.
+ *
+ * The slug, not the URL, because it is what both the GitHub API and the
+ * `data-project` attribute on the card use — one identifier from `repo` rather
+ * than a third field in the YAML that could disagree with it.
+ */
+export function repoSlug(project: ActiveProject): string | undefined {
+  return project.repo?.split("/").filter(Boolean).pop();
+}
+
+/**
+ * What /stats.json is told to count: the `stats` block, with the per-project
+ * list built from `active` rather than written out a second time.
+ *
+ * Hostnames are qualified here for the same reason they are at render time —
+ * the YAML keeps bare labels so a domain move stays one line in site.yaml.
+ */
+export function statsSources(content: Content): StatsSources {
+  const { projects, site } = content;
+  const { downloads_floor: _floor, ...sources } = projects.stats;
+
+  return {
+    ...sources,
+    projects: projects.active.flatMap((project) => {
+      const repo = repoSlug(project);
+      if (!repo) return [];
+      const hosts = (project.subdomains ?? []).map(
+        (service) => `${service.host}.${site.hosts.canonical}`,
+      );
+      return [{ repo, hosts }];
+    }),
+  };
+}
+
 /** Total stars across the archive, so the figure on the page is never stale. */
 export function totalStars(projects: Projects): number {
   return projects.archive.repos.reduce((sum, r) => sum + r.stars, 0);
@@ -281,6 +339,12 @@ export function metricValue(metric: Metric, content: Content): string {
       return String(content.projects.archive.total_repos);
     case "oss_years":
       return String(new Date().getFullYear() - content.projects.since);
+    // Not countable from content/ — nothing here knows what npm and Packagist
+    // have served. The floor stands in until /stats.json replaces it in the
+    // browser, and is formatted by the same function the client uses so the
+    // figure does not change shape when it changes source.
+    case "downloads":
+      return formatCount(content.projects.stats.downloads_floor);
     default:
       return "";
   }

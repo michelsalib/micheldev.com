@@ -4,6 +4,7 @@
 
 import {
   type Content,
+  LIVE_METRICS,
   type Locale,
   type Metric,
   metricValue,
@@ -12,7 +13,7 @@ import {
 } from "./content.ts";
 import { html, type Renderable, raw } from "./html.ts";
 
-export type Assets = { css: string; theme: string; cv: string };
+export type Assets = { css: string; theme: string; cv: string; stats: string };
 
 /**
  * The headline figures as tiles.
@@ -24,6 +25,12 @@ export type Assets = { css: string; theme: string; cv: string };
  * Which four is the caller's business, because the two pages are about
  * different things: the CV leads with the career (`cv.metrics`), the homepage
  * with the open source (`projects.metrics`).
+ *
+ * A tile whose derive key is in `LIVE_METRICS` is marked `data-stat`, which is
+ * how src/client/stats.ts finds it to write the live figure over the rendered
+ * one. The value here is never a placeholder — it is the real build-time figure,
+ * so the tile is correct before the fetch, correct if the fetch fails, and
+ * correct without JS at all.
  */
 export function figureTiles(
   content: Content,
@@ -32,12 +39,15 @@ export function figureTiles(
 ): Renderable {
   const metrics = source.slice(0, 4);
   return html`<ul class="tiles">
-    ${metrics.map(
-      (metric, i) => html`<li class="tile${raw(i === 0 ? " hue" : "")}">
-        <span class="n">${metricValue(metric, content)}</span
+    ${metrics.map((metric, i) => {
+      const live =
+        metric.derive && LIVE_METRICS.has(metric.derive) ? metric.derive : "";
+      const attr = live ? ` data-stat="${live}"` : "";
+      return html`<li class="tile${raw(i === 0 ? " hue" : "")}">
+        <span class="n"${raw(attr)}>${metricValue(metric, content)}</span
         ><span class="l">${t(metric.label, locale)}</span>
-      </li>`,
-    )}
+      </li>`;
+    })}
   </ul>`;
 }
 

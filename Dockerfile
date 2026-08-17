@@ -12,11 +12,15 @@
 FROM oven/bun:1-slim AS runner
 WORKDIR /app
 
-# The built site, including the generated PDFs and .hosts.json.
+# The built site, including the generated PDFs, .hosts.json and
+# .stats-sources.json.
 COPY dist ./dist
 
-# The server imports nothing. Bun runs the TypeScript directly.
-COPY src/server.ts ./src/server.ts
+# The server imports one local module and nothing else — no packages, so still
+# no install step. Bun runs the TypeScript directly. src/stats.ts is what backs
+# /stats.json, and it is dependency-free for exactly this reason: there is no
+# node_modules in this image for it to import from.
+COPY src/server.ts src/stats.ts ./src/
 
 ENV NODE_ENV=production
 ENV PORT=8080
