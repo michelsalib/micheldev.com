@@ -71,14 +71,27 @@ resource "google_service_account" "runtime" {
 # Every key is independently optional, and the whole thing collapses to nothing
 # when none is supplied: no secret, no binding, no environment variable, and a
 # runtime service account still holding no roles at all.
+#
+# Both gates are wrapped in nonsensitive(). They are derived from sensitive
+# variables, so Terraform marks them sensitive too, and it refuses a sensitive
+# value in count or for_each — those become resource instance keys, which would
+# put the value in plan output and state addresses. What is unwrapped here is
+# only *whether* a credential was supplied, never the credential: the keys these
+# produce are the constant "secretmanager.googleapis.com" and an index of 0 or 1.
+#
+# terraform validate does not catch this. It checks syntax and schema without
+# evaluating values, so the error appears at plan time — which for this repo
+# means in CI, on main, after the merge.
 locals {
-  cf_analytics = var.cloudflare_api_token != "" && var.cloudflare_zone_id != ""
+  cf_analytics = nonsensitive(
+    var.cloudflare_api_token != "" && var.cloudflare_zone_id != ""
+  )
 
   runtime_credentials = merge(
     var.github_token != "" ? { github_token = var.github_token } : {},
     local.cf_analytics ? { cloudflare_api_token = var.cloudflare_api_token } : {},
   )
-  has_credentials = length(local.runtime_credentials) > 0
+  has_credentials = nonsensitive(length(local.runtime_credentials) > 0)
 }
 
 resource "google_secret_manager_secret" "runtime" {
