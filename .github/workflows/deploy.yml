@@ -67,6 +67,19 @@ jobs:
           CHROME_PATH: /usr/bin/google-chrome
         run: bun run pdf
 
+      # Built here as well as in the deploy job, and this is the only step that
+      # would have caught the deploy that broke: .dockerignore denies everything
+      # and allows back by name, so a file added to the Dockerfile's COPY and not
+      # to that allowlist is simply absent from the build context. Every check
+      # above passed on that commit — none of them assembles the image, and the
+      # failure only appeared after the merge, at `docker build` in deploy.
+      #
+      # tests/build.test.ts now asserts the two lists agree, which catches the
+      # specific mistake. This catches the general one, for about fifteen
+      # seconds: the image is a COPY onto a base, with nothing to compile.
+      - name: Build the runtime image
+        run: docker build -t micheldev-www:ci .
+
       - name: Upload site
         uses: actions/upload-artifact@v4
         with:

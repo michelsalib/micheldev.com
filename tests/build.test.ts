@@ -446,3 +446,79 @@ describe("top bar has no blanket selectors", () => {
     for (const anchor of anchors) expect(anchor).toContain("nav-link");
   });
 });
+
+/**
+ * The runtime image is assembled from two lists that are edited separately: the
+ * Dockerfile's COPY, and .dockerignore — which denies everything and allows back
+ * by name. A file named in one and not the other is absent from the build
+ * context, and `docker build` fails on it.
+ *
+ * That is exactly how src/stats.ts shipped broken. Every check in this repo went
+ * green, because none of them builds the image, and the deploy failed at
+ * `COPY ... src/stats.ts: not found` after the merge. These assertions are the
+ * cheap half of that lesson; running `docker build` is the other half.
+ */
+describe("the runtime image carries what the server needs", () => {
+  /** Local modules src/server.ts pulls in at runtime, transitively. */
+  async function runtimeModules(entry: string): Promise<Set<string>> {
+    const seen = new Set<string>();
+
+    async function walk(file: string) {
+      if (seen.has(file)) return;
+      seen.add(file);
+      const source = await Bun.file(file).text();
+      // `import type` is erased and never loaded, so it needs nothing in the
+      // image. Anything else that names a relative path does.
+      for (const match of source.matchAll(
+        /import\s+(?!type\s)[^;]*?from\s+"(\.[^"]+)"/g,
+      )) {
+        const target = new URL(match[1] as string, `file:///${file}`).pathname;
+        await walk(target.replace(/^\//, ""));
+      }
+    }
+
+    await walk(entry);
+    return seen;
+  }
+
+  test("every module it imports is both copied and un-ignored", async () => {
+    const modules = await runtimeModules("src/server.ts");
+    // If this ever drops to one, the walk broke rather than the image shrinking.
+    expect(modules.size).toBeGreaterThan(1);
+
+    const dockerfile = await Bun.file("Dockerfile").text();
+    const ignore = await Bun.file(".dockerignore").text();
+
+    const copied = new Set(
+      dockerfile
+        .split("\n")
+        .filter((line) => line.startsWith("COPY "))
+        .flatMap((line) => line.slice(5).trim().split(/\s+/).slice(0, -1)),
+    );
+    const allowed = new Set(
+      ignore
+        .split("\n")
+        .filter((line) => line.startsWith("!"))
+        .map((line) => line.slice(1).trim()),
+    );
+
+    for (const module of modules) {
+      expect(copied).toContain(module);
+      expect(allowed).toContain(module);
+    }
+  });
+
+  test("none of them imports a package, because there is no node_modules", async () => {
+    for (const module of await runtimeModules("src/server.ts")) {
+      const source = await Bun.file(module).text();
+      const specifiers = [...source.matchAll(/\sfrom\s+"([^"]+)"/g)].map(
+        (match) => match[1] as string,
+      );
+      for (const specifier of specifiers) {
+        // A bare specifier resolves through node_modules, which the image does
+        // not have — the container would start and then throw on first request.
+        expect(specifier.startsWith(".")).toBe(true);
+      }
+    }
+  });
+});

@@ -1,4 +1,8 @@
 *
-# The image needs exactly two things: the built site and the file server.
+# Deny everything, then allow back. Which means this list is half of a pair: a
+# file the Dockerfile COPYs is not in the build context unless it is also named
+# here, and the failure is a build error rather than a missing file at runtime.
+# tests/build.test.ts walks the server's imports and checks both halves agree.
 !dist
 !src/server.ts
+!src/stats.ts
