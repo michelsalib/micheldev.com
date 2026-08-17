@@ -28,9 +28,18 @@ provider "google" {
 
 # ── APIs ─────────────────────────────────────────────────────────────────────
 # `cloudresourcemanager`, `iam` and `storage` must already be enabled before
-# `terraform apply`; bootstrap.sh covers that. These are safe to manage
-# declaratively from here on.
+# `terraform apply`; bootstrap.sh covers that. These are managed declaratively
+# from here on.
+#
+# Adding one to this list is the interesting case, and it was broken until
+# secretmanager needed it: enabling a service takes serviceUsageAdmin, and CI
+# only had consumer. Every entry that predates that was switched on by the first
+# local apply under an owner account, so CI had only ever refreshed them. The
+# grant is in ci.tf now, and depends_on makes it land first — IAM still takes a
+# moment to propagate, so a brand-new project may want one retry.
 resource "google_project_service" "apis" {
+  depends_on = [google_project_iam_member.ci_service_usage_admin]
+
   for_each = toset(concat([
     "run.googleapis.com",
     "artifactregistry.googleapis.com",

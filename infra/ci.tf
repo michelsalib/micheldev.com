@@ -53,6 +53,24 @@ resource "google_project_iam_member" "ci_service_usage_consumer" {
   member  = "serviceAccount:${google_service_account.ci.email}"
 }
 
+# Consumer lets CI *use* a service; enabling one needs admin.
+#
+# main.tf declares the project's APIs and calls them "safe to manage
+# declaratively", which was true only in the sense that they were already on:
+# the first apply ran locally under an owner account, and every CI apply since
+# has found them enabled and done nothing. The first API ever *added* to that
+# list — secretmanager, for the stats credentials — failed with
+# AUTH_PERMISSION_DENIED, because CI had never once exercised the permission its
+# configuration implied it had.
+#
+# Not an escalation in practice: ci_project_iam_admin above can already grant
+# this role, so all this changes is that the grant is written down.
+resource "google_project_iam_member" "ci_service_usage_admin" {
+  project = var.project_id
+  role    = "roles/serviceusage.serviceUsageAdmin"
+  member  = "serviceAccount:${google_service_account.ci.email}"
+}
+
 # Deploying a revision requires actAs on the runtime SA.
 resource "google_service_account_iam_member" "ci_can_act_as_runtime" {
   service_account_id = google_service_account.runtime.name
