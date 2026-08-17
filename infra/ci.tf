@@ -71,6 +71,19 @@ resource "google_project_iam_member" "ci_service_usage_admin" {
   member  = "serviceAccount:${google_service_account.ci.email}"
 }
 
+# The stats credentials, in main.tf, are three resources CI has to manage: the
+# secret, its version, and the accessor binding that lets the runtime read it.
+# Those need secrets.create, versions.add and secrets.setIamPolicy respectively,
+# and admin is the only predefined role holding all three — secretVersionManager
+# stops short of creating a secret, secretVersionAdder of everything else.
+#
+# Broad for one secret, and scoped to a project whose only secret is that one.
+resource "google_project_iam_member" "ci_secret_admin" {
+  project = var.project_id
+  role    = "roles/secretmanager.admin"
+  member  = "serviceAccount:${google_service_account.ci.email}"
+}
+
 # Deploying a revision requires actAs on the runtime SA.
 resource "google_service_account_iam_member" "ci_can_act_as_runtime" {
   service_account_id = google_service_account.runtime.name
