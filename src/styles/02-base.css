@@ -93,7 +93,12 @@ h3,
   height: 54px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  /* Fluid rather than fixed, and so is the nav's gap below: everything in this
+     row is a fixed-size control, so on a narrow phone the gaps are the only
+     thing that can give. At 20px + 18px the /cv bar was 37px wider than a 320px
+     measure and the theme toggle was clipped by the right edge. Both clamps
+     reach their old value by ~450px, so nothing above a phone moves. */
+  gap: clamp(12px, 5vw, 20px);
 }
 
 .wordmark {
@@ -127,7 +132,7 @@ h3,
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: clamp(11px, 4vw, 18px);
 }
 
 /* Scoped to `.nav-link` rather than every `a` in the nav. As a blanket

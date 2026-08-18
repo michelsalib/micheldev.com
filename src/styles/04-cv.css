@@ -1038,6 +1038,18 @@ section.exp .sect-note {
   }
 }
 
+/* The last rung of the same ladder /cv has been climbing since 880px, where the
+   path label went, and 560px, where the PDF button's own label went. The bar's
+   fluid gaps (02-base.css) get a 320px screen under the measure on their own, but
+   only by spending the right-hand gutter down to 6px against a 28px left one. The
+   domain suffix is what goes next: the wordmark still reads as itself without it,
+   and it buys back a gutter that matches. */
+@media (max-width: 360px) {
+  .wordmark span:not(.back) {
+    display: none;
+  }
+}
+
 /* Hidden on screen, shown by the print block below. Must stay ABOVE that
    block: same specificity, so whichever comes last wins. */
 .print-contact {

@@ -210,7 +210,14 @@ section.zone {
   color: var(--ink-3);
   display: flex;
   align-items: center;
-  gap: 12px;
+  /* Wraps because the ship line cannot shrink — see .sub-h .ship below. As a
+     single line the three items plus the rule were 359px wide whatever the
+     viewport, so every phone rendered the document 415px wide: the ship line ran
+     off the right edge mid-word and the page scrolled sideways. Wrapping puts it
+     on its own line instead, and only once it no longer fits, so the desktop row
+     is untouched. Row gap first — it applies only after something has wrapped. */
+  flex-wrap: wrap;
+  gap: 5px 12px;
   margin: 36px 0 0;
 }
 .sub-h::after {
@@ -228,8 +235,13 @@ section.zone {
 .sub-h .ship {
   color: var(--ink-3);
   /* The rule after it is a flex child that eats the remaining width; without
-     this the ship line is the one thing that gets squeezed on a narrow column. */
+     this the ship line is the one thing that gets squeezed on a narrow column.
+     Not shrinking is what makes the row wrap rather than squeeze, so the two
+     declarations belong together: max-width is the floor under it, for the
+     viewport narrow enough that the line it wrapped onto is still too short —
+     there it wraps its own text instead of overflowing again. */
   flex: none;
+  max-width: 100%;
 }
 
 /* ── The lead project ────────────────────────────────────────────────────────
