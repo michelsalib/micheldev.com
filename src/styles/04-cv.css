@@ -3,8 +3,12 @@
    on a plate: a band carrying the name, the portrait and the four figures.
    One geometric rule governs it — a 45° cut of --cut, taken out of the plate's
    lower-right corner and out of the portrait's upper-left, plus a fixed 24px
-   off the bottom-right of every tile. The paper wedge the corner cut reveals is
-   the scroll cue.
+   off the bottom-right of every tile. The paper wedge the cut reveals is the
+   scroll cue.
+   The plate is full-bleed, but the composition on it is not allowed to be wider
+   than --stage: past that the portrait, the tiles and the cut are all held back
+   from the window's edge by --stage-in, so a very wide display gets more plate
+   rather than a masthead pulled apart. See .band.
 
    The plate reads the page's tokens. It used to carry a palette of its own —
    five fixed hexes that were, to a point or two, the dark theme's token set. So
@@ -20,6 +24,25 @@
    reset there means a reader on a dark theme still prints a light sheet.      */
 .band {
   --cut: 108px;
+
+  /* Everything on the right of the masthead — the portrait, the tile block — is
+     pinned to the plate's right edge, and the plate is full-bleed. That holds the
+     composition together up to about 1440px of window. Past that the pin has to
+     stop following the window: the mast and the document below it are centred at
+     --max and stop growing, so a pin that keeps walking right takes the portrait
+     and the tiles with it. On a 2560px display they ended 650px clear of the
+     text — a masthead in two halves with a hole between them, and the tile block
+     itself outside the column the whole document is read in.
+     --stage is the widest the composition is allowed to be; --stage-in is the
+     inset that holds it there, 0 until the window passes --stage and then half of
+     everything beyond it. Because the wrap is centred too, both shift at the same
+     rate: above --stage the masthead is frozen exactly as it stands at --stage and
+     merely sits in more plate. Freezing rather than scaling is also what keeps the
+     portrait honest — the source is 1040px square, so a box any wider than 450
+     is being upscaled on a 2x display. */
+  --stage: 1440px;
+  --stage-in: max(0px, calc((100vw - var(--stage)) / 2));
+
   position: relative;
 }
 
@@ -43,11 +66,19 @@
   background: var(--p-ground);
   color: var(--p-ink);
   padding: 0 0 clamp(34px, 4vw, 52px);
+  /* The cut, and the paper wedge it opens. Seven points rather than five because
+     the cut belongs to the composition, not to the window: it has to travel
+     inboard with the portrait it slices, so past --stage it is a notch bitten out
+     of the plate's bottom edge with the rest of the band running on to the right
+     of it. Below --stage, --stage-in is 0, the third and fourth points collapse
+     onto each other and the shape is exactly the corner cut it has always been. */
   clip-path: polygon(
     0 0,
     100% 0,
-    100% calc(100% - var(--cut)),
-    calc(100% - var(--cut)) 100%,
+    100% 100%,
+    calc(100% - var(--stage-in)) 100%,
+    calc(100% - var(--stage-in)) calc(100% - var(--cut)),
+    calc(100% - var(--stage-in) - var(--cut)) 100%,
     0 100%
   );
   overflow: hidden;
@@ -60,18 +91,21 @@
 }
 
 /* The masthead must stop short of the tile block, and the two are pinned to
-   different boxes: the tiles to the plate, which is full-bleed, and the mast to
-   the wrap, which stops growing at --max and then centres. So the gap between
-   them narrows from both directions and is tightest around --max — which is
-   where the summary used to run under the tiles.
+   different boxes: the tiles to the plate, which is full-bleed until --stage, and
+   the mast to the wrap, which stops growing at --max and then centres. So the gap
+   between them narrows from both directions and is tightest around --max — which
+   is where the summary used to run under the tiles.
    Each calc is that gap, less the wrap's 28px padding and a 44px gutter. The
    first governs while the wrap still fills the viewport, the second once it is
-   centred and the mast starts drifting right at half the rate the tiles do. */
+   centred and the mast starts drifting right at half the rate the tiles do. Both
+   subtract --stage-in because that is how far the tile block has been pulled back
+   in from the plate's edge, so past --stage the second term settles on a constant
+   and the mast keeps the width it had there. */
 .mast {
   max-width: min(
     480px,
-    calc(100vw - var(--tiles-in) - 72px),
-    calc(50vw - var(--tiles-in) + var(--max) / 2 - 72px)
+    calc(100vw - var(--stage-in) - var(--tiles-in) - 72px),
+    calc(50vw - var(--stage-in) - var(--tiles-in) + var(--max) / 2 - 72px)
   );
   min-height: 340px;
 }
@@ -114,11 +148,23 @@
 
 .portrait {
   position: absolute;
-  right: 0;
+  right: var(--stage-in);
   bottom: 0;
   width: var(--portrait-w);
   height: 88%;
   clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut));
+
+  /* Once --stage-in lifts the picture off the right edge of the window, that edge
+     stops being a page boundary and becomes a cut line through the middle of the
+     plate. So it dissolves, on the same terms as the top edge does — but only by
+     as much as it has actually come inboard: --stage-in is 0 below --stage, which
+     collapses the ramp to a hard stop at 0 and leaves the mask opaque, so nothing
+     fades on a window where the photograph still runs off the page.
+     On the container rather than the img, because the tint and the sink cover the
+     whole box: masking only the photograph would fade it out from under them and
+     leave a hard-edged violet rectangle standing in the plate. */
+  --side-fade: min(56px, var(--stage-in));
+  mask-image: linear-gradient(to left, transparent, #000 var(--side-fade));
 
   /* The two things the photograph cannot inherit from a token, because they
      depend on the ground rather than on a colour: how far it is graded down, and
@@ -203,7 +249,7 @@
   --tile-accent: var(--p-accent);
 
   position: absolute;
-  right: calc(var(--portrait-w) - 66px);
+  right: calc(var(--stage-in) + var(--portrait-w) - 66px);
   bottom: 120px;
   z-index: 3;
 }
@@ -212,7 +258,7 @@
    on the page, not on the plate. */
 .notch {
   position: absolute;
-  right: 0;
+  right: var(--stage-in);
   bottom: 0;
   width: var(--cut);
   height: var(--cut);
@@ -1222,6 +1268,11 @@ section.exp .sect-note {
     height: 24mm;
     /* The same corner cut as on screen, at print scale. */
     clip-path: polygon(var(--cut) 0, 100% 0, 100% 100%, 0 100%, 0 var(--cut));
+    /* The side dissolve goes for the same reason the img's does, just below: a
+       mask prints as a rasterised ghost rather than a fade. At print width
+       --side-fade is 0 and the mask is opaque anyway, so this only drops a layer
+       Chrome would otherwise have to flatten. */
+    mask-image: none;
   }
   .portrait img {
     /* Both of these have to be declared on the img, not left to --pic-grade:
