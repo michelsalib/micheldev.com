@@ -34,14 +34,11 @@ stats:
 
 # The homepage hero tiles. The CV masthead has its own set in cv.yaml — this
 # page is about the open source, so its headline numbers are too.
-#
-# Three of the four are replaced in the browser with live figures; `oss_years`
-# is still a valid derive, it just lost its slot to the strongest number here.
 metrics:
-  - { derive: downloads, label: { en: downloads } }
+  - { derive: live_services, label: { en: services live } }
   - { derive: stars, label: { en: GitHub stars } }
   - { derive: repos, label: { en: public repos } }
-  - { derive: live_services, label: { en: services live } }
+  - { derive: downloads, label: { en: downloads } }
 
 # The first entry leads the section: it gets the plate, and its subdomains are
 # listed one per row. Reordering this list moves that treatment, the same way
@@ -141,8 +138,8 @@ links:
   - name: GitHub
     url: https://github.com/michelsalib
     host: github.com/michelsalib
-    note: 50 repos · 15 years of history
-  - name: Notion connectors
-    url: https://notion-tmdb.micheldev.com
-    host: notion-tmdb.micheldev.com
-    note: Free and hosted, no install
+    note: "{repos} repos · {oss_years} years of history"
+  - name: LinkedIn
+    url: https://www.linkedin.com/in/michelsalib/
+    host: linkedin.com/in/michelsalib
+    note: Not looking, but open to a conversation

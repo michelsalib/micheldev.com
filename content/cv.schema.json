@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "micheldev.com CV data",
-  "description": "Source of truth for /cv, the generated PDFs, and the homepage timeline.",
+  "description": "Source of truth for /cv, the generated PDFs, the homepage proof band and the link-preview card.",
   "type": "object",
   "additionalProperties": false,
   "required": ["person", "headline", "summary", "experience"],
@@ -105,6 +105,10 @@
               "$ref": "#/$defs/textList"
             }
           }
+        },
+        "story": {
+          "$ref": "#/$defs/textList",
+          "description": "The long version, as paragraphs: the part the figures and bullets above cannot carry. Rendered on /cv inside a fold that starts closed, and hidden from the PDF entirely — the page can afford it and a three-page PDF cannot. Optional, and most projects will never have one."
         },
         "stack": {
           "type": "array",

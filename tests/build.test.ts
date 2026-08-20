@@ -5,6 +5,7 @@ import {
   loadContent,
   metricValue,
   t,
+  tl,
   totalStars,
 } from "../src/content.ts";
 import { escapeHtml, html, htmlLines, raw } from "../src/html.ts";
@@ -116,6 +117,46 @@ describe("built output", () => {
     expect(cvFr).toContain('hreflang="en"');
   });
 
+  test("the sitemap is in the namespace a crawler recognises", async () => {
+    // The wrong one is not a validation nit: Search Console rejects the whole
+    // document, so none of the three URLs in it is read.
+    const xml = await Bun.file("dist/sitemap.xml").text();
+    expect(xml).toContain(
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    );
+    expect(xml).not.toContain("w3.org");
+    for (const path of ["/", "/cv", "/cv/fr"]) {
+      expect(xml).toContain(`<loc>https://micheldev.com${path}</loc>`);
+    }
+  });
+
+  test("every page carries a sized, absolute link-preview card", () => {
+    // Relative og:image URLs are ignored by most unfurlers, and a card with no
+    // declared size renders as a thumbnail on some of them.
+    for (const page of [home, cvEn, cvFr]) {
+      expect(page).toContain(
+        '<meta property="og:image" content="https://micheldev.com/assets/img/og.png" />',
+      );
+      expect(page).toContain('<meta property="og:image:width" content="1200"');
+      expect(page).toContain('<meta property="og:image:height" content="630"');
+      expect(page).toContain(
+        '<meta name="twitter:card" content="summary_large_image" />',
+      );
+    }
+  });
+
+  test("the CV pair names a default for readers of neither language", () => {
+    for (const page of [cvEn, cvFr]) {
+      expect(page).toContain('hreflang="x-default"');
+      // Pointing at the English page, not at whichever one this is.
+      expect(page).toMatch(
+        /hreflang="x-default"\s*\n?\s*href="https:\/\/micheldev\.com\/cv"/,
+      );
+    }
+    // The homepage has no alternate, so it must not claim a default.
+    expect(home).not.toContain("x-default");
+  });
+
   test("404 is noindex", async () => {
     const page = await Bun.file("dist/404.html").text();
     expect(page).toContain('name="robots" content="noindex"');
@@ -152,10 +193,22 @@ describe("content is rendered, not invented", () => {
       );
       expect(home).toMatch(new RegExp(`<span class="n"[^>]*>${figure}</span`));
     }
+    // The career figures appear on the homepage now — in the proof band, which
+    // is a rule of numbers linking to /cv, and nowhere else. The assertion used
+    // to be that they were absent from the page entirely; what it was protecting
+    // is that they never become hero tiles, so that is what it says now. The
+    // timeline itself is guarded by the next test, which is the stronger claim.
     for (const metric of cv.metrics ?? []) {
       expect(cvEn).toContain(`<span class="l">${t(metric.label, "en")}</span>`);
-      expect(home).not.toContain(t(metric.label, "en"));
+      expect(home).toContain(
+        `<span class="fig-l">${t(metric.label, "en")}</span>`,
+      );
+      expect(home).not.toContain(
+        `<span class="l">${t(metric.label, "en")}</span>`,
+      );
     }
+    // And the band hands off, rather than restating.
+    expect(home).toContain('<a class="proof-link" href="/cv"');
   });
 
   test("the hero hands off to the CV, and the link is styled as one", async () => {
@@ -185,6 +238,46 @@ describe("content is rendered, not invented", () => {
       for (const role of job.roles)
         expect(body).not.toContain(t(role.title, "en"));
     }
+  });
+
+  // The braces are the fix for four numbers that were typed out: the page read
+  // "50 repos · 510 stars" beside a tile that fetched 51 and 541.
+  describe("figures quoted in prose", () => {
+    test("no placeholder survives into a built page", () => {
+      for (const page of [home, cvEn, cvFr]) {
+        expect(page).not.toMatch(
+          /\{(years|stars|repos|live_services|oss_years|downloads|employers|projects)\}/,
+        );
+      }
+    });
+
+    test("a quoted live figure carries the same handle as a tile", async () => {
+      const { projects } = await loadContent();
+      // The GitHub card's note quotes {repos}; the tile derives the same key.
+      expect(home).toContain(
+        `<span data-stat="repos">${projects.archive.total_repos}</span>`,
+      );
+      // And the fold summary quotes both, so it agrees with the tiles above it.
+      expect(home).toMatch(
+        /<span data-stat="repos">\d+<\/span>\s*repos · <span data-stat="stars">\d+<\/span> stars/,
+      );
+    });
+
+    test("a figure counted from content/ is rendered plainly", async () => {
+      const { projects } = await loadContent();
+      // live_services is derived from projects.yaml, so it is already current:
+      // a data-stat span would promise a refresh that changes nothing.
+      expect(home).toContain(
+        `${liveServices(projects)} services under this domain`,
+      );
+    });
+
+    test("the meta description resolves its figure at build time", async () => {
+      const content = await loadContent();
+      expect(home).toContain(
+        `Open source, ${totalStars(content.projects)} GitHub stars.`,
+      );
+    });
   });
 
   test("star total is summed from the data, never hardcoded", async () => {
@@ -336,6 +429,33 @@ describe("content is rendered, not invented", () => {
       expect(page).toContain("print-contact");
       for (const detail of details) expect(page).toContain(detail);
     }
+  });
+
+  // The one field on the CV that is screen-only for a layout reason rather than
+  // a privacy one: the paragraphs are as long as the bullets they explain, and
+  // printing them pushes the PDF past the three pages pdf.ts allows.
+  test("the long version renders on the page, folded and closed", async () => {
+    const { cv } = await loadContent();
+    const withStory = cv.experience
+      .flatMap((job) => job.roles.flatMap((role) => role.projects))
+      .filter((project) => project.story);
+    expect(withStory.length).toBeGreaterThan(0);
+
+    expect(cvEn).toContain('<details class="story">');
+    expect(cvEn).not.toContain('<details class="story" open');
+    for (const project of withStory) {
+      for (const paragraph of tl(project.story, "en")) {
+        expect(cvEn).toContain(paragraph.slice(0, 40));
+      }
+    }
+  });
+
+  test("the print stylesheet drops the long version", async () => {
+    // `details` prints its summary even when closed, so the whole element goes.
+    const href = cvEn.match(/\/assets\/cv\.[0-9a-z]{8}\.css/)?.[0];
+    const css = await Bun.file(`dist${href}`).text();
+    const print = css.slice(css.indexOf("@media print"));
+    expect(print).toContain(".story{display:none}");
   });
 
   test("French page renders French prose", async () => {

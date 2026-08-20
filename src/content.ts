@@ -77,6 +77,12 @@ export type Project = {
   figures?: Figure[];
   points?: TextList;
   extra?: { lead: Text; points: TextList };
+  /**
+   * The long version, in paragraphs, behind a fold — and absent from the PDF,
+   * which the print stylesheet handles. A bullet says what was done; this is the
+   * only field with room for how it went.
+   */
+  story?: TextList;
   stack?: string[];
 };
 
@@ -311,6 +317,54 @@ export function liveServices(projects: Projects): number {
   return projects.active
     .filter((p) => p.live)
     .reduce((sum, p) => sum + (p.subdomains?.length ?? 1), 0);
+}
+
+// ── Figures quoted in prose ──────────────────────────────────────────────────
+
+/**
+ * A figure named inside authored copy: `{stars}` in a lede, in a link note or in
+ * the meta description resolves to the number the tiles carry.
+ *
+ * Why it exists: those numbers used to be typed out. The page read
+ * "50 repos · 510 stars" in three places while the tile beside them fetched 51
+ * and 541 from GitHub — the one thing content/ is supposed to make impossible.
+ * A brace is a quotation of a figure rather than a copy of it.
+ *
+ * The key is a `derive` key, so the set of things quotable in a sentence and the
+ * set of things a tile can show are the same set, by construction.
+ */
+const QUOTED_FIGURE = /\{([a-z_]+)\}/g;
+
+/** Copy, split into its literal runs and the figures quoted between them. */
+export type CopyPart = string | { figure: MetricSource; value: string };
+
+export function splitFigures(text: string, content: Content): CopyPart[] {
+  const parts: CopyPart[] = [];
+  let cursor = 0;
+
+  for (const match of text.matchAll(QUOTED_FIGURE)) {
+    const at = match.index ?? 0;
+    const key = match[1] as MetricSource;
+    const value = metricValue({ derive: key, label: "" }, content);
+    // Not a derive key — some other author's braces. Left exactly as written.
+    if (!value) continue;
+    if (at > cursor) parts.push(text.slice(cursor, at));
+    parts.push({ figure: key, value });
+    cursor = at + match[0].length;
+  }
+
+  if (cursor < text.length) parts.push(text.slice(cursor));
+  return parts;
+}
+
+/**
+ * The same substitution, flattened to a string — for a `<meta>` tag or an
+ * attribute, where there is nowhere to hang the live span.
+ */
+export function resolveFigures(text: string, content: Content): string {
+  return splitFigures(text, content)
+    .map((part) => (typeof part === "string" ? part : part.value))
+    .join("");
 }
 
 /**

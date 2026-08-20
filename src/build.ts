@@ -17,6 +17,7 @@ import {
 import { cvPage } from "./pages/cv.ts";
 import { homePage } from "./pages/home.ts";
 import { notFoundPage } from "./pages/not-found.ts";
+import { ogCard } from "./pages/og.ts";
 import type { Assets } from "./partials.ts";
 
 const OUT = "dist";
@@ -140,7 +141,30 @@ function sitemap(site: Content["site"], paths: string[]): string {
         `  <url>\n    <loc>${site.origin}${path}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`,
     )
     .join("\n");
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.w3.org/1999/sitemap/0.9">\n${urls}\n</urlset>\n`;
+  // sitemaps.org, not w3.org. The wrong namespace was a plausible-looking
+  // invention, and a sitemap in it is not a sitemap: Search Console rejects the
+  // document rather than reading the URLs inside it, so all three pages were
+  // being discovered by luck.
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+}
+
+/**
+ * The section paths, mapped to the anchors they actually are.
+ *
+ * The rails label the homepage sections `/projects` and `/elsewhere`, in mono,
+ * which reads as a route — so people typed them, and got the 404. They are one
+ * page and always were, so the labels stay and the paths resolve.
+ *
+ * Emitted for the server rather than written into it, on the same grounds as
+ * .hosts.json: the paths live in site.yaml, and the runtime has no YAML parser.
+ */
+function sectionRedirects(site: Content["site"]): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(site.sections).map(([id, section]) => [
+      section.path,
+      `/#${id}`,
+    ]),
+  );
 }
 
 export async function build(): Promise<{ files: string[]; assets: Assets }> {
@@ -191,6 +215,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     // Read by the server at boot. Dot-prefixed so it is never served, which the
     // server enforces by refusing any path segment starting with a dot.
     await write(".hosts.json", JSON.stringify(site.hosts)),
+    await write(".redirects.json", JSON.stringify(sectionRedirects(site))),
     // Same arrangement, for the same reason: /stats.json needs to know what to
     // count, that belongs in content/ with everything else, and the runtime
     // image has no YAML parser to read it with.
@@ -215,6 +240,11 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
       cvPage(content, cvAssets, locale, pdfHref(locale), true),
     );
   }
+
+  // The link-preview card, in the same place and for a related reason: it is a
+  // page only so that Chrome can photograph it. scripts/pdf.ts screenshots this
+  // into dist/assets/img/og.png, which is the only form of it anything serves.
+  await Bun.write(`${PRINT_OUT}/og/index.html`, ogCard(content));
 
   return { files, assets: homeAssets };
 }

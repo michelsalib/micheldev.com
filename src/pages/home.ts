@@ -10,13 +10,18 @@ import {
   type ActiveProject,
   type Content,
   liveServices,
+  metricValue,
   repoSlug,
+  resolveFigures,
+  t,
   totalStars,
 } from "../content.ts";
 import { html, htmlLines, type Renderable, raw } from "../html.ts";
 import {
   type Assets,
   documentHead,
+  figuresIn,
+  figuresInHtml,
   figureTiles,
   footer,
   topBarHome,
@@ -129,7 +134,44 @@ function projectCard(project: ActiveProject): Renderable {
   </a>`;
 }
 
-function projectsSection({ site, projects }: Content): Renderable {
+/**
+ * The career, as one rule of figures pointing at /cv.
+ *
+ * The page's thesis is the open source and stays that way — this is not the
+ * timeline coming back. It is the smallest thing that stops the paid work from
+ * living entirely behind a link: four figures from `cv.metrics`, the same four
+ * the CV masthead leads with, and one sentence saying where they come from.
+ *
+ * Deliberately not a second block of tiles. The hero already counts the open
+ * source in four tiles, and eight tiles in two grids read as one grid of eight
+ * — so this is a rule with numbers on it, in the mono the rest of the page uses
+ * for facts about itself.
+ */
+function proofBand(content: Content): Renderable {
+  const metrics = content.cv.metrics ?? [];
+  if (!metrics.length) return "";
+
+  return html`<section class="proof">
+    <div class="wrap">
+      <div class="proof-in reveal">
+        <ul class="figs">
+          ${metrics.map(
+            (metric) => html`<li>
+              <span class="fig-n">${metricValue(metric, content)}</span
+              ><span class="fig-l">${t(metric.label, LOCALE)}</span>
+            </li>`,
+          )}
+        </ul>
+        <a class="proof-link" href="/cv"
+          >the paid work is on the CV &rarr;</a
+        >
+      </div>
+    </div>
+  </section>`;
+}
+
+function projectsSection(content: Content): Renderable {
+  const { site, projects } = content;
   const section = site.sections.projects;
   const stars = totalStars(projects);
   const [lead, ...rest] = projects.active;
@@ -147,7 +189,7 @@ function projectsSection({ site, projects }: Content): Renderable {
         <div>
           <div class="reveal">
             <h2>${section.heading}</h2>
-            <p class="lede">${raw(section.lede_html)}</p>
+            <p class="lede">${figuresInHtml(section.lede_html, content)}</p>
           </div>
 
           <!-- The ship line is filled by src/client/stats.ts and hidden until
@@ -172,8 +214,12 @@ function projectsSection({ site, projects }: Content): Renderable {
             <summary>
               <span class="chev" aria-hidden="true">&rsaquo;</span>
               <span class="t">${projects.archive.heading}</span>
+              <!-- The summary is a claim about the whole account, so both
+                   figures are live: the repo count and the star total the tiles
+                   fetch, not the seven rows folded underneath. -->
               <span class="d"
-                >${projects.archive.total_repos} repos · ${stars} stars</span
+                ><span data-stat="repos">${projects.archive.total_repos}</span>
+                repos · <span data-stat="stars">${stars}</span> stars</span
               >
             </summary>
             <p class="lede lede-tight">
@@ -203,8 +249,15 @@ function projectsSection({ site, projects }: Content): Renderable {
                   <tr>
                     <td colspan="3">
                       ${projects.archive.repos.length} of
-                      ${projects.archive.total_repos} repositories
+                      <span data-stat="repos"
+                        >${projects.archive.total_repos}</span
+                      >
+                      repositories
                     </td>
+                    <!-- Deliberately not live: this is the total of the column
+                         above it, and the live figure counts stars on
+                         repositories this table does not list. A foot that
+                         disagrees with its own column is just wrong. -->
                     <td class="num">${stars}</td>
                   </tr>
                 </tfoot>
@@ -217,7 +270,8 @@ function projectsSection({ site, projects }: Content): Renderable {
   </section>`;
 }
 
-function elsewhereSection({ site, projects }: Content): Renderable {
+function elsewhereSection(content: Content): Renderable {
+  const { site, projects } = content;
   const section = site.sections.elsewhere;
   return html`<section
     class="zone hue-elsewhere"
@@ -233,7 +287,7 @@ function elsewhereSection({ site, projects }: Content): Renderable {
         <div>
           <div class="reveal">
             <h2>${section.heading}</h2>
-            <p class="lede">${raw(section.lede_html)}</p>
+            <p class="lede">${figuresInHtml(section.lede_html, content)}</p>
           </div>
           <div class="links reveal">
             ${projects.links.map(
@@ -241,7 +295,9 @@ function elsewhereSection({ site, projects }: Content): Renderable {
                 <span class="k"
                   >${link.name} <span class="ext">&nearr;</span></span
                 >
-                <span class="h">${link.host}<br />${link.note}</span>
+                <span class="h"
+                  >${link.host}<br />${figuresIn(link.note, content)}</span
+                >
               </a>`,
             )}
           </div>
@@ -259,7 +315,9 @@ export function homePage(content: Content, assets: Assets): string {
       site,
       assets,
       title: site.meta.title,
-      description: site.meta.description,
+      // Quoted figures resolve to their build-time value here: a <meta> tag
+      // has nowhere to hang a live span, and a crawler reads the source.
+      description: resolveFigures(site.meta.description, content),
       path: "/",
       locale: LOCALE,
       scripts: [assets.theme, assets.stats],
@@ -284,7 +342,8 @@ export function homePage(content: Content, assets: Assets): string {
           </div>
         </div>
       </section>
-      ${projectsSection(content)} ${elsewhereSection(content)}
+      ${proofBand(content)} ${projectsSection(content)}
+      ${elsewhereSection(content)}
     </main>
     ${footer(site)}`,
   );

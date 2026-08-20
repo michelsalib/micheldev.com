@@ -36,8 +36,9 @@ const COPY = {
     elsewhere: "Elsewhere",
     interests: "Interests",
     contact: "Contact",
+    story: "The long version",
     privacy:
-      "Email and phone are in the PDF only — this page is crawlable, so they stay off it.",
+      "Email and phone are in the PDF only — this page is crawlable, so they stay off it. LinkedIn, above, reaches me either way.",
     note: (n: number, e: number) => `${n} years · ${e} employers · Paris`,
   },
   fr: {
@@ -50,8 +51,9 @@ const COPY = {
     elsewhere: "Ailleurs",
     interests: "Activités",
     contact: "Contact",
+    story: "La version longue",
     privacy:
-      "L'e-mail et le téléphone ne figurent que dans le PDF — cette page est indexable.",
+      "L'e-mail et le téléphone ne figurent que dans le PDF — cette page est indexable. LinkedIn, ci-dessus, fonctionne aussi.",
     note: (n: number, e: number) => `${n} ans · ${e} employeurs · Paris`,
   },
 } as const;
@@ -73,6 +75,29 @@ function shortYears(job: Employment, locale: Locale): string {
         : "now"
       : String(job.to).slice(-2);
   return `${from}–${to}`;
+}
+
+/**
+ * The long version, folded.
+ *
+ * Closed by default and absent from the PDF — the print stylesheet drops it —
+ * which is what makes it affordable at all: the page has room for the story
+ * behind a figure, and a CV a recruiter prints does not.
+ *
+ * Paragraphs, not bullets. The bullets above already say what was done; if this
+ * could be said in a bullet, it belongs in `points` instead.
+ */
+function storyFold(project: Project, locale: Locale): Renderable {
+  const paragraphs = tl(project.story, locale);
+  if (!paragraphs.length) return "";
+
+  return html`<details class="story">
+    <summary>
+      <span class="chev" aria-hidden="true">&rsaquo;</span>
+      <span class="t">${COPY[locale].story}</span>
+    </summary>
+    ${paragraphs.map((paragraph) => html`<p>${paragraph}</p>`)}
+  </details>`;
 }
 
 /**
@@ -121,6 +146,7 @@ function projectBlock(project: Project, locale: Locale): Renderable {
         </ul>`
         : ""
     }
+    ${storyFold(project, locale)}
     ${
       project.stack?.length
         ? html`<div class="stack">
@@ -243,9 +269,16 @@ function sidebar(content: Content, locale: Locale): Renderable {
     <div class="blk">
       <span class="h">${copy.elsewhere}</span>
       <div class="links-list">
+        <!-- The label is the URL with the parts a reader does not need removed:
+             scheme, leading www, trailing slash. LinkedIn's canonical URL
+             carries the subdomain and the other two links do not, so without
+             this the block lists three hosts in two different shapes. -->
         ${Object.entries(links).map(
           ([, url]) => html`<a href="${url}"
-            >${url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+            >${url
+              .replace(/^https?:\/\//, "")
+              .replace(/^www\./, "")
+              .replace(/\/$/, "")}
             <span class="ext">&nearr;</span></a
           >`,
         )}

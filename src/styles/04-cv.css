@@ -937,6 +937,58 @@ section.exp .sect-note {
   margin: 11px 0 0;
 }
 
+/* ── The long version ─────────────────────────────────────────────────────────
+   A fold under the bullets, closed, carrying paragraphs. It exists because the
+   figures are the strongest thing on this page and the least explained: ÷5 is a
+   claim, and the reader who wants to know how has nowhere to go.
+
+   Sized down from the bullets rather than up: this is the optional depth, and it
+   should look like something you chose to open, not the main text of the block.
+   The chevron is drawn by the row, matching the homepage archive fold, and it
+   takes the employer's hue like everything else inside a job block.
+
+   Not printed — see the @media print block at the foot of this file.          */
+.story {
+  margin: 12px 0 0;
+}
+.story > summary {
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  list-style: none;
+  padding: 3px 0;
+}
+.story > summary::-webkit-details-marker {
+  display: none;
+}
+.story > summary .chev {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--hue);
+  transition: transform 0.2s ease;
+}
+.story[open] > summary .chev {
+  transform: rotate(90deg);
+}
+.story > summary .t {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.story > summary:hover .t {
+  color: var(--ink-2);
+}
+.story p {
+  margin: 9px 0 0;
+  max-width: 64ch;
+  font-size: 14px;
+  line-height: 1.62;
+  color: var(--ink-2);
+}
+
 /* ── Motion ──────────────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: scroll()) {
@@ -1501,6 +1553,14 @@ section.exp .sect-note {
   }
   .pf .kv .k {
     font-size: 6.5pt;
+  }
+
+  /* The long version is screen-only, and this is the rule that lets it exist:
+     the paragraphs are as long as the bullets they explain, and printing them
+     would take the CV past the three pages scripts/pdf.ts allows. `details`
+     prints its summary even when closed, so the whole element goes. */
+  .story {
+    display: none;
   }
 
   /* Print-only, and now in the masthead rather than the aside: on paper contact

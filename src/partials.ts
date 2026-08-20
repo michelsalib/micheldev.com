@@ -7,13 +7,46 @@ import {
   LIVE_METRICS,
   type Locale,
   type Metric,
+  type MetricSource,
   metricValue,
   type Site,
+  splitFigures,
   t,
 } from "./content.ts";
 import { html, type Renderable, raw } from "./html.ts";
 
 export type Assets = { css: string; theme: string; cv: string; stats: string };
+
+/**
+ * One figure quoted mid-sentence.
+ *
+ * A figure /stats.json can improve on gets the same `data-stat` handle the tiles
+ * carry, so a number inside a sentence refreshes with the ones in the corner
+ * rather than drifting away from them. One that is counted from content/ —
+ * services live, years — is already current and gets no span: there is nothing
+ * for the client to improve.
+ */
+function quotedFigure(figure: MetricSource, value: string): Renderable {
+  return LIVE_METRICS.has(figure)
+    ? html`<span data-stat="${figure}">${value}</span>`
+    : value;
+}
+
+/** Prose with its quoted figures rendered live. Escaped, like any prose. */
+export function figuresIn(text: string, content: Content): Renderable {
+  return splitFigures(text, content).map((part) =>
+    typeof part === "string" ? part : quotedFigure(part.figure, part.value),
+  );
+}
+
+/** The same, for a `*_html` field: the prose around the figure carries markup. */
+export function figuresInHtml(text: string, content: Content): Renderable {
+  return splitFigures(text, content).map((part) =>
+    typeof part === "string"
+      ? raw(part)
+      : quotedFigure(part.figure, part.value),
+  );
+}
 
 /**
  * The headline figures as tiles.
@@ -101,6 +134,22 @@ export function themeToggle() {
   </button>`;
 }
 
+/**
+ * The link-preview card, at the size every platform crops to (1.91:1).
+ *
+ * One image for the whole site, not one per page: the card carries the name, the
+ * role and the domain, which is what a reader who has been sent a link needs to
+ * decide whether to open it — none of that differs between / and /cv.
+ *
+ * It is *printed*, not drawn: scripts/pdf.ts screenshots .print/og/index.html
+ * with the same headless Chrome that prints the PDFs, so the card is rendered
+ * from cv.yaml and cannot describe someone else's job. Which also means it
+ * exists only after `bun run pdf` — CI runs that before it builds the image, and
+ * a local `bun run build` alone leaves this URL pointing at nothing.
+ */
+const OG_IMAGE = "/assets/img/og.png";
+const OG_SIZE = { w: 1200, h: 630 };
+
 export type HeadOptions = {
   site: Site;
   assets: Assets;
@@ -144,6 +193,18 @@ export function documentHead(o: HeadOptions): Renderable {
           href="${o.site.origin}${path}"
         />`,
     )}
+    ${
+      // Which of the alternates to serve a reader whose language matches
+      // neither. Without it Google picks one, and the pair is only a pair as far
+      // as it can tell.
+      o.alternates?.en
+        ? html`<link
+            rel="alternate"
+            hreflang="x-default"
+            href="${o.site.origin}${o.alternates.en}"
+          />`
+        : ""
+    }
     <meta name="author" content="Michel Salib" />
     <meta name="theme-color" content="#fbfafd" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0d0b14" media="(prefers-color-scheme: dark)" />
@@ -153,7 +214,14 @@ export function documentHead(o: HeadOptions): Renderable {
     <meta property="og:description" content="${o.description}" />
     <meta property="og:url" content="${url}" />
     <meta property="og:site_name" content="micheldev.com" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="${o.site.origin}${OG_IMAGE}" />
+    <meta property="og:image:width" content="${String(OG_SIZE.w)}" />
+    <meta property="og:image:height" content="${String(OG_SIZE.h)}" />
+    <meta
+      property="og:image:alt"
+      content="Michel Salib — web lead developer, Paris. micheldev.com"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
 
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/assets/favicon.svg" />
