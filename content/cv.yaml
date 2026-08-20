@@ -8,6 +8,7 @@ person:
   links:
     site: https://micheldev.com
     github: https://github.com/michelsalib
+    linkedin: https://www.linkedin.com/in/michelsalib/
 
 privacy:
   page: [site, github]
@@ -75,6 +76,41 @@ experience:
                 fr:
                   - Maîtrise de la plateforme ramenée en interne, et non plus confiée à des freelances
                   - Une pratique de développement là où il n'y en avait pas — revue de code, CI, livraisons automatisées
+            story:
+              en:
+                - >-
+                  The platform the business runs on had been built by external
+                  freelancers, and the first year was spent bringing it back
+                  in-house. I designed the replacement end to end — an event
+                  pipeline feeding a public API — then cut the business over off
+                  the old stack and decommissioned it.
+                - >-
+                  There was no development practice to inherit: no code review,
+                  no CI, no automated releases. That arrived with the rebuild.
+                  Four developers work on it now, and the integration, mobile
+                  and web teams consume it.
+                - >-
+                  The infrastructure bill came out at a fifth of the old one.
+                  Ten thousand people a day and ten B2B customers read from it,
+                  and I have run it in production since.
+              fr:
+                - >-
+                  La plateforme dont dépend l'activité avait été construite par
+                  des freelances externes, et la première année a servi à la
+                  ramener en interne. J'ai conçu le remplacement de bout en bout
+                  — un pipeline d'événements alimentant une API publique — puis
+                  basculé l'activité hors de l'ancienne stack avant de la
+                  décommissionner.
+                - >-
+                  Il n'y avait aucune pratique de développement à reprendre : ni
+                  revue de code, ni CI, ni livraisons automatisées. Elle est
+                  arrivée avec la refonte. Quatre développeurs y travaillent
+                  aujourd'hui, et les équipes d'intégration, mobile et web la
+                  consomment.
+                - >-
+                  La facture d'infrastructure représente un cinquième de
+                  l'ancienne. Dix mille personnes par jour et dix clients B2B la
+                  lisent, et je l'exploite en production depuis.
             stack: [TypeScript, Bun, GCP, Pub/Sub, MongoDB, OpenAPI, SSE]
 
   - employer: London Stock Exchange

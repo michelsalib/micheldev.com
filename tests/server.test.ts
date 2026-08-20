@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { build } from "../src/build.ts";
+import { loadContent } from "../src/content.ts";
 import { handle } from "../src/server.ts";
 
 /** Requests the handler directly, with a Host header, without opening a port. */
@@ -55,6 +56,29 @@ describe("routing", () => {
     const response = await get("/cv/");
     expect(response.status).toBe(301);
     expect(response.headers.get("location")).toBe("https://micheldev.com/cv");
+  });
+
+  // The rails label the homepage sections `/projects` and `/elsewhere`, which
+  // reads as a route, so people typed them and got the 404. The map is emitted
+  // by the build from site.yaml, so a renamed section renames its redirect.
+  test.each([
+    ["/projects", "https://micheldev.com/#projects"],
+    ["/elsewhere", "https://micheldev.com/#elsewhere"],
+  ])("%s 301s to its anchor on the homepage", async (path, location) => {
+    const response = await get(path);
+    expect(response.status).toBe(301);
+    expect(response.headers.get("location")).toBe(location);
+  });
+
+  test("section redirects come from site.yaml, not from the server", async () => {
+    const { site } = await loadContent();
+    const map = (await Bun.file("dist/.redirects.json").json()) as Record<
+      string,
+      string
+    >;
+    for (const [id, section] of Object.entries(site.sections)) {
+      expect(map[section.path]).toBe(`/#${id}`);
+    }
   });
 
   test("unknown paths return the 404 page, not a bare string", async () => {

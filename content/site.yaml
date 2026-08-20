@@ -17,7 +17,7 @@ meta:
     Michel Salib, web lead developer in Paris. I build the platforms a business
     runs on, and I run them — horse racing data at Matchem, fifteen years of
     financial news at London Stock Exchange, Refinitiv and Thomson Reuters.
-    Open source, 510 GitHub stars.
+    Open source, {stars} GitHub stars.
   locale: en
 
 hero:
@@ -43,8 +43,8 @@ sections:
     heading: What I build when nobody is paying me
     lede_html: >-
       Day job is a platform a business depends on. These are the opposite:
-      small, finished, and running on infrastructure I pay for myself — six
-      services under this domain, one repository, one deploy.
+      small, finished, and running on infrastructure I pay for myself —
+      {live_services} services under this domain, one repository, one deploy.
   elsewhere:
     path: /elsewhere
     hue: elsewhere
@@ -55,6 +55,8 @@ sections:
     heading: The rest of the map
     lede_html: >-
       If you arrived here from a search, this is where the trail continues.
+      I am not looking for a role — but LinkedIn is open if something is worth
+      a conversation.
 
 footer:
   note: Cloud Run · us-central1 · no trackers, no cookies

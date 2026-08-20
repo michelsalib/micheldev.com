@@ -1,5 +1,6 @@
 /**
- * Prints /cv and /cv/fr to PDF with headless Chrome.
+ * Prints /cv and /cv/fr to PDF, and photographs the link-preview card, with
+ * headless Chrome.
  *
  * The PDFs come from the same markup and the same `@media print` block in
  * 04-cv.css as the page, so they cannot drift from it. The one difference is the
@@ -41,8 +42,26 @@ const PAGES = [
   },
 ];
 
+/**
+ * The link-preview card. A screenshot rather than a print: og:image wants a
+ * raster at 1200×630, which is what every platform crops a preview to.
+ *
+ * It lands in dist/assets/img/ beside the portrait, so the image the head
+ * already points at exists by the time CI builds the container. A local
+ * `bun run build` on its own does not produce it — same as the PDFs.
+ */
+const CARD = {
+  path: "/og",
+  print: ".print/og/index.html",
+  out: "dist/assets/img/og.png",
+  width: 1200,
+  height: 630,
+};
+
 /** Path -> the print copy that overrides it, for the local print server. */
-const OVERRIDES = new Map(PAGES.map((page) => [page.path, page.print]));
+const OVERRIDES = new Map(
+  [...PAGES, CARD].map((page) => [page.path, page.print]),
+);
 
 /** A CV that runs past this is a layout bug, not a long career. */
 const MAX_PAGES = 3;
@@ -74,6 +93,16 @@ function findChrome(): string {
  */
 function isWindowsBinary(chrome: string): boolean {
   return chrome.startsWith("/mnt/");
+}
+
+/** Where a Windows-hosted Chrome is allowed to write, and where that lands. */
+function windowsTarget(out: string): { target: string; linux: string } {
+  const dir = process.env["TEMP_WIN"] ?? "C:\\Windows\\Temp";
+  const target = `${dir}\\${out.split("/").pop()}`;
+  return {
+    target,
+    linux: target.replace(/\\/g, "/").replace(/^C:/i, "/mnt/c"),
+  };
 }
 
 async function main() {
@@ -114,7 +143,7 @@ async function main() {
   try {
     for (const page of PAGES) {
       const target = isWindowsBinary(chrome)
-        ? `${process.env["TEMP_WIN"] ?? "C:\\Windows\\Temp"}\\${page.out.split("/").pop()}`
+        ? windowsTarget(page.out).target
         : page.out;
 
       const proc = Bun.spawn(
@@ -139,8 +168,7 @@ async function main() {
 
       if (isWindowsBinary(chrome)) {
         // Copy back from the Windows-visible location into dist/.
-        const winPath = target.replace(/\\/g, "/").replace(/^C:/i, "/mnt/c");
-        await Bun.write(page.out, Bun.file(winPath));
+        await Bun.write(page.out, Bun.file(windowsTarget(page.out).linux));
       }
 
       const size = Bun.file(page.out).size;
@@ -166,6 +194,53 @@ async function main() {
           `${pages} page${pages === 1 ? "" : "s"})`,
       );
     }
+
+    const cardTarget = isWindowsBinary(chrome)
+      ? windowsTarget(CARD.out).target
+      : CARD.out;
+
+    const shot = Bun.spawn(
+      [
+        chrome,
+        "--headless=new",
+        "--disable-gpu",
+        "--no-sandbox",
+        "--hide-scrollbars",
+        "--virtual-time-budget=8000",
+        // The window is the frame: the card sizes html and body to exactly
+        // these numbers, so the screenshot is the whole composition and nothing
+        // else.
+        `--window-size=${CARD.width},${CARD.height}`,
+        `--screenshot=${cardTarget}`,
+        `${base}${CARD.path}`,
+      ],
+      { stdout: "ignore", stderr: "pipe" },
+    );
+
+    const shotCode = await shot.exited;
+    if (shotCode !== 0) {
+      console.error(await new Response(shot.stderr).text());
+      throw new Error(`Chrome exited ${shotCode} shooting ${CARD.path}`);
+    }
+
+    if (isWindowsBinary(chrome)) {
+      await Bun.write(CARD.out, Bun.file(windowsTarget(CARD.out).linux));
+    }
+
+    // A card that failed to load its font or its portrait is still a PNG, and
+    // one this size is mostly flat colour — 10 KB is comfortably below anything
+    // the real composition weighs and comfortably above an empty frame.
+    const cardSize = Bun.file(CARD.out).size;
+    if (cardSize < 10_000) {
+      throw new Error(
+        `${CARD.out} is only ${cardSize} bytes — the card did not render`,
+      );
+    }
+
+    console.log(
+      `  ${CARD.path} -> ${CARD.out} (${(cardSize / 1024).toFixed(0)} KB, ` +
+        `${CARD.width}×${CARD.height})`,
+    );
   } finally {
     server.stop(true);
   }

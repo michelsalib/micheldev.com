@@ -61,6 +61,26 @@ async function hostConfig() {
   return hosts;
 }
 
+/**
+ * The homepage sections are labelled as paths — `/projects`, `/elsewhere` — so
+ * they are treated as paths: each one 301s to its anchor on the homepage.
+ *
+ * Emitted by the build from site.yaml, memoised on first use, and optional: a
+ * dist/ from before this existed simply has no redirects, which is the same
+ * behaviour as an empty map rather than a crash on boot.
+ */
+let sections: Record<string, string> | undefined;
+
+async function sectionRedirects() {
+  if (!sections) {
+    const file = Bun.file(`${DIST}/.redirects.json`);
+    sections = (await file.exists())
+      ? ((await file.json()) as Record<string, string>)
+      : {};
+  }
+  return sections;
+}
+
 // ── Live counters ────────────────────────────────────────────────────────────
 
 /**
@@ -213,6 +233,11 @@ export async function handle(request: Request): Promise<Response> {
   // The only path that is not a file. Ahead of the static resolve because there
   // is nothing named this in dist/ — it would 404 on its way past.
   if (url.pathname === "/stats.json") return statsResponse();
+
+  const section = (await sectionRedirects())[url.pathname];
+  if (section) {
+    return Response.redirect(`https://${canonical}${section}`, 301);
+  }
 
   // Collapse trailing slashes (except the root) to keep one URL per page.
   if (url.pathname.length > 1 && url.pathname.endsWith("/")) {
