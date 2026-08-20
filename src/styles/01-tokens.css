@@ -8,13 +8,21 @@
    be guarded against an explicit light choice, and the [data-theme] block has
    to restate the tokens to win in the other direction.                       */
 
+/* --ink-3 is the muting used for the mono microcopy — section rails, tile
+   labels, service suffixes, the footer — which is 11-12px, and it sat at 3.4:1
+   in light and 4.0:1 in dark. Both were under AA for text that size, on the one
+   token used for most of the small type on the site. Only lightness moved: the
+   violet bias and the saturation are the same, so the three-step muting still
+   reads as three steps (--ink-2 is 7.2-7.9:1, --ink 17:1). Light --live moved
+   for the same reason and by the same method — the green pill's own text.       */
+
 :root {
   --paper: #fbfafd;
   --surface: #ffffff;
   --surface-2: #f4f2f9;
   --ink: #141220;
   --ink-2: #56526b;
-  --ink-3: #8b86a0;
+  --ink-3: #716b89;
   --rule: #e5e2ee;
   --rule-strong: #cfcade;
 
@@ -30,7 +38,7 @@
   --h-elsewhere: var(--w3);
 
   /* Semantic, deliberately separate from the accent hues. */
-  --live: #10894a;
+  --live: #0f8045;
 
   --shadow:
     0 1px 2px rgb(20 18 32 / 0.04), 0 8px 24px -12px rgb(20 18 32 / 0.1);
@@ -53,7 +61,7 @@
     --surface-2: #1a1729;
     --ink: #efedf7;
     --ink-2: #a6a1bb;
-    --ink-3: #746e8a;
+    --ink-3: #837e98;
     --rule: #241f33;
     --rule-strong: #362f4c;
 
@@ -78,7 +86,7 @@
   --surface-2: #1a1729;
   --ink: #efedf7;
   --ink-2: #a6a1bb;
-  --ink-3: #746e8a;
+  --ink-3: #837e98;
   --rule: #241f33;
   --rule-strong: #362f4c;
 
