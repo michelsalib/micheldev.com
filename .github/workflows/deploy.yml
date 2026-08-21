@@ -7,8 +7,15 @@ on:
   workflow_dispatch:
 
 concurrency:
-  # Serialize deploys — never let two applies race on the same state bucket.
-  group: deploy-main
+  # Serialize deploys — never let two applies race on the same state bucket. Per
+  # ref, not a constant: a constant put pull request builds in the same group as
+  # main's deploys, and GitHub holds only one pending run per group, so a third
+  # arrival cancelled the one waiting. Dependabot opens its updates in a batch,
+  # which made that the normal case rather than a rare one — and a cancelled
+  # build never reports, so a required check would wait for a result that is
+  # never coming. Keyed by ref, main still serializes against itself, which is
+  # all the state bucket ever needed.
+  group: deploy-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
