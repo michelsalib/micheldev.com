@@ -40,6 +40,24 @@ Numbers quoted inside copy use braces: `{stars}`, `{repos}`, `{live_services}`.
 A brace names a `derive` key and renders the figure the tiles render, live where
 `/stats.json` can improve on it. See `splitFigures` in `src/content.ts`.
 
+## The masthead
+
+Both pages open on the same plate: name and copy left, four figures straddling
+the seam, a picture on the right running off the plate into a 45° corner cut. The
+geometry is in `02-base.css`, so neither page owns it, and each page sheet adds
+only its own picture.
+
+`/cv` serves the photograph. The homepage renders that *same* photograph as an
+80 × 35 grid of characters, generated at build time by `src/ascii.ts` — so
+replacing `src/images/portrait-1040.webp` changes both pages and there is no
+committed `.txt` to forget. It costs no image request in the masthead, and it
+needs none of the grading and duotone the photograph needs to sit on a dark
+plate: density carries the form, so the same markup works on either theme.
+
+That is what put an image decoder in the build. `sharp` is a devDependency and
+the only native one; CI and a local build have it, and the runtime image — which
+copies `dist/` and two modules and never runs `bun install` — does not.
+
 ## Commands
 
 ```sh
@@ -129,6 +147,7 @@ supplies the CDN that Cloud Run domain mappings lack.
 content/          the site, as data
 src/
   build.ts        orchestrates the build
+  ascii.ts        renders the portrait to characters for the homepage masthead
   content.ts      loads and types the YAML
   html.ts         tagged templates; interpolation escapes by default
   partials.ts     head, top bar, footer, figure tiles
@@ -157,6 +176,14 @@ Each of these was a bug first, and each has a test.
 - **`.dockerignore` denies everything and allows back by name.** A file added to
   the Dockerfile's `COPY` and not to that list is simply absent from the build
   context.
+- **The portrait's wall has to be segmented, not thresholded.** The photograph is
+  lit from the left, so the paint runs from near-white to a mid grey and the lit
+  side of his face sits inside that same range: every global threshold that
+  blanked the wall also blanked his cheek. `src/ascii.ts` fits a quadratic to the
+  border and floods in from it instead.
+- **`ART.cols` and `ART.rows` move together.** Cells are twice as tall as they
+  are wide (`line-height: 2ch`), so `cols / (rows × 2)` has to equal the crop's
+  aspect ratio or the face renders stretched.
 - **`bun run check` reports `noDescendingSpecificity` warnings on the
   stylesheets.** Cross-element false positives; the cascade was verified in a
   browser. Exit code is 0.

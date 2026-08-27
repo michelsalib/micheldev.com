@@ -7,6 +7,7 @@
  */
 
 import { cp, mkdir, rm } from "node:fs/promises";
+import { portraitArt } from "./ascii.ts";
 import {
   type Content,
   LOCALES,
@@ -176,12 +177,17 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
   const content = await loadContent();
   const { site } = content;
 
-  const [cssHome, cssCv, theme, cv, stats] = await Promise.all([
+  const [cssHome, cssCv, theme, cv, stats, art] = await Promise.all([
     buildCss("home"),
     buildCss("cv"),
     buildScript("src/client/theme.ts", "theme"),
     buildScript("src/client/cv.ts", "cv"),
     buildScript("src/client/stats.ts", "stats"),
+    // The homepage masthead's picture, rendered from the photograph the CV
+    // serves. Built here rather than committed so the two cannot drift — see
+    // src/ascii.ts, which is also where the decoder in the devDependencies
+    // comes from.
+    portraitArt(),
   ]);
 
   // Same scripts, different stylesheet: each page links only its own.
@@ -192,16 +198,18 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
   // never change; keep the readable names and rely on immutable caching.
   await cp("src/fonts", `${OUT}/assets/fonts`, { recursive: true });
 
-  // The hero portrait, at the two widths the layout can ask for. Copied rather
-  // than generated: there is no image tooling in this repo and adding an
-  // encoder to build a file that changes once every few years is not a trade
-  // worth making. Both are already re-encoded, resized and stripped of EXIF.
+  // The CV masthead's portrait, at the two widths that layout can ask for.
+  // Copied, not generated: both are already re-encoded, resized and stripped of
+  // EXIF, and nothing in the build needs to produce another raster.
+  //
+  // It is read as well as copied — src/ascii.ts renders the homepage masthead
+  // from these same bytes — but only ever as a source. No image is written.
   await cp("src/images", `${OUT}/assets/img`, { recursive: true });
 
   const pdfHref = (locale: Locale) => `/michel-salib-cv-${locale}.pdf`;
 
   const files = [
-    await write("index.html", homePage(content, homeAssets)),
+    await write("index.html", homePage(content, homeAssets, art)),
     await write(
       "cv/index.html",
       cvPage(content, cvAssets, "en", pdfHref("en")),

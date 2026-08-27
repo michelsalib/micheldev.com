@@ -1,11 +1,16 @@
 /**
  * The homepage: a hub index. Projects lead, links close.
  *
- * The career is the CV's job, not this page's — the hero states it in a
+ * The career is the CV's job, not this page's — the masthead states it in a
  * sentence and links out. Everything the page counts is open source, and it
  * counts it from projects.yaml rather than repeating a number.
+ *
+ * The masthead is the plate /cv opens on, shared rather than reimplemented: the
+ * geometry lives in 02-base.css and the only thing this page brings to it is its
+ * own picture, which is the CV's photograph rendered as characters.
  */
 
+import type { Art } from "../ascii.ts";
 import {
   type ActiveProject,
   type Content,
@@ -19,6 +24,7 @@ import {
 import { html, htmlLines, type Renderable, raw } from "../html.ts";
 import {
   type Assets,
+  asciiPortrait,
   documentHead,
   figuresIn,
   figuresInHtml,
@@ -142,8 +148,8 @@ function projectCard(project: ActiveProject): Renderable {
  * living entirely behind a link: four figures from `cv.metrics`, the same four
  * the CV masthead leads with, and one sentence saying where they come from.
  *
- * Deliberately not a second block of tiles. The hero already counts the open
- * source in four tiles, and eight tiles in two grids read as one grid of eight
+ * Deliberately not a second block of tiles. The masthead already counts the
+ * open source in four tiles, and eight tiles in two grids read as one grid of eight
  * — so this is a rule with numbers on it, in the mono the rest of the page uses
  * for facts about itself.
  */
@@ -307,7 +313,7 @@ function elsewhereSection(content: Content): Renderable {
   </section>`;
 }
 
-export function homePage(content: Content, assets: Assets): string {
+export function homePage(content: Content, assets: Assets, art: Art): string {
   const { cv, site, projects } = content;
 
   return String(
@@ -324,23 +330,30 @@ export function homePage(content: Content, assets: Assets): string {
     })}
     ${topBarHome(liveServices(projects))}
     <main id="main">
-      <section class="hero">
-        <div class="field"></div>
-        <div class="wrap">
-          <div class="hero-grid">
-            <div>
+      <!-- The same plate /cv opens on: copy left, figures straddling the seam,
+           picture right, running off the plate into the corner cut. The picture
+           is the photograph /cv serves, rendered as characters at build time —
+           see src/ascii.ts. -->
+      <section class="band">
+        <div class="plate">
+          <div class="wrap">
+            <div class="mast">
               <p class="eyebrow in">${site.hero.eyebrow}</p>
               <h1 class="in">${cv.person.name}</h1>
               <p class="role in">${raw(site.hero.role_html)}</p>
               <p class="thesis in">${raw(site.hero.thesis_html)}</p>
             </div>
+          </div>
+          <div class="plate-lower">
             <div class="figures">
               ${figureTiles(content, LOCALE, projects.metrics)}
               <!-- Dormant until the zone token is configured; see stats.ts. -->
               <p class="pulse" data-visits hidden></p>
             </div>
+            ${asciiPortrait(art, cv.person.name)}
           </div>
         </div>
+        <p class="notch"><span>scroll</span></p>
       </section>
       ${proofBand(content)} ${projectsSection(content)}
       ${elsewhereSection(content)}

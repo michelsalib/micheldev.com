@@ -1,36 +1,135 @@
-/* ── Hero ──────────────────────────────────────────────────────────────────
-   Copy on the left, the four headline figures as tiles on the right. The tile
-   itself is a shared component — see 02-base.css — so the homepage sets only
-   where the block sits; the CV masthead reuses the same one on its plate.     */
-.hero {
-  position: relative;
-  padding: clamp(48px, 7vw, 88px) 0 clamp(40px, 5vw, 64px);
-  overflow: hidden;
+/* ── Masthead ──────────────────────────────────────────────────────────────
+   The plate, the mast, the figure block and the notch are all shared — see
+   02-base.css. What this sheet adds is the homepage's own picture: the same
+   photograph the CV serves, rendered to an 80 × 35 grid of characters at build
+   time by src/ascii.ts.
+
+   The homepage used to open on a plain two-column hero with an ambient hairline
+   field drifting behind it, and no picture at all. It opens on the plate now,
+   which is the same composition /cv opens on, so the two pages read as one site
+   instead of two designs — and the picture is what the hero was missing.
+
+   Characters rather than the photograph, on a page that already links to the
+   page with the photograph on it. Three things come free with that. The
+   photograph needs a grade and a duotone to sit on a dark plate, because it
+   carries its own light, and the art needs neither: density carries the form, so
+   the same markup works on paper and on the plate. It is two kilobytes of text
+   and no image request in the masthead. And a portrait made out of a monospaced
+   ramp is the one thing on this site that could not be a photograph of anyone
+   else.                                                                       */
+.plate {
+  /* Wider than the box the photograph gets. Legibility, not taste: the cell here
+     works out at 100cqw / 80 / 0.56, or about 11px on a desktop plate, and below
+     roughly 6px the ramp stops resolving into a face at all. So where the
+     photograph can afford a margin of wall around him, the art spends it on his
+     head instead. */
+  --portrait-w: clamp(300px, 34%, 468px);
 }
 
-/* Ambient hairline field, drifting on scroll. The one decorative element. */
-.field {
+/* The box, pinned exactly where the photograph's is on the CV: the plate's right
+   edge, on the plate's floor, running into the corner cut. It does not clip,
+   though — the art's own corners are empty wall, so a 45° cut through them would
+   cut nothing, and the plate's overflow already does the bleed. */
+.ascii-portrait {
   position: absolute;
-  inset: -20% -10% -30%;
-  z-index: 0;
+  right: var(--stage-in);
+  bottom: 0;
+  width: var(--portrait-w);
+  z-index: 1;
+  /* So the art sizes itself off this box rather than off the viewport. */
+  container-type: inline-size;
   pointer-events: none;
-  opacity: 0.5;
-  background-image: linear-gradient(
-    to right,
-    var(--rule) 0 1px,
-    transparent 1px 100%
-  );
-  background-size: 84px 100%;
-  mask-image: radial-gradient(120% 80% at 20% 16%, #000 0%, transparent 72%);
 }
 
-.hero-grid {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: clamp(30px, 4.5vw, 60px);
-  align-items: center;
+/* The art itself: one <pre>, and the geometry stated rather than guessed.
+
+   `1ch` is the mono face's advance width, so `line-height: 2ch` makes every cell
+   exactly twice as tall as it is wide — which is the ratio src/ascii.ts sampled
+   the photograph at, so the face cannot arrive stretched at any size. That
+   leaves the font size one job, filling --cols columns, and `cqw` states it in
+   one line at every width with nothing measured at runtime.
+
+   --bleed takes the text past the box's right edge, where the plate's own
+   overflow cuts it; the columns it loses are shoulder and wall. The width has to
+   be declared for it, and cannot be `max-content`: that resolves against the
+   container query before the font size does and comes out short, which leaves
+   the glyphs past the box edge with no gradient behind them — see below — and so
+   not painted at all. */
+.art {
+  --cols: 80;
+  --adv: 0.56; /* Ubuntu Sans Mono advance width, in em */
+  --bleed: 1.06;
+
+  margin: 0;
+  width: calc(100cqw * var(--bleed));
+  font-family: var(--f-mono);
+  font-size: calc(100cqw * var(--bleed) / (var(--cols) * var(--adv)));
+  line-height: 2ch;
+  /* 500 rather than 400: at an 11px cell the lighter weight leaves the low end
+     of the ramp too thin to read against paper. */
+  font-weight: 500;
+  white-space: pre;
+  -webkit-user-select: none;
+  user-select: none;
+
+  /* The colour is a gradient clipped to the glyphs, which is what makes this one
+     element and one animation instead of 2 800 spans with 2 800 delays. */
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-repeat: no-repeat;
+  background-image: linear-gradient(
+    112deg,
+    var(--w1) 0%,
+    var(--w2) 19%,
+    var(--w3) 38%,
+    var(--w4) 62%,
+    var(--w5) 82%,
+    var(--w1) 100%
+  );
+
+  /* Both edges of the crop dissolved into the plate rather than stopping on a
+     line — the same job .portrait img's mask and .portrait .sink do for the
+     photograph on /cv. The top rows are the crown of his head, which the crop
+     cuts and this hands to the plate; the bottom rows are collar. */
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    #000 8%,
+    #000 82%,
+    transparent 100%
+  );
+}
+
+/* The coarser rendering, and a second one from src/ascii.ts rather than this one
+   scaled: fewer, larger cells resolve where 80 small ones mush. Off by default;
+   the container query near the bottom of this sheet decides when it earns its
+   place. */
+.art.narrow {
+  display: none;
+  --cols: 54;
+}
+
+/* The five employer hues, walking diagonally across the face.
+
+   It reverses rather than wrapping, which is what `alternate` buys: a gradient
+   panned in one direction only lands back on its start with a jump unless the
+   travel is an exact multiple of the pattern, and at 230% of a box whose size is
+   a clamp it never is. Eased, so the reversal reads as breathing rather than as
+   a bounce. */
+@media (prefers-reduced-motion: no-preference) {
+  .art {
+    background-size: 230% 230%;
+    animation: art-drift 22s ease-in-out infinite alternate;
+  }
+  @keyframes art-drift {
+    from {
+      background-position: 0% 0%;
+    }
+    to {
+      background-position: 100% 100%;
+    }
+  }
 }
 
 /* Used by the 404, which is a heading and a paragraph on paper. */
@@ -88,7 +187,7 @@
   color: var(--ink);
   font-weight: 600;
 }
-/* The hero's one prose link, the hand-off to the CV. Base CSS strips colour and
+/* The masthead's one prose link, the hand-off to the CV. Base CSS strips colour and
    underline from every `a`, so the markup alone would render it as plain text. */
 .thesis a {
   color: var(--ink);
@@ -99,18 +198,6 @@
 }
 .thesis a:hover {
   border-bottom-color: var(--h-work);
-}
-
-/* The metrics strip and the figure tiles are both shared components — see
-   02-base.css. The homepage renders the tiles; the CV masthead renders both.
-
-   .figures wraps the tiles here only so the visit count can sit under them: the
-   hero grid's second track is `auto`, so a bare sibling would become a third
-   column rather than a second row.                                            */
-.figures {
-  display: grid;
-  justify-items: start;
-  gap: 12px;
 }
 
 /* One project's live line: version and date on the cards, traffic on the lead
@@ -132,8 +219,8 @@
   margin: 0;
 }
 
-/* The visit count. Hidden in the markup and revealed by the client only when
-   Cloudflare is configured and answers, so on a zone without a token this is
+/* The visit count, under the tiles. Written by src/client/stats.ts, and only
+   when Cloudflare is configured and answers — so on a zone with no token this is
    markup that never paints. */
 .pulse {
   margin: 0;
@@ -143,13 +230,35 @@
   line-height: 1.5;
   letter-spacing: 0.02em;
   color: var(--ink-3);
+  /* Its line exists before there is anything in it — see below for why, and note
+     that `1lh` has to be declared here rather than as a grid track on .figures,
+     where it would resolve against the 16px body line and reserve 9px too many. */
+  min-height: 1lh;
+}
+
+/* `hidden` cannot mean `display: none` on this one element.
+   The figure block is anchored to the plate's floor, so a row appearing under
+   the tiles does not push anything down — it pushes the tiles *up*, by the
+   line's height plus the grid gap. Measured at 28px: the masthead settles, and
+   then a second later the four tiles hop. So while it is hidden the line is
+   invisible but still measured, which reserves its row from the first paint.
+   That is space held for a figure that may never arrive, which the rest of this
+   site deliberately does not do — the release line in the projects section ships
+   hidden for exactly that reason. It is worth it here and not there because what
+   gets reserved is 28px of bare plate, which looks identical whether the number
+   lands in it or not, and because this block is above the fold in the first
+   screen a reader ever sees. `visibility` rather than opacity so it stays out of
+   the accessibility tree, exactly as `display: none` kept it. */
+.pulse[hidden] {
+  display: block;
+  visibility: hidden;
 }
 
 /* ── Sections ────────────────────────────────────────────────────────────── */
 /* ── The proof band ───────────────────────────────────────────────────────────
-   The career's four figures, between the hero and the projects.
+   The career's four figures, between the masthead and the projects.
 
-   A rule with numbers on it rather than a second tile grid: the hero counts the
+   A rule with numbers on it rather than a second tile grid: the masthead counts
    open source in tiles right above this, and two identical grids of four would
    read as one grid of eight with no boundary between two different claims.
 
@@ -724,70 +833,11 @@ table.archive tfoot td.num {
       animation-timeline: view();
       animation-range: entry 4% cover 22%;
     }
-    .field {
-      animation: drift linear both;
-      animation-timeline: scroll(root block);
-    }
-  }
-
-  @keyframes drift {
-    from {
-      transform: translate3d(0, 0, 0);
-    }
-    to {
-      transform: translate3d(-64px, -180px, 0);
-    }
-  }
-
-  .hero .in {
-    animation: rise 0.6s cubic-bezier(0.22, 0.68, 0.32, 1) both;
-  }
-  .hero .in:nth-child(1) {
-    animation-delay: 0.02s;
-  }
-  .hero .in:nth-child(2) {
-    animation-delay: 0.08s;
-  }
-  .hero .in:nth-child(3) {
-    animation-delay: 0.14s;
-  }
-  .hero .in:nth-child(4) {
-    animation-delay: 0.2s;
-  }
-  /* The tiles land after the copy, in reading order. */
-  .hero .tile {
-    animation: rise 0.5s cubic-bezier(0.22, 0.68, 0.32, 1) both;
-  }
-  .hero .tile:nth-child(1) {
-    animation-delay: 0.26s;
-  }
-  .hero .tile:nth-child(2) {
-    animation-delay: 0.32s;
-  }
-  .hero .tile:nth-child(3) {
-    animation-delay: 0.38s;
-  }
-  .hero .tile:nth-child(4) {
-    animation-delay: 0.44s;
   }
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .hero-grid {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: start;
-  }
-  /* The block sits under the copy now instead of beside it, so it takes the
-     whole measure and the four tiles share it two-up. At its intrinsic width it
-     would hug the left and leave a third of the row empty. */
-  .hero .tiles {
-    width: 100%;
-  }
-  .hero .tile {
-    flex: 1 1 calc(50% - var(--tile-gap));
-    width: auto;
-  }
   .zone-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
@@ -847,4 +897,70 @@ table.archive tfoot td.num {
 /* The archive lede sits under a sub-heading rather than a section heading. */
 .lede-tight {
   margin-top: 12px;
+}
+
+/* ── Masthead, narrow ─────────────────────────────────────────────────────────
+   Matched to the 880px the shared masthead breaks at, not the 900px the sections
+   below use: the figures come out from under the picture there, and the picture
+   has to answer for itself in the same breath.
+
+   And what it does is go *behind* them rather than beside them. The shared rule
+   stands the four tiles in one column and hands the picture the rest of the row,
+   which works for a photograph because `object-fit: cover` stretches it to
+   whatever height that column happens to be — 400px of it. The art cannot be
+   stretched: it holds the aspect it was sampled at. Beside the column it came out
+   215px wide with 200px of empty plate above it, and below the column it took a
+   whole screen of its own. Behind it, it gets the full measure and the tiles
+   punch into it exactly as they punch into the photograph at full width, which is
+   the composition the plate exists for.
+
+   So the box is not made a row item at all: it stays absolute, pinned to the
+   plate as it is at every other width, and only its width and its stacking
+   change. It is allowed past the measure on the left because the left third of
+   the crop is bare wall, so what hangs off the edge there is nothing.
+
+   From about 520px up the head lands clear of the tile column, exactly as it does
+   at full width. Below that it does not, and cannot: the column is 132px of
+   opaque card and there are only 340px to share. The head goes behind it, which
+   is what a backdrop is — the crown reads above the tiles and the beard to the
+   right of them. Walking the picture off the right edge to free the face was
+   tried and is not an improvement; it buys ten per cent of the head back and
+   costs the composition its right edge. */
+@media (max-width: 880px) {
+  .ascii-portrait {
+    width: min(116%, 470px);
+    z-index: 0;
+  }
+  .art {
+    /* The bleed is in the width above, which is measured against the plate
+       rather than against a box sitting inside it. */
+    --bleed: 1;
+  }
+  /* Over the tiles rather than under them. Under them it is the one piece of
+     text on the plate sitting directly on the art, and 11px of mono over a ramp
+     of punctuation is not reading matter — above them it has bare plate behind
+     it. The row it reserves is the same row either way, so this does not
+     reintroduce the jump it was given a reserved row for. */
+  .pulse {
+    order: -1;
+  }
+}
+
+/* Which of the two renderings shows, decided on the only thing that actually
+   matters — how many pixels a character cell gets. A container query, not a
+   media query: the box is `flex: 1 1 300px` above, so its width is a function of
+   what the figures left rather than of the viewport, and 420px of it on a tablet
+   wants the detailed rendering however narrow the window is.
+
+   Below 380px the 80-column art falls under about 8px a cell and its ramp starts
+   to mush; the 54-column one is coarser but its glyphs still resolve. Above it,
+   the reverse — 54 columns at 14px a cell reads as blocks next to the type. The
+   default is the wide one, so this is the only rule needed either way. */
+@container (max-width: 380px) {
+  .art.wide {
+    display: none;
+  }
+  .art.narrow {
+    display: block;
+  }
 }

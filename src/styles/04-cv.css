@@ -1,129 +1,8 @@
-/* ── Masthead band ─────────────────────────────────────────────────────────
-   This page is the one that is actually about him, so it is the one that opens
-   on a plate: a band carrying the name, the portrait and the four figures.
-   One geometric rule governs it — a 45° cut of --cut, taken out of the plate's
-   lower-right corner and out of the portrait's upper-left, plus a fixed 24px
-   off the bottom-right of every tile. The paper wedge the cut reveals is the
-   scroll cue.
-   The plate is full-bleed, but the composition on it is not allowed to be wider
-   than --stage: past that the portrait, the tiles and the cut are all held back
-   from the window's edge by --stage-in, so a very wide display gets more plate
-   rather than a masthead pulled apart. See .band.
-
-   The plate reads the page's tokens. It used to carry a palette of its own —
-   five fixed hexes that were, to a point or two, the dark theme's token set. So
-   on a light theme the page ran white chrome, dark band, white document: two
-   theme edges inside the first 536px, and a masthead that read as a slab
-   dropped into the page rather than the top of it. The --p-* names are kept
-   because the tiles and the portrait read them, but every one of them now
-   resolves through the theme, which is why there is nothing left to undo when
-   the theme flips.
-
-   What is still theme-specific is the photograph's grading — see .portrait,
-   which grades for the ground it is on. Print keeps its own block; the token
-   reset there means a reader on a dark theme still prints a light sheet.      */
-.band {
-  --cut: 108px;
-
-  /* Everything on the right of the masthead — the portrait, the tile block — is
-     pinned to the plate's right edge, and the plate is full-bleed. That holds the
-     composition together up to about 1440px of window. Past that the pin has to
-     stop following the window: the mast and the document below it are centred at
-     --max and stop growing, so a pin that keeps walking right takes the portrait
-     and the tiles with it. On a 2560px display they ended 650px clear of the
-     text — a masthead in two halves with a hole between them, and the tile block
-     itself outside the column the whole document is read in.
-     --stage is the widest the composition is allowed to be; --stage-in is the
-     inset that holds it there, 0 until the window passes --stage and then half of
-     everything beyond it. Because the wrap is centred too, both shift at the same
-     rate: above --stage the masthead is frozen exactly as it stands at --stage and
-     merely sits in more plate. Freezing rather than scaling is also what keeps the
-     portrait honest — the source is 1040px square, so a box any wider than 450
-     is being upscaled on a 2x display. */
-  --stage: 1440px;
-  --stage-in: max(0px, calc((100vw - var(--stage)) / 2));
-
-  position: relative;
-}
-
-.plate {
-  --p-ground: var(--surface);
-  --p-ink: var(--ink);
-  --p-ink-2: var(--ink-2);
-  --p-ink-3: var(--ink-3);
-  --p-rule: var(--rule);
-  --p-accent: var(--h-work);
-
-  /* Read by the tiles as well as the portrait, so the seam the tiles straddle
-     and the tiles themselves can never drift apart. */
-  --portrait-w: clamp(280px, 37%, 450px);
-  /* Where the tile block's left edge falls, measured in from the plate's right
-     edge: the block is two tiles and a gap wide (274px) and is pushed 66px onto
-     the portrait. The masthead reads it to know where it has to stop. */
-  --tiles-in: calc(var(--portrait-w) + 208px);
-
-  position: relative;
-  background: var(--p-ground);
-  color: var(--p-ink);
-  padding: 0 0 clamp(34px, 4vw, 52px);
-  /* The cut, and the paper wedge it opens. Seven points rather than five because
-     the cut belongs to the composition, not to the window: it has to travel
-     inboard with the portrait it slices, so past --stage it is a notch bitten out
-     of the plate's bottom edge with the rest of the band running on to the right
-     of it. Below --stage, --stage-in is 0, the third and fourth points collapse
-     onto each other and the shape is exactly the corner cut it has always been. */
-  clip-path: polygon(
-    0 0,
-    100% 0,
-    100% 100%,
-    calc(100% - var(--stage-in)) 100%,
-    calc(100% - var(--stage-in)) calc(100% - var(--cut)),
-    calc(100% - var(--stage-in) - var(--cut)) 100%,
-    0 100%
-  );
-  overflow: hidden;
-}
-
-.plate > .wrap {
-  position: relative;
-  z-index: 2;
-  padding-top: clamp(28px, 3.4vw, 42px);
-}
-
-/* The masthead must stop short of the tile block, and the two are pinned to
-   different boxes: the tiles to the plate, which is full-bleed until --stage, and
-   the mast to the wrap, which stops growing at --max and then centres. So the gap
-   between them narrows from both directions and is tightest around --max — which
-   is where the summary used to run under the tiles.
-   Each calc is that gap, less the wrap's 28px padding and a 44px gutter. The
-   first governs while the wrap still fills the viewport, the second once it is
-   centred and the mast starts drifting right at half the rate the tiles do. Both
-   subtract --stage-in because that is how far the tile block has been pulled back
-   in from the plate's edge, so past --stage the second term settles on a constant
-   and the mast keeps the width it had there. */
-.mast {
-  max-width: min(
-    480px,
-    calc(100vw - var(--stage-in) - var(--tiles-in) - 72px),
-    calc(50vw - var(--stage-in) - var(--tiles-in) + var(--max) / 2 - 72px)
-  );
-  min-height: 340px;
-}
-
-.mast .eyebrow {
-  font-family: var(--f-mono);
-  font-size: 11.5px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--p-ink-3);
-  margin: 0;
-}
-.mast h1 {
-  font-size: clamp(34px, 5vw, 58px);
-  line-height: 1.02;
-  margin: 14px 0 0;
-  color: var(--p-ink);
-}
+/* ── Masthead, the photograph ─────────────────────────────────────────────────
+   The plate itself is a shared component — see 02-base.css. What this sheet adds
+   is the CV's own picture: the photograph, which needs a grade and a duotone the
+   ASCII rendering on the homepage does not, plus the two lines of copy that only
+   this masthead carries.                                                      */
 .mast .headline {
   font-family: var(--f-display);
   font-stretch: 100%;
@@ -137,13 +16,6 @@
   margin: 20px 0 0;
   font-size: 16px;
   color: var(--p-ink-2);
-}
-
-/* At full width the tiles and the portrait are each positioned against the
-   plate, so their wrapper gets out of the way entirely. It becomes a box only
-   when the narrow layout needs a row — see the 880px breakpoint. */
-.plate-lower {
-  display: contents;
 }
 
 .portrait {
@@ -238,48 +110,10 @@
   --tint-on: block;
 }
 
-/* The tile is a shared component — see 02-base.css. All the plate does is hand
-   it a palette and put the block on the portrait's edge, so two of the four
-   are punched into the picture. */
-.plate .tiles {
-  --tile-bg: var(--surface-2);
-  --tile-ring: var(--rule-strong);
-  --tile-n: var(--p-ink);
-  --tile-l: var(--p-ink-3);
-  --tile-accent: var(--p-accent);
-
-  position: absolute;
-  right: calc(var(--stage-in) + var(--portrait-w) - 66px);
-  bottom: 120px;
-  z-index: 3;
-}
-
-/* The label in the wedge the corner cut opens. Paper-coloured tokens: it sits
-   on the page, not on the plate. */
-.notch {
-  position: absolute;
-  right: var(--stage-in);
-  bottom: 0;
-  width: var(--cut);
-  height: var(--cut);
-  display: grid;
-  place-items: end end;
-  padding: 0 3px 5px 0;
-  font-family: var(--f-mono);
-  font-size: 9.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-  z-index: 2;
-}
-.notch span {
-  writing-mode: vertical-rl;
-}
-
-/* The metrics strip and the figure tiles are both shared components — see
-   02-base.css. What stays in this sheet is only what the CV adds: the plate
-   palette above, the scroll-driven `rise`, its reduced-motion reset, and the
-   print sizes further down. */
+/* The metrics strip, the figure tiles and the plate they sit on are all shared
+   components — see 02-base.css. What stays in this sheet is only what the CV
+   adds: the photograph above, the scroll-driven `rise`, its reduced-motion
+   reset, and the print sizes further down. */
 
 /* ── Language switch + download ──────────────────────────────────────────── */
 .lang-switch {
@@ -1068,70 +902,10 @@ section.exp .sect-note {
       animation-range: entry 2% cover 22%;
     }
   }
-
-  .mast .in {
-    animation: rise 0.6s cubic-bezier(0.22, 0.68, 0.32, 1) both;
-  }
-  .mast .in:nth-child(1) {
-    animation-delay: 0.02s;
-  }
-  .mast .in:nth-child(2) {
-    animation-delay: 0.08s;
-  }
-  .mast .in:nth-child(3) {
-    animation-delay: 0.14s;
-  }
-  .mast .in:nth-child(4) {
-    animation-delay: 0.2s;
-  }
-  /* The tiles land after the copy, in reading order. The portrait does not
-     animate: it is the largest thing on the page and moving it reads as the
-     page still loading. */
-  .plate .tile {
-    animation: rise 0.5s cubic-bezier(0.22, 0.68, 0.32, 1) both;
-  }
-  .plate .tile:nth-child(1) {
-    animation-delay: 0.24s;
-  }
-  .plate .tile:nth-child(2) {
-    animation-delay: 0.3s;
-  }
-  .plate .tile:nth-child(3) {
-    animation-delay: 0.36s;
-  }
-  .plate .tile:nth-child(4) {
-    animation-delay: 0.42s;
-  }
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
 @media (max-width: 880px) {
-  /* No room left for a seam to straddle, so the tiles come out from under the
-     portrait and stand beside it as one column. The cut scales down with them,
-     which moves the plate corner, the portrait corner and the notch together. */
-  .band {
-    --cut: 88px;
-  }
-  .mast {
-    max-width: none;
-    min-height: 0;
-  }
-  .plate-lower {
-    display: flex;
-    align-items: stretch;
-    padding-left: 28px;
-    /* Cancels the plate's bottom padding so the portrait still runs into the
-       notch, exactly as it does at full width. */
-    margin: 28px 0 calc(-1 * clamp(34px, 4vw, 52px));
-  }
-  .plate .tiles {
-    position: relative;
-    inset: auto;
-    flex: none;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    width: var(--tile-w);
-  }
   /* Fills whatever the tile column leaves, up to 520. A percentage would open a
      hole between the two columns on a tablet; no cap at all would balloon the
      head as the viewport approaches the breakpoint. */

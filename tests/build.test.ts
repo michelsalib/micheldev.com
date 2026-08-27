@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
+import { portraitArt } from "../src/ascii.ts";
 import { build } from "../src/build.ts";
 import {
   liveServices,
@@ -463,6 +464,107 @@ describe("content is rendered, not invented", () => {
     const summary = typeof cv.summary === "string" ? cv.summary : cv.summary.fr;
     expect(cvFr).toContain(summary.slice(0, 40).trim());
     expect(cvFr).toContain('lang="fr"');
+  });
+});
+
+/**
+ * The homepage and the CV open on the same plate, and the homepage's picture is
+ * generated from the CV's photograph at build time rather than committed beside
+ * it. Both halves of that are worth a test: the composition, because it now
+ * lives in one stylesheet that either page can break, and the derivation,
+ * because a committed .txt is exactly what this was built to avoid.
+ */
+describe("the masthead both pages open on", () => {
+  let homeCss = "";
+  let cvCss = "";
+
+  beforeAll(async () => {
+    const home = await Bun.file("dist/index.html").text();
+    const cv = await Bun.file("dist/cv/index.html").text();
+    homeCss = await Bun.file(
+      `dist${home.match(/\/assets\/home\.[0-9a-z]{8}\.css/)?.[0]}`,
+    ).text();
+    cvCss = await Bun.file(
+      `dist${cv.match(/\/assets\/cv\.[0-9a-z]{8}\.css/)?.[0]}`,
+    ).text();
+  });
+
+  test("both pages render the plate, the figures and the scroll cue", () => {
+    for (const page of [home, cvEn, cvFr]) {
+      expect(page).toContain('<section class="band">');
+      expect(page).toContain('<div class="plate">');
+      expect(page).toContain('<div class="figures">');
+      expect(page).toContain('<p class="notch"><span>scroll</span></p>');
+    }
+  });
+
+  test("the geometry is shared, and only the picture is per-page", () => {
+    // The plate is in 02-base.css, so it reaches both sheets. If it were ever
+    // copied back into a page sheet this still passes — which is why the second
+    // half matters: the two pictures must NOT reach each other's sheet.
+    for (const css of [homeCss, cvCss]) expect(css).toContain(".plate{");
+    expect(homeCss).toMatch(/\.art\{/);
+    expect(homeCss).not.toMatch(/\.portrait\{/);
+    expect(cvCss).toMatch(/\.portrait\{/);
+    expect(cvCss).not.toMatch(/\.art\{/);
+  });
+
+  test("the homepage's picture is the art the generator produced", async () => {
+    const art = await portraitArt();
+    // Character for character, which holds because the ramp contains nothing
+    // `html` would escape — tests/ascii.test.ts asserts that separately.
+    expect(home).toContain(art.wide);
+    expect(home).toContain(art.narrow);
+    expect(home).toContain(
+      '<pre class="art wide" role="img" aria-label="Michel Salib">',
+    );
+    expect(home).toContain(
+      '<pre class="art narrow" role="img" aria-label="Michel Salib">',
+    );
+  });
+
+  test("the homepage masthead costs no image request", () => {
+    // The point of rendering it as characters. The CV still serves the
+    // photograph, and still preloads it — it is the largest paint on that page.
+    const body = home.slice(home.indexOf("<body>"));
+    expect(body).not.toContain("<img");
+    expect(home).not.toContain('as="image"');
+    expect(cvEn).toContain("<img");
+    expect(cvEn).toContain('as="image"');
+  });
+
+  test("the art sizes and swaps off its own box, not the viewport", () => {
+    // Every number in the art's geometry is a share of `100cqw`, so the box has
+    // to be a query container: without container-type, `cqw` falls back to the
+    // viewport and the art is sized off the window instead of off its column.
+    expect(homeCss).toMatch(
+      /\.ascii-portrait\{[^}]*container-type:inline-size/,
+    );
+    // And which of the two renderings shows is a question about the box too —
+    // 420px of it on a tablet wants the detailed one however narrow the window.
+    // (The minifier rewrites `max-width: 380px` to the range form.)
+    expect(homeCss).toMatch(/@container \(width<=380px\)/);
+  });
+
+  test("the visit line reserves its row before it has anything in it", () => {
+    // The figure block is anchored to the plate's floor, so a row appearing
+    // under the tiles does not push anything down — it pushes the tiles up.
+    // Measured at 28px of masthead hop, a second after the page had settled.
+    // So `hidden` has to keep its box on this one element, and the box has to
+    // have the line's height in it while it is empty.
+    expect(homeCss).toMatch(/\.pulse\[hidden\]\{[^}]*display:block/);
+    expect(homeCss).toMatch(/\.pulse\[hidden\]\{[^}]*visibility:hidden/);
+    expect(homeCss).toMatch(/\.pulse\{[^}]*min-height:1lh/);
+    // Still hidden in the markup: a reader with no JS, or a zone with no
+    // Cloudflare token, must not be shown an empty line.
+    expect(home).toContain('<p class="pulse" data-visits hidden></p>');
+  });
+
+  test("a screen reader is told it is a picture of him", () => {
+    // Not thirty-five rows of punctuation.
+    const labels = home.match(/aria-label="Michel Salib"/g) ?? [];
+    expect(labels).toHaveLength(2);
+    expect(home).toContain('role="img"');
   });
 });
 

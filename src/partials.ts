@@ -2,6 +2,7 @@
  * Shared chrome: document head, top bar, footer.
  */
 
+import type { Art } from "./ascii.ts";
 import {
   type Content,
   LIVE_METRICS,
@@ -111,6 +112,26 @@ export function portrait(alt: string): Renderable {
     />
     <span class="tint" aria-hidden="true"></span>
     <span class="sink" aria-hidden="true"></span>
+  </div>`;
+}
+
+/**
+ * The homepage masthead's picture: the same portrait, as characters.
+ *
+ * Two renderings rather than one scaled — see src/ascii.ts for why — and the
+ * stylesheet shows whichever the width can resolve. Both carry the same label,
+ * so a screen reader is told it is a picture of him and never reads out
+ * thirty-five rows of punctuation.
+ *
+ * No clipping and no tint. The photograph needs a duotone and a grade to sit on
+ * a dark plate, because a photograph carries its own light; density carries the
+ * form here, so the identical markup works on paper and on the plate and the
+ * only thing the theme changes is which hues the glyphs are painted in.
+ */
+export function asciiPortrait(art: Art, alt: string): Renderable {
+  return html`<div class="ascii-portrait">
+    <pre class="art wide" role="img" aria-label="${alt}">${art.wide}</pre>
+    <pre class="art narrow" role="img" aria-label="${alt}">${art.narrow}</pre>
   </div>`;
 }
 
