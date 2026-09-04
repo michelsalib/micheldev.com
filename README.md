@@ -48,15 +48,32 @@ geometry is in `02-base.css`, so neither page owns it, and each page sheet adds
 only its own picture.
 
 `/cv` serves the photograph. The homepage renders that *same* photograph as an
-80 × 35 grid of characters, generated at build time by `src/ascii.ts` — so
-replacing `src/images/portrait-1040.webp` changes both pages and there is no
-committed `.txt` to forget. It costs no image request in the masthead, and it
-needs none of the grading and duotone the photograph needs to sit on a dark
-plate: density carries the form, so the same markup works on either theme.
+80 × 35 grid of shade blocks — `░▒▓█` — generated at build time by
+`src/ascii.ts`, so replacing `src/images/portrait-1040.webp` changes both pages
+and there is no committed `.txt` to forget. It costs no image request in the
+masthead, and it needs none of the grading and duotone the photograph needs to
+sit on a dark plate: density carries the form, so the same markup works on
+either theme.
+
+The ramp is measured, not conventional. Every candidate glyph was rendered to a
+canvas and its ink taken as a share of a character cell; the textbook ASCII ramp
+turns out to step *backwards* three times in Ubuntu Sans Mono and to spend half
+its range between `*` and `#`. The blocks are monotonic and reach 100% of a cell
+against ASCII's 36. They cost a font: no Latin subset carries them, so the
+picture brings 1.6 KB of DejaVu Sans Mono, subset to eighteen glyphs — chosen
+because its `░▒▓` measure 17.6 / 48.1 / 78.8 against Noto's 11.7 / 23.2 / 70.2.
+Type on the site is 91 KB across three files, still self-hosted.
 
 That is what put an image decoder in the build. `sharp` is a devDependency and
 the only native one; CI and a local build have it, and the runtime image — which
 copies `dist/` and two modules and never runs `bun install` — does not.
+
+The characters turn into place on load like the flaps on a station board, and a
+few of them keep turning afterwards — a full revolution each, so they come back
+to the character they were already showing and the picture never drifts. That is
+`src/client/art.ts`, 1.5 KB, and it rewrites the text of one `<pre>` rather than
+animating 2 800 spans. The art is already correct in the HTML, so with no JS, or
+under `prefers-reduced-motion`, the portrait is simply there.
 
 ## Commands
 
@@ -148,12 +165,14 @@ content/          the site, as data
 src/
   build.ts        orchestrates the build
   ascii.ts        renders the portrait to characters for the homepage masthead
+  ramp.ts         the character ramp and the reel its flaps turn through
   content.ts      loads and types the YAML
   html.ts         tagged templates; interpolation escapes by default
   partials.ts     head, top bar, footer, figure tiles
   pages/          home, cv, 404, og card
   styles/         00-fonts, 01-tokens, 02-base, 03-home, 04-cv
-  client/         theme toggle, CV spine + summary strip, live figures
+  client/         theme toggle, CV spine + summary strip, live figures, the
+                  masthead's split-flap
   server.ts       the Cloud Run runtime; imports one local module, no packages
   stats.ts        counts npm, Packagist, GitHub, Cloudflare; dependency-free
   format.ts       number and date shapes, shared by the build and the browser
@@ -184,6 +203,12 @@ Each of these was a bug first, and each has a test.
 - **`ART.cols` and `ART.rows` move together.** Cells are twice as tall as they
   are wide (`line-height: 2ch`), so `cols / (rows × 2)` has to equal the crop's
   aspect ratio or the face renders stretched.
+- **`2ch` is the advance of a zero.** The blocks subset carries one for exactly
+  that reason: without a `0` the spec makes `1ch` half an em, which squashes the
+  picture by a third. A subset that drops it has to state the line height in em.
+- **The blocks face cannot fall back.** A fallback would render `░▒▓█` at
+  whatever advance it happens to have and shear the grid, so it is
+  `font-display: block` and preloaded on the homepage — never `swap`.
 - **`bun run check` reports `noDescendingSpecificity` warnings on the
   stylesheets.** Cross-element false positives; the cascade was verified in a
   browser. Exit code is 0.

@@ -177,12 +177,13 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
   const content = await loadContent();
   const { site } = content;
 
-  const [cssHome, cssCv, theme, cv, stats, art] = await Promise.all([
+  const [cssHome, cssCv, theme, cv, stats, artJs, art] = await Promise.all([
     buildCss("home"),
     buildCss("cv"),
     buildScript("src/client/theme.ts", "theme"),
     buildScript("src/client/cv.ts", "cv"),
     buildScript("src/client/stats.ts", "stats"),
+    buildScript("src/client/art.ts", "art"),
     // The homepage masthead's picture, rendered from the photograph the CV
     // serves. Built here rather than committed so the two cannot drift — see
     // src/ascii.ts, which is also where the decoder in the devDependencies
@@ -191,8 +192,8 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
   ]);
 
   // Same scripts, different stylesheet: each page links only its own.
-  const homeAssets: Assets = { css: cssHome, theme, cv, stats };
-  const cvAssets: Assets = { css: cssCv, theme, cv, stats };
+  const homeAssets: Assets = { css: cssHome, theme, cv, stats, art: artJs };
+  const cvAssets: Assets = { css: cssCv, theme, cv, stats, art: artJs };
 
   // Fonts are already subset and hashed by content only in the sense that they
   // never change; keep the readable names and rely on immutable caching.
@@ -237,6 +238,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     cssCv,
     theme,
     cv,
+    artJs,
   ];
 
   // The print copies: identical markup plus the contact line, written outside

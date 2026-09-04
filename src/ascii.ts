@@ -25,6 +25,7 @@
  */
 
 import sharp from "sharp";
+import { RAMP } from "./ramp.ts";
 
 /**
  * The photograph the CV masthead serves, at its largest width. One source for
@@ -58,9 +59,6 @@ const CROP = { x: 0.192, y: 0.058, w: 0.779, h: 0.673 };
  * through that edge and eats half his head.
  */
 const RES = 480;
-
-/** Ten steps, lightest first. Anything longer reads as noise at this size. */
-const RAMP = " .:-=+*#%@";
 
 /** Lifts the midtones a little; the beard is otherwise a solid block of @. */
 const GAMMA = 1.05;

@@ -10,13 +10,16 @@
    instead of two designs — and the picture is what the hero was missing.
 
    Characters rather than the photograph, on a page that already links to the
-   page with the photograph on it. Three things come free with that. The
-   photograph needs a grade and a duotone to sit on a dark plate, because it
-   carries its own light, and the art needs neither: density carries the form, so
-   the same markup works on paper and on the plate. It is two kilobytes of text
-   and no image request in the masthead. And a portrait made out of a monospaced
-   ramp is the one thing on this site that could not be a photograph of anyone
-   else.                                                                       */
+   page with the photograph on it. Two things come free with that. The photograph
+   needs a grade and a duotone to sit on a dark plate, because it carries its own
+   light, and the art needs neither: density carries the form, so the same markup
+   works on paper and on the plate. And there is no image request in the masthead
+   — the picture is text, and it turns its characters over into place on load.
+
+   What it is not is free of type. The ramp is ░▒▓█, which no Latin-1 subset
+   carries, so the picture brings 1.6 KB of its own face with it, and 4.3 KB of
+   markup rather than 2 KB, because a block is three bytes of UTF-8 where a full
+   stop is one. See 00-fonts.css for why those four and why that face.         */
 .plate {
   /* Wider than the box the photograph gets. Legibility, not taste: the cell here
      works out at 100cqw / 80 / 0.56, or about 11px on a desktop plate, and below
@@ -57,17 +60,19 @@
    not painted at all. */
 .art {
   --cols: 80;
-  --adv: 0.56; /* Ubuntu Sans Mono advance width, in em */
+  --adv: 0.60205; /* DejaVu Sans Mono advance, 1233/2048 of an em */
   --bleed: 1.06;
 
   margin: 0;
   width: calc(100cqw * var(--bleed));
-  font-family: var(--f-mono);
+  /* Not the site's mono — see 00-fonts.css. The picture is the only thing that
+     reads --adv, so a face with an advance of its own costs the geometry
+     nothing, which is the whole reason the blocks are affordable at all. */
+  font-family: var(--f-blocks);
   font-size: calc(100cqw * var(--bleed) / (var(--cols) * var(--adv)));
   line-height: 2ch;
-  /* 500 rather than 400: at an 11px cell the lighter weight leaves the low end
-     of the ramp too thin to read against paper. */
-  font-weight: 500;
+  /* One weight in the subset, and a solid block has no thin end to thicken. */
+  font-weight: 400;
   white-space: pre;
   -webkit-user-select: none;
   user-select: none;

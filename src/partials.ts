@@ -2,7 +2,7 @@
  * Shared chrome: document head, top bar, footer.
  */
 
-import type { Art } from "./ascii.ts";
+import { ART, type Art } from "./ascii.ts";
 import {
   type Content,
   LIVE_METRICS,
@@ -16,7 +16,13 @@ import {
 } from "./content.ts";
 import { html, type Renderable, raw } from "./html.ts";
 
-export type Assets = { css: string; theme: string; cv: string; stats: string };
+export type Assets = {
+  css: string;
+  theme: string;
+  cv: string;
+  stats: string;
+  art: string;
+};
 
 /**
  * One figure quoted mid-sentence.
@@ -123,6 +129,10 @@ export function portrait(alt: string): Renderable {
  * so a screen reader is told it is a picture of him and never reads out
  * thirty-five rows of punctuation.
  *
+ * `data-cols` is for src/client/art.ts, which flips the characters into place on
+ * load and needs to know the grid width: the rendered lines have their trailing
+ * spaces stripped, so the width cannot be read off the longest one.
+ *
  * No clipping and no tint. The photograph needs a duotone and a grade to sit on
  * a dark plate, because a photograph carries its own light; density carries the
  * form here, so the identical markup works on paper and on the plate and the
@@ -130,8 +140,16 @@ export function portrait(alt: string): Renderable {
  */
 export function asciiPortrait(art: Art, alt: string): Renderable {
   return html`<div class="ascii-portrait">
-    <pre class="art wide" role="img" aria-label="${alt}">${art.wide}</pre>
-    <pre class="art narrow" role="img" aria-label="${alt}">${art.narrow}</pre>
+    <pre
+      class="art wide"
+      role="img"
+      aria-label="${alt}"
+      data-cols="${ART.wide.cols}">${art.wide}</pre>
+    <pre
+      class="art narrow"
+      role="img"
+      aria-label="${alt}"
+      data-cols="${ART.narrow.cols}">${art.narrow}</pre>
   </div>`;
 }
 
@@ -190,6 +208,14 @@ export type HeadOptions = {
    * has arrived and laid the plate out.
    */
   preloadPortrait?: boolean;
+  /**
+   * Preloads the face the homepage masthead's picture is drawn in. That page
+   * only, and for the mirror of the reason above: the face is
+   * `font-display: block`, because a fallback would shear the picture's grid
+   * rather than degrade it, so the picture does not paint at all until the file
+   * arrives. 1.6 KB, discovered here instead of two round trips later.
+   */
+  preloadBlocks?: boolean;
 };
 
 export function documentHead(o: HeadOptions): Renderable {
@@ -261,6 +287,17 @@ export function documentHead(o: HeadOptions): Renderable {
       type="font/woff2"
       crossorigin="anonymous"
     />
+    ${
+      o.preloadBlocks
+        ? html`<link
+            rel="preload"
+            href="/assets/fonts/dejavu-sans-mono-blocks.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin="anonymous"
+          />`
+        : ""
+    }
     ${
       o.preloadPortrait
         ? html`<link

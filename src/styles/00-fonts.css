@@ -1,6 +1,8 @@
 /* Ubuntu Sans and Ubuntu Sans Mono, variable, subset to latin and self-hosted.
-   The Ubuntu Font Licence permits embedding. Two files, 89 KB together, so there
-   is no CDN and no third-party request anywhere on this site.
+   The Ubuntu Font Licence permits embedding. Plus 1.6 KB of DejaVu Sans Mono for
+   the homepage masthead's picture, which is drawn in shade blocks that the
+   Ubuntu subset does not carry — see below. Three files, 91 KB together, so
+   there is no CDN and no third-party request anywhere on this site.
 
    Kept out of the minified bundle on purpose: Bun's CSS bundler resolves url()
    against the entrypoint's directory, and these are root-relative paths that
@@ -22,4 +24,30 @@
   font-weight: 100 700;
   font-style: normal;
   font-display: swap;
+}
+
+/* The masthead's picture, and nothing else on the site, is drawn in ░▒▓█ — and
+   the Ubuntu Sans Mono subset above stops at Latin-1, so those four characters
+   would fall back to whatever the reader happens to have, at whatever advance it
+   happens to use, and shear the grid. This is DejaVu Sans Mono subset to the
+   eighteen glyphs the picture needs: the four blocks, the twelve letters and
+   digits the flaps turn through on their way to them, and a zero, which is there
+   only so `2ch` still resolves to the advance — see .art in 03-home.css.
+
+   DejaVu because its shades are the evenly spaced ones. Measured as a share of a
+   character cell, its ░▒▓ come out at 17.6, 48.1 and 78.8 percent against an
+   ideal 25 / 50 / 75; the same four glyphs in Noto Sans Mono measure 11.7, 23.2
+   and 70.2, which puts a 47-point step where an even one is 25.
+
+   1.6 KB, static rather than variable, and it carries its own licence: the
+   Bitstream Vera notice it derives from is in the file's name table, and permits
+   both redistribution and embedding. */
+@font-face {
+  font-family: "DVMono";
+  src: url("/assets/fonts/dejavu-sans-mono-blocks.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  /* Not `swap`. A fallback here does not degrade gracefully — it shears the grid
+     — and the file is 1.6 KB and preloaded, so blocking is over in a frame. */
+  font-display: block;
 }

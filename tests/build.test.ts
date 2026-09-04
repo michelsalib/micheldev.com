@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from "bun:test";
-import { portraitArt } from "../src/ascii.ts";
+import { ART, portraitArt } from "../src/ascii.ts";
 import { build } from "../src/build.ts";
 import {
   liveServices,
@@ -515,12 +515,24 @@ describe("the masthead both pages open on", () => {
     // `html` would escape — tests/ascii.test.ts asserts that separately.
     expect(home).toContain(art.wide);
     expect(home).toContain(art.narrow);
-    expect(home).toContain(
-      '<pre class="art wide" role="img" aria-label="Michel Salib">',
-    );
-    expect(home).toContain(
-      '<pre class="art narrow" role="img" aria-label="Michel Salib">',
-    );
+    for (const [kind, at] of [
+      ["wide", ART.wide],
+      ["narrow", ART.narrow],
+    ] as const) {
+      expect(home).toContain(`class="art ${kind}"`);
+      // The grid width, for src/client/art.ts: the rendered lines have their
+      // trailing spaces stripped, so it cannot be read off the longest one.
+      expect(home).toContain(`data-cols="${at.cols}">`);
+    }
+    expect(home).toContain('role="img"');
+  });
+
+  test("only the homepage ships the script that turns the flaps", () => {
+    // /cv has a photograph in that corner and nothing to flip, so the bundle has
+    // no business on it.
+    expect(home).toMatch(/<script src="\/assets\/art\.[0-9a-z]{8}\.js" defer>/);
+    expect(cvEn).not.toMatch(/\/assets\/art\.[0-9a-z]{8}\.js/);
+    expect(cvFr).not.toMatch(/\/assets\/art\.[0-9a-z]{8}\.js/);
   });
 
   test("the homepage masthead costs no image request", () => {
@@ -531,6 +543,38 @@ describe("the masthead both pages open on", () => {
     expect(home).not.toContain('as="image"');
     expect(cvEn).toContain("<img");
     expect(cvEn).toContain('as="image"');
+  });
+
+  test("the blocks the picture is drawn in bring their own face", () => {
+    // ░▒▓█ are outside every Latin subset, so the picture ships 1.6 KB of DejaVu
+    // Sans Mono with it. `font-display: block` means a fallback never paints —
+    // it would shear the grid rather than degrade — so the homepage has to
+    // preload it, and /cv, which has a photograph in that corner, must not.
+    expect(homeCss).toContain("DVMono");
+    expect(homeCss).toMatch(/\.art\{[^}]*font-family:var\(--f-blocks\)/);
+    // 00-fonts.css is concatenated verbatim rather than minified — its url()s
+    // only resolve once dist/ exists — so it keeps its whitespace.
+    expect(homeCss).toMatch(/font-display:\s*block/);
+
+    const flat = (page: string) => page.replace(/\s+/g, " ");
+    expect(flat(home)).toContain(
+      '<link rel="preload" href="/assets/fonts/dejavu-sans-mono-blocks.woff2" as="font"',
+    );
+    expect(cvEn).not.toContain("dejavu-sans-mono-blocks");
+    expect(cvFr).not.toContain("dejavu-sans-mono-blocks");
+  });
+
+  test("that face is served from this origin, like every other byte", async () => {
+    expect(
+      await Bun.file(
+        "dist/assets/fonts/dejavu-sans-mono-blocks.woff2",
+      ).exists(),
+    ).toBe(true);
+    // Small enough that blocking on it is a frame, not a wait.
+    const size = Bun.file(
+      "dist/assets/fonts/dejavu-sans-mono-blocks.woff2",
+    ).size;
+    expect(size).toBeLessThan(4096);
   });
 
   test("the art sizes and swaps off its own box, not the viewport", () => {

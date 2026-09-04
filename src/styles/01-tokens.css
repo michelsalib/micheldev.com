@@ -50,6 +50,10 @@
   --f-display: "USans", "Ubuntu Sans", "Ubuntu", system-ui, sans-serif;
   --f-body: "USans", "Ubuntu Sans", "Ubuntu", system-ui, sans-serif;
   --f-mono: "USansMono", "Ubuntu Sans Mono", ui-monospace, monospace;
+  /* The masthead picture's four shade blocks and the flaps that turn to them.
+     One page, one element — see .art in 03-home.css — but this is where the
+     faces are declared. */
+  --f-blocks: "DVMono", ui-monospace, monospace;
 
   color-scheme: light;
 }

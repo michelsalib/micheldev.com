@@ -326,7 +326,8 @@ export function homePage(content: Content, assets: Assets, art: Art): string {
       description: resolveFigures(site.meta.description, content),
       path: "/",
       locale: LOCALE,
-      scripts: [assets.theme, assets.stats],
+      preloadBlocks: true,
+      scripts: [assets.theme, assets.stats, assets.art],
     })}
     ${topBarHome(liveServices(projects))}
     <main id="main">

@@ -568,8 +568,10 @@ h3,
 }
 
 /* The copy lands first and the figures follow it, in reading order. The picture
-   does not animate: it is the largest thing on the plate and moving it reads as
-   the page still loading. */
+   is not in here at all, and does not move: it is the largest thing on the plate
+   and sliding it reads as the page still loading. What it does instead is turn
+   its characters over into place, which happens in src/client/art.ts and needs
+   no CSS — the glyphs change, the box does not. */
 @media (prefers-reduced-motion: no-preference) {
   .mast .in {
     animation: rise 0.6s cubic-bezier(0.22, 0.68, 0.32, 1) both;
