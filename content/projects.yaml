@@ -69,6 +69,15 @@ active:
       - host: bitwarden-backup
         what: Scheduled backup
 
+  - name: envhound
+    url: https://github.com/michelsalib/envhound
+    repo: https://github.com/michelsalib/envhound
+    live: false
+    tags: [typescript, cli]
+    blurb: >-
+      Finds which startup file sets each environment variable, audits your
+      PATH, and changes them without leaving you to guess which dotfile wins.
+
   - name: media-cast
     url: https://github.com/michelsalib/media-cast
     repo: https://github.com/michelsalib/media-cast
