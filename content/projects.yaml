@@ -12,6 +12,8 @@ stats:
   # Which projects get counted is not listed here: it is every entry in `active`
   # that carries a `repo`, so a project named on the page is measured by
   # construction and there is no second list to keep in step with this one.
+  # The same goes for npm: a card's own `npm` package is added to this list, so
+  # it names only packages with no card of their own.
   npm: [chai-shallow-deep-equal]
   # First full year on npm. The history is walked from here, a year per request.
   npm_since: 2015
@@ -69,9 +71,21 @@ active:
       - host: bitwarden-backup
         what: Scheduled backup
 
+  - name: netbeagle
+    url: https://github.com/michelsalib/netbeagle
+    repo: https://github.com/michelsalib/netbeagle
+    npm: netbeagle
+    live: false
+    tags: [typescript, cli]
+    blurb: >-
+      Shows which process or container listens on each port, who can reach it,
+      and how everything on your machine connects — then flags what is exposed
+      that shouldn't be.
+
   - name: envhound
     url: https://github.com/michelsalib/envhound
     repo: https://github.com/michelsalib/envhound
+    npm: envhound
     live: false
     tags: [typescript, cli]
     blurb: >-

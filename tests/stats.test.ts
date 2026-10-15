@@ -162,6 +162,21 @@ describe("the runtime is told what to count", () => {
     expect(counted).toEqual(listed);
   });
 
+  test("a project's npm package is counted without being listed twice", async () => {
+    const content = await loadContent();
+    const sources = statsSources(content);
+    const own = content.projects.active.flatMap((project) =>
+      project.npm ? [project.npm] : [],
+    );
+
+    expect(own.length).toBeGreaterThan(0);
+    for (const pkg of own) {
+      expect(sources.npm).toContain(pkg);
+      expect(content.projects.stats.npm).not.toContain(pkg);
+    }
+    expect(new Set(sources.npm).size).toBe(sources.npm.length);
+  });
+
   test("hostnames are qualified with the apex, not left as bare labels", async () => {
     const content = await loadContent();
     const lead = statsSources(content).projects[0];

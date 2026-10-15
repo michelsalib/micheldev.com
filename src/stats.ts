@@ -27,6 +27,8 @@ export type ProjectSource = {
   repo: string;
   /** Hostnames it serves, fully qualified. Empty for anything not hosted here. */
   hosts: string[];
+  /** Its npm package, also present in `StatsSources.npm`. */
+  npm?: string;
 };
 
 /** What to count. Mirrors the `stats` block of content/projects.yaml. */
@@ -53,7 +55,7 @@ export type ProjectStat = {
   /** Latest published release, and when. */
   tag?: string;
   at?: string;
-  /** Release asset downloads, all versions. */
+  /** Release asset downloads, all versions, plus its npm package's if it has one. */
   downloads?: number;
   /** Requests served across this project's hostnames in the last 7 days. */
   requests?: number;
@@ -157,29 +159,53 @@ function githubAuth(): Record<string, string> {
 
 // ── Sources ──────────────────────────────────────────────────────────────────
 
+type NpmRange = { downloads: { downloads: number }[] };
+
 /**
- * Lifetime downloads for one npm package.
+ * Lifetime downloads for each npm package, keyed by name.
  *
  * npm's range endpoint refuses a span longer than 18 months, so the history is
  * walked a calendar year at a time and summed. The years run concurrently. A
  * year still in progress simply returns fewer days, so the current one needs no
  * special case.
+ *
+ * Each year is one bulk request for all the packages: a request per package per
+ * year was 36 at once for three packages, and npm answered with 429s. A year
+ * before a package existed comes back as zeros, so one `npm_since` serves them
+ * all. An unknown package comes back as null and throws — a typo must void the
+ * sum, not quietly count as zero. With a single package npm drops the keyed
+ * wrapper, hence the two shapes.
  */
-async function npmDownloads(pkg: string, since: number): Promise<number> {
+async function npmDownloads(
+  pkgs: string[],
+  since: number,
+): Promise<Record<string, number>> {
+  if (pkgs.length === 0) return {};
   const years: number[] = [];
   for (let year = since; year <= new Date().getUTCFullYear(); year++) {
     years.push(year);
   }
 
-  const totals = await Promise.all(
+  const sum = (range: NpmRange | null | undefined, pkg: string): number => {
+    if (!range) throw new Error(`npm has no downloads for ${pkg}`);
+    return range.downloads.reduce((total, day) => total + day.downloads, 0);
+  };
+  const perYear = await Promise.all(
     years.map(async (year) => {
-      const data = await getJson<{ downloads: { downloads: number }[] }>(
-        `https://api.npmjs.org/downloads/range/${year}-01-01:${year}-12-31/${pkg}`,
-      );
-      return data.downloads.reduce((sum, day) => sum + day.downloads, 0);
+      const url = `https://api.npmjs.org/downloads/range/${year}-01-01:${year}-12-31/${pkgs.join(",")}`;
+      if (pkgs.length === 1) {
+        return [sum(await getJson<NpmRange>(url), pkgs[0] as string)];
+      }
+      const data = await getJson<Record<string, NpmRange | null>>(url);
+      return pkgs.map((pkg) => sum(data[pkg], pkg));
     }),
   );
-  return totals.reduce((sum, n) => sum + n, 0);
+  return Object.fromEntries(
+    pkgs.map((pkg, i) => [
+      pkg,
+      perYear.reduce((total, year) => total + (year[i] as number), 0),
+    ]),
+  );
 }
 
 async function packagistDownloads(name: string): Promise<number> {
@@ -428,9 +454,7 @@ export async function collectStats(
   previous?: Stats,
 ): Promise<Stats> {
   const [npm, packagist, releases, traffic, counts, seen] = await Promise.all([
-    Promise.allSettled(
-      sources.npm.map((pkg) => npmDownloads(pkg, sources.npm_since)),
-    ),
+    settle(npmDownloads(sources.npm, sources.npm_since)),
     Promise.allSettled(sources.packagist.map(packagistDownloads)),
     Promise.all(
       sources.projects.map((project) =>
@@ -446,7 +470,9 @@ export async function collectStats(
     settle(cloudflareVisits()),
   ]);
 
-  const fromNpm = sumAll(npm);
+  const fromNpm = npm
+    ? Object.values(npm).reduce((sum, n) => sum + n, 0)
+    : undefined;
   const fromPackagist = sumAll(packagist);
   const fromReleases = releases.every((release) => release !== undefined)
     ? releases.reduce((sum, release) => sum + release.downloads, 0)
@@ -473,10 +499,15 @@ export async function collectStats(
   sources.projects.forEach((project, i) => {
     const was = previous?.projects?.[project.repo];
     const release = releases[i];
+    // Both halves or last week's figure: half a sum would read as a drop.
+    const fromPackage = project.npm ? npm?.[project.npm] : 0;
     const stat: ProjectStat = {
       tag: release?.ship?.tag ?? was?.tag,
       at: release?.ship?.at ?? was?.at,
-      downloads: release?.downloads ?? was?.downloads,
+      downloads:
+        release && fromPackage !== undefined
+          ? release.downloads + fromPackage
+          : was?.downloads,
       requests: traffic[i] ?? was?.requests,
     };
     // A project with nothing to say is left out, so the client can tell the

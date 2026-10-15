@@ -94,6 +94,11 @@
             "description": "Where the row links. A live service should point at the service, not the repo."
           },
           "repo": { "type": "string", "pattern": "^https://" },
+          "npm": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]*$",
+            "description": "Its npm package. Counted in the downloads tile and on this project's line, so it is not repeated under stats.npm. Unscoped: npm's bulk endpoint refuses scoped names."
+          },
           "live": {
             "type": "boolean",
             "description": "Deployed and reachable. Grants the green live dot, which must not be claimed otherwise."
