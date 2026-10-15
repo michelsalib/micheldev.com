@@ -684,6 +684,27 @@ describe("CSP compatibility", () => {
   });
 });
 
+describe("client scripts keep to themselves", () => {
+  // Loaded as classic `<script defer>`, so a bundle's top-level `var` is a
+  // global. When they were ESM, art.js's minified `var c` overwrote stats.js's
+  // tile list before /stats.json answered, and no live figure ever reached the
+  // page — silently, because that fetch swallows every error on purpose.
+  test("every script a page loads is wrapped in its own scope", async () => {
+    const srcs = new Set(
+      [home, cvEn].flatMap((page) =>
+        [...page.matchAll(/<script src="([^"]+)"/g)].map((m) => m[1]),
+      ),
+    );
+    expect(srcs.size).toBeGreaterThan(1);
+
+    for (const src of srcs) {
+      const code = (await Bun.file(`dist${src}`).text()).trim();
+      expect(code).toStartWith("(()=>{");
+      expect(code).toEndWith("})();");
+    }
+  });
+});
+
 describe("top bar has no blanket selectors", () => {
   // `.bar nav a` at (0,2,1) captured every anchor in the nav and silently
   // outranked the components placed there: the PDF button lost its padding and

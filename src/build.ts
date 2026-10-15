@@ -106,7 +106,12 @@ async function buildScript(entry: string, label: string): Promise<string> {
     entrypoints: [entry],
     target: "browser",
     minify: true,
-    format: "esm",
+    // The pages load these as classic `<script defer>`, where every top-level
+    // `var` of every bundle lands in one shared global scope. As ESM, the
+    // minifier's `var c` in art.js overwrote stats.js's own `c` before
+    // /stats.json answered, and the swallowed TypeError left every live figure
+    // at its build-time value. An IIFE gives each bundle a scope of its own.
+    format: "iife",
   });
 
   if (!result.success) {
