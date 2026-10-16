@@ -6,6 +6,7 @@ import { build } from "../src/build.ts";
 import { loadContent, repoSlug, statsSources } from "../src/content.ts";
 import { formatAgo, formatCount } from "../src/format.ts";
 import { STATS_CACHE_CONTROL } from "../src/server.ts";
+import { countsAsInstall } from "../src/stats.ts";
 
 // Nothing in this file talks to npm, Packagist, GitHub or Cloudflare. The live
 // figures are the point of the feature but they are also somebody else's uptime
@@ -137,6 +138,39 @@ describe("credentials arrive packed or discrete", () => {
     const resolved = await resolve({});
     expect(resolved["github_token"]).toBeUndefined();
     expect(resolved["cloudflare_api_token"]).toBeUndefined();
+  });
+});
+
+describe("a release download counts only when it is an install", () => {
+  // Real asset names, from every repository the page counts.
+  test.each([
+    "envhound.js",
+    "envhound-linux-x64",
+    "envhound-windows-x64.exe",
+    "netbeagle-darwin-arm64",
+    "media-cast-2.0.0-setup.exe",
+    "media-cast-2.0.0.dmg",
+    "Media-Cast-2.0.0-universal-mac.zip",
+    "AudioTray-0.11.0-Setup.exe",
+    "audio-tray-x86_64-pc-windows-msvc.zip",
+    "weekly-update-checker-0.3.0-setup.exe",
+  ])("%s is an install", (name) => {
+    expect(countsAsInstall(name)).toBe(true);
+  });
+
+  test.each([
+    "SHA256SUMS",
+    "checksums.txt",
+    "envhound.intoto.jsonl",
+    "install.sh",
+    "install.ps1",
+    "latest.yml",
+    "latest-mac.yml",
+    "builder-debug.yml",
+    "media-cast-2.0.0-setup.exe.blockmap",
+    "Media.Cast-2.0.0-universal-mac.zip.blockmap",
+  ])("%s is not", (name) => {
+    expect(countsAsInstall(name)).toBe(false);
   });
 });
 

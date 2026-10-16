@@ -55,7 +55,7 @@ export type ProjectStat = {
   /** Latest published release, and when. */
   tag?: string;
   at?: string;
-  /** Release asset downloads, all versions, plus its npm package's if it has one. */
+  /** Installs from release assets, all versions, plus its npm package's downloads if it has one. */
   downloads?: number;
   /** Requests served across this project's hostnames in the last 7 days. */
   requests?: number;
@@ -67,7 +67,7 @@ export type ProjectStat = {
  * already rendered. A wrong number is worse than an unchanged one.
  */
 export type Stats = {
-  /** Lifetime installs across npm, Packagist and GitHub release assets. */
+  /** Lifetime installs across npm, Packagist and GitHub release assets (see `countsAsInstall`). */
   downloads?: number;
   stars?: number;
   repos?: number;
@@ -218,10 +218,29 @@ async function packagistDownloads(name: string): Promise<number> {
 type Release = {
   tag_name: string;
   published_at: string | null;
-  assets: { download_count: number }[];
+  assets: { name: string; download_count: number }[];
 };
 
-/** Asset downloads for one repository, and its most recent published release. */
+/**
+ * Release files fetched alongside an install, or instead of one, rather than
+ * being one.
+ *
+ * Every asset's count is a download, but not every download is an install. One
+ * `install.sh` run fetches the script, the program and SHA256SUMS: three counts.
+ * Worse, electron-updater fetches latest.yml on every update check, and its
+ * .blockmap files on every differential update — media-cast's latest.yml alone
+ * had 101 of its 207. So checksums, signatures, attestations, install scripts
+ * and updater metadata are left out, and what is counted is the programs and
+ * installers themselves.
+ */
+const NOT_AN_INSTALL =
+  /^(sha256sums|checksums?)(\.txt)?$|\.(sha256|sha512|sig|asc|pem|intoto\.jsonl|sbom\.json|blockmap|ya?ml)$|^install\.(sh|ps1)$/i;
+
+export function countsAsInstall(asset: string): boolean {
+  return !NOT_AN_INSTALL.test(asset);
+}
+
+/** Install downloads for one repository, and its most recent published release. */
 async function githubReleases(
   user: string,
   repo: string,
@@ -234,7 +253,9 @@ async function githubReleases(
   let downloads = 0;
   let ship: LastShip | undefined;
   for (const release of releases) {
-    for (const asset of release.assets) downloads += asset.download_count;
+    for (const asset of release.assets) {
+      if (countsAsInstall(asset.name)) downloads += asset.download_count;
+    }
     // Drafts have no publication date, and the API does not promise an order
     // that puts the newest first — media-cast returns v1.3.6 behind a later id.
     const at = release.published_at;
