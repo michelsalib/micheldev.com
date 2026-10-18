@@ -71,10 +71,10 @@ active:
       - host: bitwarden-backup
         what: Scheduled backup
 
-  - name: netbeagle
-    url: https://github.com/michelsalib/netbeagle
-    repo: https://github.com/michelsalib/netbeagle
-    npm: netbeagle
+  - name: nethound
+    url: https://github.com/michelsalib/nethound
+    repo: https://github.com/michelsalib/nethound
+    npm: ["@michelsalib/nethound", netbeagle]
     live: false
     tags: [typescript, cli]
     blurb: >-
@@ -85,7 +85,7 @@ active:
   - name: envhound
     url: https://github.com/michelsalib/envhound
     repo: https://github.com/michelsalib/envhound
-    npm: envhound
+    npm: ["@michelsalib/envhound", envhound]
     live: false
     tags: [typescript, cli]
     blurb: >-
