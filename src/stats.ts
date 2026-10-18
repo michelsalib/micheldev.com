@@ -27,8 +27,8 @@ export type ProjectSource = {
   repo: string;
   /** Hostnames it serves, fully qualified. Empty for anything not hosted here. */
   hosts: string[];
-  /** Its npm package, also present in `StatsSources.npm`. */
-  npm?: string;
+  /** Its npm packages, current and former names, also present in `StatsSources.npm`. */
+  npm?: string[];
 };
 
 /** What to count. Mirrors the `stats` block of content/projects.yaml. */
@@ -55,7 +55,7 @@ export type ProjectStat = {
   /** Latest published release, and when. */
   tag?: string;
   at?: string;
-  /** Installs from release assets, all versions, plus its npm package's downloads if it has one. */
+  /** Installs from release assets, all versions, plus its npm packages' downloads if it has any. */
   downloads?: number;
   /** Requests served across this project's hostnames in the last 7 days. */
   requests?: number;
@@ -169,18 +169,23 @@ type NpmRange = { downloads: { downloads: number }[] };
  * year still in progress simply returns fewer days, so the current one needs no
  * special case.
  *
- * Each year is one bulk request for all the packages: a request per package per
- * year was 36 at once for three packages, and npm answered with 429s. A year
- * before a package existed comes back as zeros, so one `npm_since` serves them
- * all. An unknown package comes back as null and throws — a typo must void the
- * sum, not quietly count as zero. With a single package npm drops the keyed
- * wrapper, hence the two shapes.
+ * Each year is one bulk request for all the unscoped packages: a request per
+ * package per year was 36 at once for three packages, and npm answered with
+ * 429s. A year before a package existed comes back as zeros, so one `npm_since`
+ * serves them all. An unknown package comes back as null and throws — a typo
+ * must void the sum, not quietly count as zero. With a single package npm drops
+ * the keyed wrapper, hence the two shapes.
+ *
+ * The bulk endpoint refuses scoped names (`@michelsalib/nethound`), so each of
+ * those is walked on its own, one package after another once the bulk walk is
+ * done, which keeps the requests in flight at one per year, as before. A
+ * package npm has no record of answers 404 and throws the same way; a package
+ * published today is in that state until npm's counts catch up, a day or so.
  */
 async function npmDownloads(
   pkgs: string[],
   since: number,
 ): Promise<Record<string, number>> {
-  if (pkgs.length === 0) return {};
   const years: number[] = [];
   for (let year = since; year <= new Date().getUTCFullYear(); year++) {
     years.push(year);
@@ -190,22 +195,31 @@ async function npmDownloads(
     if (!range) throw new Error(`npm has no downloads for ${pkg}`);
     return range.downloads.reduce((total, day) => total + day.downloads, 0);
   };
-  const perYear = await Promise.all(
-    years.map(async (year) => {
-      const url = `https://api.npmjs.org/downloads/range/${year}-01-01:${year}-12-31/${pkgs.join(",")}`;
-      if (pkgs.length === 1) {
-        return [sum(await getJson<NpmRange>(url), pkgs[0] as string)];
-      }
-      const data = await getJson<Record<string, NpmRange | null>>(url);
-      return pkgs.map((pkg) => sum(data[pkg], pkg));
-    }),
-  );
-  return Object.fromEntries(
-    pkgs.map((pkg, i) => [
-      pkg,
-      perYear.reduce((total, year) => total + (year[i] as number), 0),
-    ]),
-  );
+  // One pass over the years for these packages, summed per package.
+  const walk = async (batch: string[]): Promise<Record<string, number>> => {
+    const perYear = await Promise.all(
+      years.map(async (year) => {
+        const url = `https://api.npmjs.org/downloads/range/${year}-01-01:${year}-12-31/${batch.join(",")}`;
+        if (batch.length === 1) {
+          return [sum(await getJson<NpmRange>(url), batch[0] as string)];
+        }
+        const data = await getJson<Record<string, NpmRange | null>>(url);
+        return batch.map((pkg) => sum(data[pkg], pkg));
+      }),
+    );
+    return Object.fromEntries(
+      batch.map((pkg, i) => [
+        pkg,
+        perYear.reduce((total, year) => total + (year[i] as number), 0),
+      ]),
+    );
+  };
+
+  const unscoped = pkgs.filter((pkg) => !pkg.startsWith("@"));
+  const scoped = pkgs.filter((pkg) => pkg.startsWith("@"));
+  const totals = unscoped.length ? await walk(unscoped) : {};
+  for (const pkg of scoped) Object.assign(totals, await walk([pkg]));
+  return totals;
 }
 
 async function packagistDownloads(name: string): Promise<number> {
@@ -521,7 +535,9 @@ export async function collectStats(
     const was = previous?.projects?.[project.repo];
     const release = releases[i];
     // Both halves or last week's figure: half a sum would read as a drop.
-    const fromPackage = project.npm ? npm?.[project.npm] : 0;
+    const fromPackage = project.npm
+      ? npm && project.npm.reduce((sum, pkg) => sum + (npm[pkg] ?? 0), 0)
+      : 0;
     const stat: ProjectStat = {
       tag: release?.ship?.tag ?? was?.tag,
       at: release?.ship?.at ?? was?.at,

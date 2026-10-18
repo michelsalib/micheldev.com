@@ -196,12 +196,10 @@ describe("the runtime is told what to count", () => {
     expect(counted).toEqual(listed);
   });
 
-  test("a project's npm package is counted without being listed twice", async () => {
+  test("a project's npm packages are counted without being listed twice", async () => {
     const content = await loadContent();
     const sources = statsSources(content);
-    const own = content.projects.active.flatMap((project) =>
-      project.npm ? [project.npm] : [],
-    );
+    const own = content.projects.active.flatMap((project) => project.npm ?? []);
 
     expect(own.length).toBeGreaterThan(0);
     for (const pkg of own) {
@@ -209,6 +207,21 @@ describe("the runtime is told what to count", () => {
       expect(content.projects.stats.npm).not.toContain(pkg);
     }
     expect(new Set(sources.npm).size).toBe(sources.npm.length);
+  });
+
+  test("a renamed package keeps its former name, so its history still counts", async () => {
+    const content = await loadContent();
+    const renamed = content.projects.active.filter(
+      (project) => (project.npm?.length ?? 0) > 1,
+    );
+
+    expect(renamed.length).toBeGreaterThan(0);
+    for (const project of renamed) {
+      const sources = statsSources(content).projects.find(
+        (source) => source.repo === repoSlug(project),
+      );
+      expect(sources?.npm).toEqual(project.npm);
+    }
   });
 
   test("hostnames are qualified with the apex, not left as bare labels", async () => {

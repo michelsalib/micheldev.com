@@ -95,9 +95,14 @@
           },
           "repo": { "type": "string", "pattern": "^https://" },
           "npm": {
-            "type": "string",
-            "pattern": "^[a-z0-9][a-z0-9._-]*$",
-            "description": "Its npm package. Counted in the downloads tile and on this project's line, so it is not repeated under stats.npm. Unscoped: npm's bulk endpoint refuses scoped names."
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^(@[a-z0-9][a-z0-9._-]*/)?[a-z0-9][a-z0-9._-]*$"
+            },
+            "description": "Its npm packages: the current name first, then any it was published under before, so a rename keeps its history. All are summed into the downloads tile and this project's line, so none is repeated under stats.npm."
           },
           "live": {
             "type": "boolean",

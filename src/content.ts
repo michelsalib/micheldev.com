@@ -158,8 +158,11 @@ export type ActiveProject = {
   name: string;
   url: string;
   repo?: string;
-  /** Its npm package, whose downloads join this project's line and the total. */
-  npm?: string;
+  /**
+   * Its npm packages, current name first, then former ones. All of their
+   * downloads join this project's line and the total.
+   */
+  npm?: string[];
   live?: boolean;
   tags: string[];
   blurb: string;
@@ -286,9 +289,7 @@ export function statsSources(content: Content): StatsSources {
 
   // A project's own package is counted because it is named on the project, the
   // same way its repository is: `stats.npm` lists only what has no card.
-  const ownPackages = projects.active.flatMap((project) =>
-    project.npm ? [project.npm] : [],
-  );
+  const ownPackages = projects.active.flatMap((project) => project.npm ?? []);
 
   return {
     ...sources,
