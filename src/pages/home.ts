@@ -127,8 +127,10 @@ function leadPlate(project: ActiveProject, apex: string): Renderable {
  */
 function projectCard(project: ActiveProject): Renderable {
   const repo = repoSlug(project);
+  // A page on this site gets a plain arrow; ↗ promises somewhere else.
+  const arrow = project.url.startsWith("/") ? raw("&rarr;") : raw("&nearr;");
   return html`<a class="card" href="${project.url}">
-    <span class="h">${project.name} <span class="ext">&nearr;</span></span>
+    <span class="h">${project.name} <span class="ext">${arrow}</span></span>
     <p class="b">${project.blurb}</p>
     <div class="meta">
       ${project.tags.map(

@@ -22,6 +22,8 @@ export type Assets = {
   cv: string;
   stats: string;
   art: string;
+  /** The install box's tabs and the copy buttons on a project page. */
+  project: string;
 };
 
 /**
@@ -358,6 +360,34 @@ export function topBarCv(locale: Locale, pdf: string): Renderable {
         <a class="dl" href="${pdf}" download
           >&darr; <span class="t">PDF</span></a
         >
+        ${themeToggle()}
+      </nav>
+    </div>
+  </header>`;
+}
+
+/**
+ * A project page's bar: the /cv bar's shape, with the project where /cv sits
+ * and the README's own landmarks in the nav.
+ */
+export function topBarProject(
+  name: string,
+  repo: string,
+  links: { href: string; label: string }[],
+  hue: number,
+): Renderable {
+  return html`<header class="bar">
+    <div class="bar-in">
+      <a class="wordmark" href="/"
+        ><span class="back">&larr;</span><b>micheldev</b><span>.com</span></a
+      >
+      <span class="here hue hue-${hue}">/${name}</span>
+      <nav>
+        ${links.map(
+          (link) =>
+            html`<a class="nav-link hide-s" href="${link.href}">${link.label}</a>`,
+        )}
+        <a class="nav-link cv" href="${repo}">github&nbsp;&nearr;</a>
         ${themeToggle()}
       </nav>
     </div>

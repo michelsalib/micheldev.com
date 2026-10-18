@@ -72,7 +72,7 @@ active:
         what: Scheduled backup
 
   - name: nethound
-    url: https://github.com/michelsalib/nethound
+    url: /nethound
     repo: https://github.com/michelsalib/nethound
     npm: ["@michelsalib/nethound", netbeagle]
     live: false
@@ -81,9 +81,31 @@ active:
       Shows which process or container listens on each port, who can reach it,
       and how everything on your machine connects — then flags what is exposed
       that shouldn't be.
+    page:
+      hue: 5
+      drop: [Development]
+      release_files: [install.sh, install.ps1]
+      install:
+        - label: curl
+          cmd: curl -fsSL {origin}/nethound/install.sh | sh
+          note: Linux, macOS, WSL · checks SHA256SUMS · into ~/.local/bin
+        - label: PowerShell
+          cmd: irm {origin}/nethound/install.ps1 | iex
+          note: Windows · into %LOCALAPPDATA%\Programs\nethound
+        - label: brew
+          cmd: brew install michelsalib/nethound/nethound
+          note: Homebrew, macOS and Linux · the standalone binary
+        - label: scoop
+          cmd: |-
+            scoop bucket add nethound https://github.com/michelsalib/scoop-nethound
+            scoop install nethound/nethound
+          note: Windows · the standalone binary
+        - label: npm
+          cmd: npm install -g @michelsalib/nethound
+          note: Node ≥ 20 or Bun · or npx, with nothing to install
 
   - name: envhound
-    url: https://github.com/michelsalib/envhound
+    url: /envhound
     repo: https://github.com/michelsalib/envhound
     npm: ["@michelsalib/envhound", envhound]
     live: false
@@ -91,6 +113,28 @@ active:
     blurb: >-
       Finds which startup file sets each environment variable, audits your
       PATH, and changes them without leaving you to guess which dotfile wins.
+    page:
+      hue: 6
+      drop: [Development, Releasing]
+      release_files: [install.sh, install.ps1]
+      install:
+        - label: curl
+          cmd: curl -fsSL {origin}/envhound/install.sh | sh
+          note: Linux, macOS, WSL · checks SHA256SUMS · into ~/.local/bin
+        - label: PowerShell
+          cmd: irm {origin}/envhound/install.ps1 | iex
+          note: Windows · into %LOCALAPPDATA%\Programs\envhound
+        - label: brew
+          cmd: brew install michelsalib/envhound/envhound
+          note: Homebrew, macOS and Linux · the standalone binary
+        - label: scoop
+          cmd: |-
+            scoop bucket add envhound https://github.com/michelsalib/scoop-envhound
+            scoop install envhound/envhound
+          note: Windows · the standalone binary
+        - label: npm
+          cmd: npm install -g @michelsalib/envhound
+          note: Node ≥ 20 or Bun · or npx, with nothing to install
 
   - name: media-cast
     url: https://github.com/michelsalib/media-cast

@@ -26,7 +26,8 @@ The `/cv` page and both PDFs render from one source, so they cannot disagree.
 | File | What it drives |
 | --- | --- |
 | `cv.yaml` | `/cv`, `/cv/fr`, both PDFs, the OG card |
-| `projects.yaml` | The `/projects` section, the archive table, `/elsewhere`, `/stats.json` |
+| `projects.yaml` | The `/projects` section, the archive table, `/elsewhere`, `/stats.json`, the project pages |
+| `docs/<name>/` | A project page's README at its latest release, and the images it names. Synced, not edited |
 | `site.yaml` | Homepage copy, section headings, canonical + redirect hosts |
 | `*.schema.json` | Validates each file, in the editor and in CI (`bun run validate`) |
 
@@ -83,6 +84,7 @@ bun install
 bun run dev        # rebuild on change, served through the production handler
 bun run build      # → dist/
 bun run pdf        # print both CV PDFs and shoot the OG card (needs Chrome)
+bun run sync       # copy the project pages' READMEs at their latest release
 bun start          # serve dist/ exactly as Cloud Run does
 
 bun run validate   # content against its schemas, plus consistency checks
@@ -121,6 +123,37 @@ container as `STATS_CREDENTIALS` — Cloud Run projects a secret as a single
 environment variable, so packing them keeps it to one version and one IAM
 binding. Supply none and none of it exists: the visit count is absent, GitHub is
 called anonymously, and the runtime service account holds no roles at all.
+
+## Project pages
+
+`/nethound` and `/envhound` are each tool's README in this site's design: the
+masthead plate carries the README's header (logo, tagline) with an install box
+and the README's first `$` transcript, and the README itself follows, section
+by section, with a contents rail. A `page` block on an `active` project is all
+it takes; the hue, the sections to leave on GitHub (`drop`), the install tabs
+and the short URLs are set there.
+
+The README is read at the **latest release's tag**, so the page documents what
+`install.sh` installs today. `bun run sync` copies it, with the images it names,
+into `content/docs/<name>/`; the build reads only that snapshot, because tests
+run the build and talk to no network. CI refreshes it before every deploy from
+main, a release of either tool triggers one (`repository_dispatch`, event
+`project-released`), and a weekly run catches a dispatch that never arrived. The
+committed snapshot is what pull requests and local builds render.
+
+GitHub is a README's first reader, so `src/readme.ts` takes it apart rather than
+rendering it whole: the centred HTML header goes to the masthead, the shields.io
+badges are dropped (third-party images, which `img-src 'self'` refuses),
+repository links point at the release tag, a link to a sibling with a page goes
+to that page, and scripts, handlers and `style` attributes are stripped. Bun's
+built-in Markdown does the rendering, so this costs no dependency.
+
+`release_files` gives each tool a short install URL —
+`curl -fsSL https://micheldev.com/nethound/install.sh | sh` — which the server
+answers with a **302** to `releases/latest/download/` on GitHub, and the page
+prints it wherever the README spells the long one. A 302 and not the sections'
+301, because "latest" moves with every release and a cached permanent redirect
+would not.
 
 ## The PDFs and the OG card
 
@@ -169,14 +202,15 @@ src/
   content.ts      loads and types the YAML
   html.ts         tagged templates; interpolation escapes by default
   partials.ts     head, top bar, footer, figure tiles
-  pages/          home, cv, 404, og card
-  styles/         00-fonts, 01-tokens, 02-base, 03-home, 04-cv
+  readme.ts       takes a project's README apart for its page
+  pages/          home, cv, 404, og card, project
+  styles/         00-fonts, 01-tokens, 02-base, 03-home, 04-cv, 05-project
   client/         theme toggle, CV spine + summary strip, live figures, the
-                  masthead's split-flap
+                  masthead's split-flap, a project page's install tabs
   server.ts       the Cloud Run runtime; imports one local module, no packages
   stats.ts        counts npm, Packagist, GitHub, Cloudflare; dependency-free
   format.ts       number and date shapes, shared by the build and the browser
-scripts/          validate, pdf
+scripts/          validate, pdf, sync-docs
 infra/            Terraform
 tests/            build output, server behaviour, print cascade
 ```

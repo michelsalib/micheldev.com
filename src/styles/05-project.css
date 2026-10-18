@@ -1,0 +1,459 @@
+/* ── Project pages ─────────────────────────────────────────────────────────
+   /nethound, /envhound: a README in the site's design. The plate, the tiles,
+   the notch and the bar are shared (02-base.css); this sheet lays out what the
+   plate carries here — the README's header and install box on the left, its
+   first transcript on the right — and gives the README's own markup a type
+   scale, because it arrives as plain HTML with no classes of its own.
+
+   Each page takes one of the six --w hues (`page.hue` in projects.yaml), set as
+   a class on <main> like every other accent on the site.                      */
+
+.project {
+  --accent: var(--hue);
+}
+.project .plate {
+  --p-accent: var(--hue);
+}
+
+/* ── Masthead ──────────────────────────────────────────────────────────── */
+
+.proj-mast {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 44px;
+  align-items: start;
+}
+
+.proj-id {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.proj-id img {
+  width: 72px;
+  height: 72px;
+  flex: none;
+}
+.proj-id .eyebrow {
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--p-ink-3);
+  margin: 0;
+}
+.proj-id h1 {
+  font-size: clamp(36px, 5vw, 56px);
+  line-height: 1;
+  margin: 6px 0 0;
+}
+
+.tagline code {
+  font-family: var(--f-mono);
+  font-size: 0.9em;
+}
+.tagline {
+  margin: 22px 0 0;
+  font-size: clamp(17px, 1.7vw, 19px);
+  line-height: 1.5;
+  max-width: 34em;
+  color: var(--p-ink);
+}
+
+/* Install box. Without JS it is a list of methods, each with its label; the
+   client script adds .tabbed, shows the tablist and hides all but one. */
+.install {
+  margin-top: 26px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface-2);
+}
+.install .tabs {
+  display: flex;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule-strong);
+}
+.install .tabs[hidden] {
+  display: none;
+}
+.install [role="tab"] {
+  appearance: none;
+  border: 0;
+  border-right: 1px solid var(--rule);
+  background: none;
+  color: var(--ink-2);
+  font-family: var(--f-mono);
+  font-size: 12px;
+  padding: 0 14px;
+  min-height: 40px;
+  cursor: pointer;
+}
+.install [role="tab"][aria-selected="true"] {
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: inset 0 -2px 0 var(--hue);
+}
+.install .method {
+  padding: 14px 16px;
+}
+.install .method + .method {
+  border-top: 1px solid var(--rule);
+}
+.install.tabbed .method + .method {
+  border-top: 0;
+}
+.install .label {
+  margin: 0 0 6px;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hue);
+}
+.install.tabbed .label {
+  display: none;
+}
+.install pre {
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 13.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ink);
+}
+.install .note {
+  margin: 8px 0 0;
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+/* The README's first transcript, where the other pages put a picture. */
+.demo {
+  margin: 0;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper);
+  font-family: var(--f-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  min-width: 0;
+}
+.demo figcaption {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--hue);
+  font-weight: 600;
+}
+/* Wrapped, not scrolled: a cut-off line in a picture reads as a bug. */
+.demo pre {
+  margin: 0;
+  padding: 14px;
+  font: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--ink-2);
+}
+
+/* The tiles sit on the plate's floor, left, clear of the corner cut. */
+.proj-figures {
+  margin-top: 34px;
+}
+/* One row: the shared block is fixed at two tiles wide for a 2 × 2. */
+.proj-figures .tiles {
+  width: auto;
+}
+
+/* ── Release line ──────────────────────────────────────────────────────── */
+
+.rel {
+  margin: 30px 0 0;
+  padding: 12px 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.rel .live-stat {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0;
+  color: var(--hue);
+}
+/* The bar sits outside <main>, so it is handed the page's hue directly. */
+.bar .here.hue {
+  color: var(--hue);
+}
+.rel a,
+.toc .out a,
+.source a {
+  color: var(--ink);
+  border-bottom: 1px solid color-mix(in srgb, var(--hue) 45%, transparent);
+}
+.rel a:hover,
+.toc .out a:hover,
+.source a:hover {
+  border-bottom-color: var(--hue);
+}
+
+/* ── The README ────────────────────────────────────────────────────────── */
+
+.doc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+  margin-top: 52px;
+}
+.toc {
+  flex: 0 0 var(--rail);
+  position: sticky;
+  top: 80px;
+  align-self: flex-start;
+}
+.toc-h {
+  margin: 0 0 10px;
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid var(--rule);
+}
+.toc li a {
+  display: block;
+  padding: 5px 0 5px 14px;
+  margin-left: -1px;
+  border-left: 2px solid transparent;
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  color: var(--ink-2);
+}
+.toc li a:hover {
+  color: var(--hue);
+  border-left-color: var(--hue);
+}
+.toc .out {
+  margin: 22px 0 0;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  font-family: var(--f-mono);
+  font-size: 12px;
+}
+
+.readme {
+  flex: 999 1 560px;
+  min-width: 0;
+  color: var(--ink-2);
+}
+.sec {
+  padding-bottom: 52px;
+  scroll-margin-top: 72px;
+}
+.rail-l {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--f-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hue);
+}
+.rail-l::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+.readme .rail-l {
+  max-width: none;
+}
+.readme h2 {
+  margin: 10px 0 0;
+  font-size: clamp(24px, 3.1vw, 32px);
+  line-height: 1.12;
+  color: var(--ink);
+}
+.readme h3 {
+  margin: 32px 0 0;
+  font-size: 18px;
+  color: var(--ink);
+  scroll-margin-top: 72px;
+}
+.readme p,
+.readme ul,
+.readme ol {
+  margin: 14px 0 0;
+  max-width: 70ch;
+}
+.readme ul,
+.readme ol {
+  padding-left: 20px;
+}
+.readme li + li {
+  margin-top: 6px;
+}
+.readme strong {
+  color: var(--ink);
+}
+.readme a {
+  color: var(--ink);
+  border-bottom: 1px solid color-mix(in srgb, var(--hue) 45%, transparent);
+}
+.readme a:hover {
+  border-bottom-color: var(--hue);
+}
+.readme :not(pre) > code,
+.readme kbd {
+  font-family: var(--f-mono);
+  font-size: 0.88em;
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  padding: 0 4px;
+  color: var(--ink);
+}
+.readme kbd {
+  border-bottom-width: 2px;
+}
+.readme pre {
+  margin: 16px 0 0;
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: var(--surface-2);
+  border: 1px solid var(--rule);
+  font-family: var(--f-mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.readme pre code {
+  font: inherit;
+}
+.readme img {
+  display: block;
+  height: auto;
+  margin: 20px auto 0;
+  border: 1px solid var(--rule);
+}
+.readme .table {
+  margin-top: 16px;
+  overflow-x: auto;
+}
+.readme table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14.5px;
+}
+.readme th,
+.readme td {
+  text-align: left;
+  vertical-align: top;
+  padding: 10px 14px 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.readme th {
+  font-family: var(--f-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+/* A command column wide enough for most commands on one line, and no wider:
+   left to itself, the longest command took half the table. */
+.readme td:first-child {
+  width: 32%;
+}
+.readme td code {
+  font-weight: 600;
+}
+
+.source {
+  margin: 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--rule);
+  font-family: var(--f-mono);
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+
+/* Copy buttons, added by the client script around commands only. */
+.has-copy {
+  position: relative;
+}
+.has-copy .copy {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  appearance: none;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface);
+  color: var(--ink-3);
+  font-family: var(--f-mono);
+  font-size: 11px;
+  padding: 0 9px;
+  min-height: 28px;
+  cursor: pointer;
+}
+.has-copy .copy:hover {
+  color: var(--ink);
+}
+.readme .has-copy pre {
+  padding-right: 70px;
+}
+.install .has-copy pre {
+  padding-right: 64px;
+  min-height: 28px;
+}
+.install .has-copy .copy {
+  top: -2px;
+  right: 0;
+}
+
+/* ── Narrow ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 880px) {
+  /* The shared narrow rule stacks the plate's tiles beside the CV portrait;
+     there is no portrait here, so they stay a row. */
+  .proj-figures .tiles {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: auto;
+  }
+  .proj-mast {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .bar nav a.hide-s {
+    display: none;
+  }
+  .toc {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .wrap {
+    padding: 0 16px;
+  }
+  /* Lifted clear of the corner cut, which reaches the last tile here. */
+  .proj-figures {
+    margin-bottom: 56px;
+  }
+  /* Three across, shrunk to fit, rather than a column three tiles tall. */
+  .proj-figures .tiles {
+    --tile-w: calc((100% - 2 * var(--tile-gap)) / 3);
+    flex-wrap: nowrap;
+  }
+}
