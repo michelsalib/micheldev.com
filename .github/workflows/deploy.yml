@@ -5,6 +5,13 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+  # A release of a project with a page (nethound, envhound) sends this, so its
+  # page shows the new README within minutes. The weekly run catches a release
+  # whose dispatch never arrived.
+  repository_dispatch:
+    types: [project-released]
+  schedule:
+    - cron: "17 6 * * 1"
 
 concurrency:
   # Serialize deploys — never let two applies race on the same state bucket. Per
@@ -42,6 +49,16 @@ jobs:
 
       - name: Install
         run: bun install --frozen-lockfile
+
+      # The project pages are rendered from each tool's README at its latest
+      # release. The snapshot in content/docs is what pull requests and local
+      # builds use; anything that deploys refreshes it first. A GitHub failure
+      # warns and keeps the snapshot rather than blocking the deploy.
+      - name: Refresh the project pages' READMEs
+        if: github.event_name != 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: bun run sync --keep-going
 
       - name: Validate content against the schema
         run: bun run validate
@@ -179,7 +196,7 @@ jobs:
         run: |
           URL="$(terraform output -raw service_url)"
           echo "checking ${URL}"
-          for path in / /cv /cv/fr /michel-salib-cv-en.pdf; do
+          for path in / /cv /cv/fr /michel-salib-cv-en.pdf /nethound /envhound; do
             code="$(curl -s -o /dev/null -w '%{http_code}' "${URL}${path}")"
             echo "  ${path} -> ${code}"
             [ "${code}" = "200" ] || exit 1
@@ -195,6 +212,10 @@ jobs:
           code="$(curl -s -o /dev/null -w '%{http_code}' "${URL}/definitely-not-a-page")"
           echo "  /definitely-not-a-page -> ${code}"
           [ "${code}" = "404" ] || exit 1
+          # A short install URL must hand off to the latest release.
+          code="$(curl -s -o /dev/null -w '%{http_code}' "${URL}/nethound/install.sh")"
+          echo "  /nethound/install.sh -> ${code}"
+          [ "${code}" = "302" ] || exit 1
 
       - name: Deployed
         working-directory: infra

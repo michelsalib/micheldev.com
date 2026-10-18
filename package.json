@@ -16,6 +16,7 @@
     "dev": "bun run src/dev.ts",
     "start": "bun run src/server.ts",
     "pdf": "bun run scripts/pdf.ts",
+    "sync": "bun run scripts/sync-docs.ts",
     "validate": "bun run scripts/validate.ts",
     "check": "biome check",
     "fix": "biome check --write .",

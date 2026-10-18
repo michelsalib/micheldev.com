@@ -32,8 +32,10 @@ type CvDoc = {
 type ProjectsDoc = {
   active: {
     name: string;
+    url: string;
     live?: boolean;
     subdomains?: { host: string; what: string }[];
+    page?: { hue: number };
   }[];
   archive: { total_repos: number; repos: { name: string; stars: number }[] };
 };
@@ -125,6 +127,44 @@ for (const project of projects.active) {
   if (new Set(hosts).size !== hosts.length) {
     problems.push(`${project.name}: lists the same subdomain twice`);
   }
+}
+
+// A project page lives at /<name>, beside the site's own paths, and links to it
+// from the homepage row; its README must have been synced for the build to
+// render it.
+const site = docs["site"] as { sections: Record<string, { path: string }> };
+const taken = new Set([
+  "cv",
+  "assets",
+  "stats.json",
+  ...Object.values(site.sections).map((section) => section.path.slice(1)),
+]);
+const pages = projects.active.filter((project) => project.page);
+for (const project of pages) {
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(project.name)) {
+    problems.push(
+      `${project.name}: a page name must be a lower-case path segment`,
+    );
+  }
+  if (taken.has(project.name)) {
+    problems.push(
+      `${project.name}: a page there would shadow /${project.name}`,
+    );
+  }
+  if (project.url !== `/${project.name}`) {
+    problems.push(
+      `${project.name}: has a page, so its url must be /${project.name}`,
+    );
+  }
+  if (!(await Bun.file(`content/docs/${project.name}/README.md`).exists())) {
+    problems.push(
+      `${project.name}: has no README in content/docs — run \`bun run sync\``,
+    );
+  }
+}
+const pageHues = pages.map((project) => project.page?.hue);
+if (new Set(pageHues).size !== pageHues.length) {
+  problems.push("two project pages share a hue; give each its own");
 }
 
 if (problems.length > 0) {

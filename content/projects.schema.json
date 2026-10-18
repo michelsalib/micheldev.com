@@ -136,10 +136,55 @@
             },
             "uniqueItems": true,
             "description": "One entry per running service, listed on the lead plate. Must match the subdomains actually mapped in Terraform."
+          },
+          "page": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["hue", "install"],
+            "description": "A page of its own at /<name>, rendered from the README of its latest release. `bun run sync` copies that README into content/docs/<name>/; CI refreshes it before every deploy. `url` must then be /<name>.",
+            "properties": {
+              "hue": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6,
+                "description": "Which of the six --w hues the page is painted in. Give each page its own."
+              },
+              "drop": {
+                "type": "array",
+                "items": { "type": "string" },
+                "uniqueItems": true,
+                "description": "README sections (## headings, as written) that are for contributors rather than users, and stay on GitHub."
+              },
+              "release_files": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "uniqueItems": true,
+                "description": "Files of its latest GitHub release served at /<name>/<file>, as a 302 to the release, so a short install URL always gets the newest one. Where the README names the long URL, the page prints the short one."
+              },
+              "install": {
+                "type": "array",
+                "minItems": 1,
+                "description": "The install box on the masthead, a tab each. {origin} in a command is the site's origin.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["label", "cmd", "note"],
+                  "properties": {
+                    "label": { "type": "string", "maxLength": 12 },
+                    "cmd": { "type": "string" },
+                    "note": { "type": "string" }
+                  }
+                }
+              }
+            }
           }
         },
         "dependentRequired": {
-          "subdomains": ["live"]
+          "subdomains": ["live"],
+          "page": ["repo"]
         }
       }
     },

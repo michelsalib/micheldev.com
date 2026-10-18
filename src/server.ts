@@ -63,7 +63,9 @@ async function hostConfig() {
 
 /**
  * The homepage sections are labelled as paths — `/projects`, `/elsewhere` — so
- * they are treated as paths: each one 301s to its anchor on the homepage.
+ * they are treated as paths: each one 301s to its anchor on the homepage. The
+ * same file carries the project pages' short install URLs, whose targets are
+ * absolute — see `handle`.
  *
  * Emitted by the build from site.yaml, memoised on first use, and optional: a
  * dist/ from before this existed simply has no redirects, which is the same
@@ -234,9 +236,14 @@ export async function handle(request: Request): Promise<Response> {
   // is nothing named this in dist/ — it would 404 on its way past.
   if (url.pathname === "/stats.json") return statsResponse();
 
-  const section = (await sectionRedirects())[url.pathname];
-  if (section) {
-    return Response.redirect(`https://${canonical}${section}`, 301);
+  // Two kinds: a section path, which permanently becomes its homepage anchor,
+  // and a project's short install URL, which goes to its latest release. That
+  // one is a 302 — "latest" moves with every release, and a cached 301 would
+  // keep handing out the old one.
+  const target = (await sectionRedirects())[url.pathname];
+  if (target?.startsWith("https://")) return Response.redirect(target, 302);
+  if (target) {
+    return Response.redirect(`https://${canonical}${target}`, 301);
   }
 
   // Collapse trailing slashes (except the root) to keep one URL per page.

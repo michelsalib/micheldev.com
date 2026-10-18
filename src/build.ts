@@ -10,16 +10,21 @@ import { cp, mkdir, rm } from "node:fs/promises";
 import { portraitArt } from "./ascii.ts";
 import {
   type Content,
+  DOCS_DIR,
+  type DocsRelease,
   LOCALES,
   type Locale,
   loadContent,
+  pageProjects,
   statsSources,
 } from "./content.ts";
 import { cvPage } from "./pages/cv.ts";
 import { homePage } from "./pages/home.ts";
 import { notFoundPage } from "./pages/not-found.ts";
 import { ogCard } from "./pages/og.ts";
+import { type ProjectDocs, projectPage } from "./pages/project.ts";
 import type { Assets } from "./partials.ts";
+import { localImages, parseReadme } from "./readme.ts";
 
 const OUT = "dist";
 
@@ -51,6 +56,7 @@ const SHARED_CSS = ["src/styles/01-tokens.css", "src/styles/02-base.css"];
 const PAGE_CSS = {
   home: [...SHARED_CSS, "src/styles/03-home.css"],
   cv: [...SHARED_CSS, "src/styles/04-cv.css"],
+  project: [...SHARED_CSS, "src/styles/05-project.css"],
 } as const;
 
 /** Short, stable, content-addressed suffix. */
@@ -173,6 +179,64 @@ function sectionRedirects(site: Content["site"]): Record<string, string> {
   );
 }
 
+/**
+ * The short install URLs: /nethound/install.sh to the file in the latest
+ * release. Absolute targets, which the server answers with a 302 rather than
+ * the sections' 301 — "latest" moves with every release, and a permanent
+ * redirect would be cached past the next one.
+ */
+function releaseRedirects(content: Content): Record<string, string> {
+  return Object.fromEntries(
+    pageProjects(content.projects).flatMap((project) =>
+      (project.page.release_files ?? []).map((file) => [
+        `/${project.name}/${file}`,
+        `${project.repo.replace(/\/$/, "")}/releases/latest/download/${file}`,
+      ]),
+    ),
+  );
+}
+
+/**
+ * Each project page's README, as scripts/sync-docs.ts left it in content/docs.
+ * A missing snapshot fails the build with the command that makes one, rather
+ * than shipping a page with nothing on it.
+ */
+async function projectDocs(content: Content) {
+  const pages = pageProjects(content.projects);
+  const siblings = Object.fromEntries(
+    pages.map((project) => [
+      project.repo.replace(/\/$/, ""),
+      `/${project.name}`,
+    ]),
+  );
+  return Promise.all(
+    pages.map(async (project) => {
+      const dir = `${DOCS_DIR}/${project.name}`;
+      const readmeFile = Bun.file(`${dir}/README.md`);
+      if (!(await readmeFile.exists())) {
+        throw new Error(`${dir}/README.md is missing: run \`bun run sync\``);
+      }
+      const markdown = await readmeFile.text();
+      const release = (await Bun.file(
+        `${dir}/release.json`,
+      ).json()) as DocsRelease;
+      const docs: ProjectDocs = {
+        release,
+        readme: parseReadme(markdown, {
+          name: project.name,
+          repo: project.repo.replace(/\/$/, ""),
+          tag: release.tag,
+          origin: content.site.origin,
+          drop: project.page.drop ?? [],
+          releaseFiles: project.page.release_files ?? [],
+          siblings,
+        }),
+      };
+      return { project, docs, images: localImages(markdown) };
+    }),
+  );
+}
+
 export async function build(): Promise<{ files: string[]; assets: Assets }> {
   await rm(OUT, { recursive: true, force: true });
   await rm(PRINT_OUT, { recursive: true, force: true });
@@ -182,23 +246,57 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
   const content = await loadContent();
   const { site } = content;
 
-  const [cssHome, cssCv, theme, cv, stats, artJs, art] = await Promise.all([
+  const [
+    cssHome,
+    cssCv,
+    cssProject,
+    theme,
+    cv,
+    stats,
+    artJs,
+    projectJs,
+    art,
+    projects,
+  ] = await Promise.all([
     buildCss("home"),
     buildCss("cv"),
+    buildCss("project"),
     buildScript("src/client/theme.ts", "theme"),
     buildScript("src/client/cv.ts", "cv"),
     buildScript("src/client/stats.ts", "stats"),
     buildScript("src/client/art.ts", "art"),
+    buildScript("src/client/project.ts", "project"),
     // The homepage masthead's picture, rendered from the photograph the CV
     // serves. Built here rather than committed so the two cannot drift — see
     // src/ascii.ts, which is also where the decoder in the devDependencies
     // comes from.
     portraitArt(),
+    projectDocs(content),
   ]);
 
   // Same scripts, different stylesheet: each page links only its own.
-  const homeAssets: Assets = { css: cssHome, theme, cv, stats, art: artJs };
-  const cvAssets: Assets = { css: cssCv, theme, cv, stats, art: artJs };
+  const scripts = { theme, cv, stats, art: artJs, project: projectJs };
+  const homeAssets: Assets = { css: cssHome, ...scripts };
+  const cvAssets: Assets = { css: cssCv, ...scripts };
+  const projectAssets: Assets = { css: cssProject, ...scripts };
+
+  // Each project page and the images its README names, served beside it.
+  const projectFiles: string[] = [];
+  for (const { project, docs, images } of projects) {
+    projectFiles.push(
+      await write(
+        `${project.name}/index.html`,
+        projectPage(content, projectAssets, project, docs),
+      ),
+    );
+    for (const image of images) {
+      await cp(
+        `${DOCS_DIR}/${project.name}/${image}`,
+        `${OUT}/${project.name}/${image}`,
+      );
+    }
+  }
+  const projectPaths = projects.map(({ project }) => `/${project.name}`);
 
   // Fonts are already subset and hashed by content only in the sense that they
   // never change; keep the readable names and rely on immutable caching.
@@ -229,21 +327,33 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     // Read by the server at boot. Dot-prefixed so it is never served, which the
     // server enforces by refusing any path segment starting with a dot.
     await write(".hosts.json", JSON.stringify(site.hosts)),
-    await write(".redirects.json", JSON.stringify(sectionRedirects(site))),
+    await write(
+      ".redirects.json",
+      JSON.stringify({
+        ...sectionRedirects(site),
+        ...releaseRedirects(content),
+      }),
+    ),
     // Same arrangement, for the same reason: /stats.json needs to know what to
     // count, that belongs in content/ with everything else, and the runtime
     // image has no YAML parser to read it with.
     await write(".stats-sources.json", JSON.stringify(statsSources(content))),
-    await write("sitemap.xml", sitemap(site, ["/", "/cv", "/cv/fr"])),
+    await write(
+      "sitemap.xml",
+      sitemap(site, ["/", "/cv", "/cv/fr", ...projectPaths]),
+    ),
     await write(
       "robots.txt",
       `User-agent: *\nAllow: /\n\nSitemap: ${site.origin}/sitemap.xml\n`,
     ),
+    ...projectFiles,
     cssHome,
     cssCv,
+    cssProject,
     theme,
     cv,
     artJs,
+    projectJs,
   ];
 
   // The print copies: identical markup plus the contact line, written outside
@@ -272,5 +382,8 @@ if (import.meta.main) {
   console.log(`built ${files.length} entries into ${OUT}/ in ${ms}ms`);
   for (const locale of LOCALES) {
     console.log(`  /cv${locale === "en" ? "" : "/fr"}`);
+  }
+  for (const file of files.filter((f) => /^[^/.]+\/index\.html$/.test(f))) {
+    if (!file.startsWith("cv/")) console.log(`  /${file.split("/")[0]}`);
   }
 }

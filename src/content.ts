@@ -167,7 +167,36 @@ export type ActiveProject = {
   tags: string[];
   blurb: string;
   subdomains?: Subdomain[];
+  page?: ProjectPage;
 };
+
+/** One tab of the install box on a project page. */
+export type InstallMethod = { label: string; cmd: string; note: string };
+
+/** A page of its own at /<name>, rendered from its README. */
+export type ProjectPage = {
+  /** 1–6: which of the --w hues it is painted in. */
+  hue: number;
+  drop?: string[];
+  release_files?: string[];
+  install: InstallMethod[];
+};
+
+/** The release a project page was rendered from, as scripts/sync-docs.ts saw it. */
+export type DocsRelease = { tag: string; published_at: string };
+
+/** Where scripts/sync-docs.ts keeps each page's README and the images it names. */
+export const DOCS_DIR = "content/docs";
+
+/** Active projects with a page, which is to say a `page` block and a repo. */
+export function pageProjects(
+  projects: Projects,
+): (ActiveProject & { page: ProjectPage; repo: string })[] {
+  return projects.active.filter(
+    (project): project is ActiveProject & { page: ProjectPage; repo: string } =>
+      Boolean(project.page && project.repo),
+  );
+}
 
 export type Projects = {
   /** Year of the first public repository. Only `oss_years` reads it. */
