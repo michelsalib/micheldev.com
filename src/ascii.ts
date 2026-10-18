@@ -72,11 +72,29 @@ const GAMMA = 1.05;
  * soft cast shadow behind his shoulder that no quadratic fits. `slack` is the
  * leash on that: without it the creep walks down the shadow's gradient, out onto
  * his temple, and keeps going.
+ *
+ * `warm` is the gate none of that could replace. In grey, his lit forehead and
+ * cheek sit inside the wall's own range, and the fill walked straight through
+ * them — the head came out as a crescent with its whole left half missing. In
+ * colour they are nothing alike: the paint is neutral, skin and beard are warm.
+ * Red minus blue is about 0.02 on the wall and above 0.15 on the face, so a
+ * pixel over this is never wall whatever its luminance. The shirt is cool, but
+ * it is dark, and luminance already keeps the fill off it.
  */
-const WALL = { tol: 0.05, creep: 0.012, slack: 0.22 };
+const WALL = { tol: 0.05, creep: 0.012, slack: 0.22, warm: 0.09 };
 
 /** Percentiles of the *subject* clipped to black and to white. */
 const CLIP = { low: 0.02, high: 0.985 };
+
+/**
+ * The lightest the subject may come out, so that it never rounds to a space.
+ *
+ * Bare paper means wall and nothing else. Without this the highlight on his
+ * forehead rounded to blank too and punched holes in the head the mask had just
+ * closed. Just under the halfway point between the first two ramp steps, so the
+ * brightest skin lands on ░.
+ */
+const LIGHTEST = 0.86;
 
 /**
  * The two renderings, and why there are two.
@@ -147,7 +165,7 @@ async function analyse(): Promise<{ value: Float64Array; size: number }> {
       width: Math.round(CROP.w * width),
       height: Math.round(CROP.h * height),
     })
-    .greyscale()
+    .removeAlpha()
     .resize(RES, RES, { fit: "fill", kernel: "lanczos3" })
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -160,9 +178,15 @@ async function analyse(): Promise<{ value: Float64Array; size: number }> {
     );
   }
   const size = info.width;
+  // Decoded in colour rather than greyscale, for the warmth gate in WALL.
   const lum = new Float64Array(size * size);
+  const warm = new Float64Array(size * size);
   for (let i = 0; i < lum.length; i++) {
-    lum[i] = (data[i * info.channels] as number) / 255;
+    const r = data[i * info.channels] as number;
+    const g = data[i * info.channels + 1] as number;
+    const b = data[i * info.channels + 2] as number;
+    lum[i] = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    warm[i] = (r - b) / 255;
   }
 
   // ── Fit a quadratic to the border ring ──────────────────────────────────
@@ -201,7 +225,7 @@ async function analyse(): Promise<{ value: Float64Array; size: number }> {
   const visit = (x: number, y: number, from: number) => {
     if (x < 0 || y < 0 || x >= size || y >= size) return;
     const i = y * size + x;
-    if (isWall[i]) return;
+    if (isWall[i] || (warm[i] as number) > WALL.warm) return;
     const value = lum[i] as number;
     const offFit = Math.abs(value - wallAt(x, y));
     const local =
@@ -250,7 +274,7 @@ async function analyse(): Promise<{ value: Float64Array; size: number }> {
   for (let i = 0; i < lum.length; i++) {
     value[i] = isWall[i]
       ? 1
-      : Math.min(1, Math.max(0, ((lum[i] as number) - low) / span));
+      : LIGHTEST * Math.min(1, Math.max(0, ((lum[i] as number) - low) / span));
   }
 
   return { value, size };
