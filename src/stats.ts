@@ -165,22 +165,25 @@ type NpmRange = { downloads: { downloads: number }[] };
  * Lifetime downloads for each npm package, keyed by name.
  *
  * npm's range endpoint refuses a span longer than 18 months, so the history is
- * walked a calendar year at a time and summed. The years run concurrently. A
- * year still in progress simply returns fewer days, so the current one needs no
- * special case.
+ * walked a calendar year at a time and summed. A year still in progress simply
+ * returns fewer days, so the current one needs no special case.
  *
  * Each year is one bulk request for all the unscoped packages: a request per
  * package per year was 36 at once for three packages, and npm answered with
- * 429s. A year before a package existed comes back as zeros, so one `npm_since`
- * serves them all. An unknown package comes back as null and throws — a typo
- * must void the sum, not quietly count as zero. With a single package npm drops
- * the keyed wrapper, hence the two shapes.
+ * 429s. An unknown package comes back as null and throws — a typo must void the
+ * sum, not quietly count as zero. With a single package npm drops the keyed
+ * wrapper, hence the two shapes.
  *
  * The bulk endpoint refuses scoped names (`@michelsalib/nethound`), so each of
- * those is walked on its own, one package after another once the bulk walk is
- * done, which keeps the requests in flight at one per year, as before. A
- * package npm has no record of answers 404 and throws the same way; a package
- * published today is in that state until npm's counts catch up, a day or so.
+ * those is walked on its own. A package npm has no record of answers 404 and
+ * throws the same way; a package published today is in that state until npm's
+ * counts catch up, a day or so.
+ *
+ * The years are walked one at a time, newest first, and a walk stops at the
+ * first year its packages did not download at all: that is a year before they
+ * existed. Running every year of every walk at once was 36 requests in a few
+ * seconds, and npm answered all of them with 429s; this way the scoped packages,
+ * published in 2026, cost two requests each, and only one is ever in flight.
  */
 async function npmDownloads(
   pkgs: string[],
@@ -197,22 +200,23 @@ async function npmDownloads(
   };
   // One pass over the years for these packages, summed per package.
   const walk = async (batch: string[]): Promise<Record<string, number>> => {
-    const perYear = await Promise.all(
-      years.map(async (year) => {
-        const url = `https://api.npmjs.org/downloads/range/${year}-01-01:${year}-12-31/${batch.join(",")}`;
-        if (batch.length === 1) {
-          return [sum(await getJson<NpmRange>(url), batch[0] as string)];
-        }
-        const data = await getJson<Record<string, NpmRange | null>>(url);
-        return batch.map((pkg) => sum(data[pkg], pkg));
-      }),
+    const totals: Record<string, number> = Object.fromEntries(
+      batch.map((pkg) => [pkg, 0]),
     );
-    return Object.fromEntries(
-      batch.map((pkg, i) => [
-        pkg,
-        perYear.reduce((total, year) => total + (year[i] as number), 0),
-      ]),
-    );
+    for (const year of years.toReversed()) {
+      const url = `https://api.npmjs.org/downloads/range/${year}-01-01:${year}-12-31/${batch.join(",")}`;
+      const counts =
+        batch.length === 1
+          ? [sum(await getJson<NpmRange>(url), batch[0] as string)]
+          : await getJson<Record<string, NpmRange | null>>(url).then((data) =>
+              batch.map((pkg) => sum(data[pkg], pkg)),
+            );
+      if (counts.every((n) => n === 0)) break;
+      batch.forEach((pkg, i) => {
+        totals[pkg] = (totals[pkg] as number) + (counts[i] as number);
+      });
+    }
+    return totals;
   };
 
   const unscoped = pkgs.filter((pkg) => !pkg.startsWith("@"));
