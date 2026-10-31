@@ -30,6 +30,7 @@ import {
   figuresInHtml,
   figureTiles,
   footer,
+  personSchema,
   topBarHome,
 } from "../partials.ts";
 
@@ -330,6 +331,12 @@ export function homePage(content: Content, assets: Assets, art: Art): string {
       locale: LOCALE,
       preloadBlocks: true,
       scripts: [assets.theme, assets.stats, assets.art],
+      structuredData: {
+        "@type": "WebSite",
+        name: site.hosts.canonical,
+        url: site.origin,
+        author: personSchema(content),
+      },
     })}
     ${topBarHome(liveServices(projects))}
     <main id="main">

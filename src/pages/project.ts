@@ -22,6 +22,7 @@ import {
   type Assets,
   documentHead,
   footer,
+  personSchema,
   topBarProject,
 } from "../partials.ts";
 import { plainText, type Readme } from "../readme.ts";
@@ -128,6 +129,27 @@ export function projectPage(
       path: `/${project.name}`,
       locale: "en",
       scripts: [assets.theme, assets.stats, assets.project],
+      structuredData: {
+        "@type": "SoftwareApplication",
+        name: project.name,
+        description: project.blurb,
+        url: `${site.origin}/${project.name}`,
+        applicationCategory: "DeveloperApplication",
+        operatingSystem: "Linux, macOS, Windows",
+        softwareVersion: release.tag.replace(/^v/, ""),
+        datePublished: release.published_at.slice(0, 10),
+        downloadUrl: `${project.repo}/releases/latest`,
+        codeRepository: project.repo,
+        license: "https://opensource.org/licenses/MIT",
+        offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+        author: personSchema(content),
+        sameAs: [
+          project.repo,
+          ...(project.npm ?? [])
+            .slice(0, 1)
+            .map((name) => `https://www.npmjs.com/package/${name}`),
+        ],
+      },
     })}
     ${topBarProject(project.name, project.repo, navLinks, project.page.hue)}
     <main id="main" class="project hue-${project.page.hue}">

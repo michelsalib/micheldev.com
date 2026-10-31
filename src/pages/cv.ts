@@ -21,6 +21,7 @@ import {
   documentHead,
   figureTiles,
   footer,
+  personSchema,
   portrait,
   topBarCv,
 } from "../partials.ts";
@@ -342,6 +343,12 @@ export function cvPage(
       alternates: { en: "/cv", fr: "/cv/fr" },
       scripts: [assets.theme, assets.cv],
       preloadPortrait: true,
+      structuredData: {
+        "@type": "ProfilePage",
+        url: `${site.origin}${path}`,
+        inLanguage: locale,
+        mainEntity: personSchema(content, locale),
+      },
     })}
     ${topBarCv(locale, pdfHref)}
     <nav class="toc" aria-label="${copy.jumpTo}">

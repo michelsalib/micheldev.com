@@ -218,7 +218,34 @@ export type HeadOptions = {
    * arrives. 1.6 KB, discovered here instead of two round trips later.
    */
   preloadBlocks?: boolean;
+  /** schema.org JSON-LD, for the search result rather than the page. */
+  structuredData?: object;
 };
+
+/**
+ * The person every page is by, as schema.org describes one. Its `@id` lets a
+ * project page name its author without repeating him, and `sameAs` is what ties
+ * this site to the GitHub and LinkedIn profiles in a search engine's eyes.
+ */
+export function personSchema(content: Content, locale: Locale = "en"): object {
+  const { person } = content.cv;
+  const { site: _site, ...profiles } = person.links ?? {};
+  return {
+    "@type": "Person",
+    "@id": `${content.site.origin}/#person`,
+    name: person.name,
+    url: content.site.origin,
+    jobTitle: t(content.cv.headline, locale),
+    image: `${content.site.origin}/assets/img/portrait-1040.webp`,
+    sameAs: Object.values(profiles),
+  };
+}
+
+/** `</script>` inside a string would end the block early; `\u003c` cannot. */
+function jsonLd(data: object): Renderable {
+  const json = JSON.stringify({ "@context": "https://schema.org", ...data });
+  return html`<script type="application/ld+json">${raw(json.replaceAll("<", "\\u003c"))}</script>`;
+}
 
 export function documentHead(o: HeadOptions): Renderable {
   const url = `${o.site.origin}${o.path}`;
@@ -313,6 +340,7 @@ export function documentHead(o: HeadOptions): Renderable {
           />`
         : ""
     }
+    ${o.structuredData ? jsonLd(o.structuredData) : ""}
     <link rel="stylesheet" href="${o.assets.css}" />
     ${(o.scripts ?? []).map((src) => html`<script src="${src}" defer></script>`)}
   </head>
