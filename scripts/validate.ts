@@ -36,6 +36,7 @@ type ProjectsDoc = {
     live?: boolean;
     subdomains?: { host: string; what: string }[];
     page?: { hue: number };
+    product?: { hue: number; screenshots: { shot: string }[] };
   }[];
   archive: { total_repos: number; repos: { name: string; stars: number }[] };
 };
@@ -139,7 +140,9 @@ const taken = new Set([
   "stats.json",
   ...Object.values(site.sections).map((section) => section.path.slice(1)),
 ]);
-const pages = projects.active.filter((project) => project.page);
+const pages = projects.active.filter(
+  (project) => project.page || project.product,
+);
 for (const project of pages) {
   if (!/^[a-z0-9][a-z0-9-]*$/.test(project.name)) {
     problems.push(
@@ -156,13 +159,25 @@ for (const project of pages) {
       `${project.name}: has a page, so its url must be /${project.name}`,
     );
   }
-  if (!(await Bun.file(`content/docs/${project.name}/README.md`).exists())) {
+  // A product page is written here, so what it needs synced is its release.
+  const synced = project.product ? "release.json" : "README.md";
+  if (!(await Bun.file(`content/docs/${project.name}/${synced}`).exists())) {
     problems.push(
-      `${project.name}: has no README in content/docs — run \`bun run sync\``,
+      `${project.name}: has no ${synced} in content/docs — run \`bun run sync\``,
     );
   }
+  for (const { shot } of project.product?.screenshots ?? []) {
+    for (const theme of ["light", "dark"]) {
+      const path = `src/images/${project.name}/${shot}-${theme}.webp`;
+      if (!(await Bun.file(path).exists())) {
+        problems.push(`${project.name}: screenshot ${path} is missing`);
+      }
+    }
+  }
 }
-const pageHues = pages.map((project) => project.page?.hue);
+const pageHues = pages.map(
+  (project) => project.page?.hue ?? project.product?.hue,
+);
 if (new Set(pageHues).size !== pageHues.length) {
   problems.push("two project pages share a hue; give each its own");
 }

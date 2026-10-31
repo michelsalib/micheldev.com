@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, test } from "bun:test";
 import { build } from "../src/build.ts";
-import { loadContent, pageProjects } from "../src/content.ts";
+import { loadContent, pageProjects, productProjects } from "../src/content.ts";
+import { productDownloads } from "../src/pages/product.ts";
 import {
   localImages,
   parseReadme,
@@ -243,6 +244,122 @@ describe("the built project pages", () => {
   });
 });
 
+describe("the built product pages", () => {
+  const pages: { name: string; html: string }[] = [];
+
+  beforeAll(async () => {
+    await build();
+    for (const project of productProjects((await loadContent()).projects)) {
+      pages.push({
+        name: project.name,
+        html: await Bun.file(`dist/${project.name}/index.html`).text(),
+      });
+    }
+  });
+
+  test("every project with a product block gets one", () => {
+    expect(pages.map((page) => page.name)).toEqual(["media-cast"]);
+  });
+
+  test("they are in the sitemap, and the homepage links them here", async () => {
+    const sitemap = await Bun.file("dist/sitemap.xml").text();
+    const home = await Bun.file("dist/index.html").text();
+    for (const { name } of pages) {
+      expect(sitemap).toContain(`<loc>https://micheldev.com/${name}</loc>`);
+      expect(home).toContain(`href="/${name}"`);
+    }
+  });
+
+  test("every image is served from this origin, and exists", async () => {
+    for (const { html } of pages) {
+      const sources = [...html.matchAll(/<img[^>]+src="([^"]+)"/g)].map(
+        (match) => match[1] as string,
+      );
+      // The icon, plus a light and a dark copy of each screenshot.
+      expect(sources.length).toBeGreaterThanOrEqual(3);
+      for (const src of sources) {
+        expect(src.startsWith("/")).toBe(true);
+        expect(await Bun.file(`dist${src}`).exists()).toBe(true);
+      }
+    }
+  });
+
+  test("every screenshot comes in both themes, with its size stated", () => {
+    for (const { html } of pages) {
+      const light = html.match(/class="light"/g) ?? [];
+      const dark = html.match(/class="dark"/g) ?? [];
+      expect(light.length).toBeGreaterThan(0);
+      expect(light.length).toBe(dark.length);
+      expect(html).not.toMatch(/<img[^>]+width="0"/);
+    }
+  });
+
+  test("every in-page link has somewhere to land", () => {
+    for (const { html } of pages) {
+      const ids = new Set(
+        [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]),
+      );
+      for (const [, anchor] of html.matchAll(/href="#([^"]+)"/g)) {
+        expect(ids.has(anchor)).toBe(true);
+      }
+    }
+  });
+
+  test("no inline style attributes, which the CSP would void", () => {
+    for (const { html } of pages) expect(html).not.toMatch(/\sstyle="/);
+  });
+
+  test("the download buttons use the short URLs, and work without JS", () => {
+    for (const { name, html } of pages) {
+      expect(html).toContain(`href="/${name}/download/windows"`);
+      expect(html).toContain(`href="/${name}/download/mac"`);
+      // Nothing is picked until the client script has looked at the system.
+      expect(html).not.toContain("get-btn primary");
+      expect(html).toContain(`data-project="${name}"`);
+    }
+  });
+});
+
+describe("the product downloads", () => {
+  const project = {
+    name: "app",
+    url: "/app",
+    repo: "https://github.com/me/app",
+    tags: ["x"],
+    blurb: "",
+    product: {
+      downloads: [
+        { os: "windows", label: "Windows", asset: "-setup\\.exe$", note: "" },
+      ],
+    },
+  } as unknown as Parameters<typeof productDownloads>[0];
+
+  test("each resolves to its installer in the synced release", () => {
+    const [download] = productDownloads(project, {
+      tag: "v1.0.0",
+      published_at: "2026-01-01T00:00:00Z",
+      assets: [
+        { name: "app-1.0.0-setup.exe.blockmap", size: 1 },
+        { name: "app-1.0.0-setup.exe", size: 2 },
+      ],
+    });
+    expect(download?.url).toBe(
+      "https://github.com/me/app/releases/download/v1.0.0/app-1.0.0-setup.exe",
+    );
+    expect(download?.size).toBe(2);
+  });
+
+  test("an installer missing from the release fails the build", () => {
+    expect(() =>
+      productDownloads(project, {
+        tag: "v1.0.0",
+        published_at: "2026-01-01T00:00:00Z",
+        assets: [],
+      }),
+    ).toThrow("no asset of v1.0.0");
+  });
+});
+
 describe("the short install URLs", () => {
   const get = (path: string) =>
     handle(
@@ -268,6 +385,18 @@ describe("the short install URLs", () => {
     expect(response.headers.get("location")).toBe(
       `https://github.com/michelsalib/${repo}/releases/latest/download/${file}`,
     );
+  });
+
+  test.each([
+    ["windows", /\/releases\/download\/v[^/]+\/[^/]+-setup\.exe$/],
+    ["mac", /\/releases\/download\/v[^/]+\/[^/]+\.dmg$/],
+  ])("/media-cast/download/%s 302s to its installer", async (os, target) => {
+    const response = await get(`/media-cast/download/${os}`);
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toMatch(
+      /^https:\/\/github\.com\/michelsalib\/media-cast\//,
+    );
+    expect(response.headers.get("location")).toMatch(target);
   });
 
   test("the page itself is served, and the section redirects still 301", async () => {

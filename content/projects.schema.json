@@ -180,11 +180,143 @@
                 }
               }
             }
+          },
+          "product": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "hue",
+              "title",
+              "logo",
+              "headline",
+              "lede",
+              "downloads",
+              "screenshots",
+              "steps",
+              "features",
+              "first_run",
+              "questions"
+            ],
+            "description": "A page of its own at /<name> for an application, written here for the people who use it rather than rendered from a README. `bun run sync` snapshots its latest release (installers and icon) into content/docs/<name>/. `url` must then be /<name>.",
+            "properties": {
+              "hue": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 6,
+                "description": "Which of the six --w hues the page is painted in. Shared with the README pages: give each page its own."
+              },
+              "title": {
+                "type": "string",
+                "description": "The app's name as its users see it."
+              },
+              "logo": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9._/-]*\\.svg$",
+                "description": "Its icon's path in the repository, synced at the release tag."
+              },
+              "headline": { "type": "string" },
+              "lede": { "type": "string" },
+              "downloads": {
+                "type": "array",
+                "minItems": 1,
+                "description": "A button each, served at /<name>/download/<os> as a 302 to the asset of the synced release.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["os", "label", "asset", "note"],
+                  "properties": {
+                    "os": { "enum": ["windows", "mac"] },
+                    "label": { "type": "string", "maxLength": 12 },
+                    "asset": {
+                      "type": "string",
+                      "description": "A regular expression for the installer's file name among the release's assets."
+                    },
+                    "note": { "type": "string" }
+                  }
+                }
+              },
+              "screenshots": {
+                "type": "array",
+                "minItems": 1,
+                "description": "src/images/<name>/<shot>-light.webp and -dark.webp, shown with the site's theme. The first is on the masthead.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["shot", "alt"],
+                  "properties": {
+                    "shot": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+                    "alt": { "type": "string" },
+                    "caption": { "type": "string" }
+                  }
+                }
+              },
+              "steps": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 4,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["title", "text"],
+                  "properties": {
+                    "title": { "type": "string" },
+                    "text": { "type": "string" }
+                  }
+                }
+              },
+              "features": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["title", "text"],
+                  "properties": {
+                    "title": { "type": "string" },
+                    "text": { "type": "string" }
+                  }
+                }
+              },
+              "first_run": {
+                "type": "array",
+                "description": "What the operating system asks the first time, per system.",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["title", "points"],
+                  "properties": {
+                    "title": { "type": "string" },
+                    "points": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              },
+              "questions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["q", "a"],
+                  "properties": {
+                    "q": { "type": "string" },
+                    "a": { "type": "string" }
+                  }
+                }
+              }
+            }
           }
         },
         "dependentRequired": {
           "subdomains": ["live"],
-          "page": ["repo"]
+          "page": ["repo"],
+          "product": ["repo"]
+        },
+        "not": {
+          "required": ["page", "product"],
+          "description": "One page per project: a README page or a product page."
         }
       }
     },

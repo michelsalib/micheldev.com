@@ -155,6 +155,32 @@ prints it wherever the README spells the long one. A 302 and not the sections'
 301, because "latest" moves with every release and a cached permanent redirect
 would not.
 
+## Product pages
+
+`/media-cast` is the other kind of page. Its readers want to watch a film on
+their TV, not read a README, so its copy is written for them in projects.yaml —
+a `product` block instead of `page`: a headline, the steps, the features, what
+macOS and Windows ask the first time, and the questions people ask. It keeps
+the README pages' plate, tiles, release line and rail (`05-project.css`) and
+adds its own sheet, `06-product.css`.
+
+Only what changes with a release is synced: `bun run sync` saves the latest
+release's asset list and the app icon into `content/docs/media-cast/`. Each
+download button is a short URL, `/media-cast/download/windows`, which the
+server 302s to the matching installer of that release. Not
+`releases/latest/download/` like the install scripts: an installer's name
+carries its version, so "latest" has no fixed name to resolve. An installer
+pattern (`asset`) that matches nothing fails the build rather than shipping a
+dead button. Without JS the buttons are equals; `src/client/product.ts` puts the
+reader's own system first, and says so on a phone or on Linux.
+
+The screenshots are the app itself, in `src/images/media-cast/`, one copy per
+theme (`ready-light.webp`, `ready-dark.webp`…). The page shows the one matching
+the site's theme, and the build fails if a copy is missing or the two differ in
+size. To retake them, drive the app with Playwright, stub `connect` and `load`
+in main so nothing reaches a real TV, and use a video you may publish (the
+current ones are Big Buck Bunny, © Blender Foundation, CC BY 3.0).
+
 ## The PDFs and the OG card
 
 `/cv` and its PDF are the same document: the PDF is Chrome printing the page
@@ -203,8 +229,9 @@ src/
   html.ts         tagged templates; interpolation escapes by default
   partials.ts     head, top bar, footer, figure tiles
   readme.ts       takes a project's README apart for its page
-  pages/          home, cv, 404, og card, project
-  styles/         00-fonts, 01-tokens, 02-base, 03-home, 04-cv, 05-project
+  pages/          home, cv, 404, og card, project, product
+  styles/         00-fonts, 01-tokens, 02-base, 03-home, 04-cv, 05-project,
+                  06-product
   client/         theme toggle, CV spine + summary strip, live figures, the
                   masthead's split-flap, a project page's install tabs
   server.ts       the Cloud Run runtime; imports one local module, no packages

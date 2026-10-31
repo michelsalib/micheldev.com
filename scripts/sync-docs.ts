@@ -9,6 +9,10 @@
  * At the latest release's tag, not the default branch: the page documents what
  * `install.sh` installs today, not what is merged and not yet shipped.
  *
+ * A product page (media-cast) has no README to copy — its copy is written in
+ * projects.yaml — so it gets its release's asset list, which its download
+ * buttons point into, and its icon.
+ *
  * CI runs this before every deploy from main (`--keep-going`), and a release of
  * nethound or envhound triggers one, so production always shows the newest
  * release; the committed snapshot is what local builds and pull requests use.
@@ -24,6 +28,7 @@ import {
   type DocsRelease,
   loadContent,
   pageProjects,
+  productProjects,
 } from "../src/content.ts";
 import { localImages } from "../src/readme.ts";
 
@@ -45,16 +50,29 @@ async function get(url: string, json: boolean): Promise<Response> {
   return response;
 }
 
-async function sync(name: string, repo: string): Promise<string> {
+/**
+ * What to copy for one page. A README page needs its README and the images it
+ * names; a product page is written in projects.yaml, so it needs only the
+ * release's installers and its icon (`logo`).
+ */
+type Target = { name: string; repo: string; logo?: string };
+
+async function sync({ name, repo, logo }: Target): Promise<string> {
   const slug = new URL(repo).pathname.replace(/^\/|\/$/g, "");
   const latest = (await (
     await get(`https://api.github.com/repos/${slug}/releases/latest`, true)
-  ).json()) as { tag_name: string; published_at: string };
+  ).json()) as {
+    tag_name: string;
+    published_at: string;
+    assets: { name: string; size: number }[];
+  };
   const raw = `https://raw.githubusercontent.com/${slug}/${latest.tag_name}`;
 
-  const readme = await (await get(`${raw}/README.md`, false)).text();
+  const readme = logo
+    ? undefined
+    : await (await get(`${raw}/README.md`, false)).text();
   const images = await Promise.all(
-    localImages(readme).map(async (path) => ({
+    (readme ? localImages(readme) : [logo as string]).map(async (path) => ({
       path,
       bytes: new Uint8Array(
         await (await get(`${raw}/${path}`, false)).arrayBuffer(),
@@ -70,22 +88,33 @@ async function sync(name: string, repo: string): Promise<string> {
   const release: DocsRelease = {
     tag: latest.tag_name,
     published_at: latest.published_at,
+    ...(logo
+      ? { assets: latest.assets.map(({ name, size }) => ({ name, size })) }
+      : {}),
   };
   await Bun.write(
     `${dir}/release.json`,
     `${JSON.stringify(release, null, 2)}\n`,
   );
-  await Bun.write(`${dir}/README.md`, readme);
+  if (readme) await Bun.write(`${dir}/README.md`, readme);
   for (const image of images)
     await Bun.write(`${dir}/${image.path}`, image.bytes);
   return `${latest.tag_name}, ${images.length} image(s)`;
 }
 
 const { projects } = await loadContent();
+const targets: Target[] = [
+  ...pageProjects(projects).map(({ name, repo }) => ({ name, repo })),
+  ...productProjects(projects).map(({ name, repo, product }) => ({
+    name,
+    repo,
+    logo: product.logo,
+  })),
+];
 let failed = false;
-for (const project of pageProjects(projects)) {
+for (const project of targets) {
   try {
-    console.log(`${project.name}: ${await sync(project.name, project.repo)}`);
+    console.log(`${project.name}: ${await sync(project)}`);
   } catch (error) {
     failed = true;
     const message = `${project.name}: ${(error as Error).message}`;

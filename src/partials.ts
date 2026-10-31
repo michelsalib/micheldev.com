@@ -24,6 +24,8 @@ export type Assets = {
   art: string;
   /** The install box's tabs and the copy buttons on a project page. */
   project: string;
+  /** A product page's download buttons, ordered for the reader's computer. */
+  product: string;
 };
 
 /**
@@ -397,12 +399,19 @@ export function topBarCv(locale: Locale, pdf: string): Renderable {
 /**
  * A project page's bar: the /cv bar's shape, with the project where /cv sits
  * and the README's own landmarks in the nav.
+ *
+ * `cta` replaces the GitHub link in the bold slot. A product page puts its
+ * download there: its readers came for the app, not the repository.
  */
 export function topBarProject(
   name: string,
   repo: string,
   links: { href: string; label: string }[],
   hue: number,
+  cta: { href: string; label: Renderable } = {
+    href: repo,
+    label: raw("github&nbsp;&nearr;"),
+  },
 ): Renderable {
   return html`<header class="bar">
     <div class="bar-in">
@@ -415,7 +424,7 @@ export function topBarProject(
           (link) =>
             html`<a class="nav-link hide-s" href="${link.href}">${link.label}</a>`,
         )}
-        <a class="nav-link cv" href="${repo}">github&nbsp;&nearr;</a>
+        <a class="nav-link cv" href="${cta.href}">${cta.label}</a>
         ${themeToggle()}
       </nav>
     </div>

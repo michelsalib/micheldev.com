@@ -7,6 +7,7 @@
  */
 
 import { cp, mkdir, rm } from "node:fs/promises";
+import sharp from "sharp";
 import { portraitArt } from "./ascii.ts";
 import {
   type Content,
@@ -16,12 +17,18 @@ import {
   type Locale,
   loadContent,
   pageProjects,
+  productProjects,
   statsSources,
 } from "./content.ts";
 import { cvPage } from "./pages/cv.ts";
 import { homePage } from "./pages/home.ts";
 import { notFoundPage } from "./pages/not-found.ts";
 import { ogCard } from "./pages/og.ts";
+import {
+  productDownloads,
+  productPage,
+  type ShotSizes,
+} from "./pages/product.ts";
 import { type ProjectDocs, projectPage } from "./pages/project.ts";
 import type { Assets } from "./partials.ts";
 import { localImages, parseReadme } from "./readme.ts";
@@ -57,6 +64,13 @@ const PAGE_CSS = {
   home: [...SHARED_CSS, "src/styles/03-home.css"],
   cv: [...SHARED_CSS, "src/styles/04-cv.css"],
   project: [...SHARED_CSS, "src/styles/05-project.css"],
+  // A product page is a project page with other things below its masthead, so
+  // it takes that sheet whole and adds its own.
+  product: [
+    ...SHARED_CSS,
+    "src/styles/05-project.css",
+    "src/styles/06-product.css",
+  ],
 } as const;
 
 /** Short, stable, content-addressed suffix. */
@@ -197,6 +211,77 @@ function releaseRedirects(content: Content): Record<string, string> {
 }
 
 /**
+ * Each product page's release, as scripts/sync-docs.ts left it. Missing, it
+ * fails the build the way a missing README does.
+ */
+async function productReleases(content: Content) {
+  return Promise.all(
+    productProjects(content.projects).map(async (project) => {
+      const file = Bun.file(`${DOCS_DIR}/${project.name}/release.json`);
+      if (!(await file.exists())) {
+        throw new Error(
+          `${DOCS_DIR}/${project.name}/release.json is missing: run \`bun run sync\``,
+        );
+      }
+      return {
+        project,
+        release: (await file.json()) as DocsRelease,
+        sizes: await shotSizes(project.name, project.product.screenshots),
+      };
+    }),
+  );
+}
+
+/**
+ * Each screenshot's pixel size, for its width and height attributes, read from
+ * the light copy. Both copies must exist and agree, or one theme would get a
+ * missing picture, or a stretched one.
+ */
+async function shotSizes(
+  name: string,
+  screenshots: { shot: string }[],
+): Promise<ShotSizes> {
+  const sizes: ShotSizes = {};
+  for (const { shot } of screenshots) {
+    const [light, dark] = await Promise.all(
+      ["light", "dark"].map(async (theme) => {
+        const path = `src/images/${name}/${shot}-${theme}.webp`;
+        if (!(await Bun.file(path).exists()))
+          throw new Error(`${path} is missing`);
+        const { width = 0, height = 0 } = await sharp(path).metadata();
+        return { width, height };
+      }),
+    );
+    if (light?.width !== dark?.width || light?.height !== dark?.height) {
+      throw new Error(
+        `${name}/${shot}: the light and dark copies differ in size`,
+      );
+    }
+    sizes[shot] = light as { width: number; height: number };
+  }
+  return sizes;
+}
+
+/**
+ * /media-cast/download/windows to that installer in the synced release. Not
+ * releases/latest like the install scripts: an installer's name carries its
+ * version, so there is no fixed name for "latest" to resolve. Still a 302, so
+ * the next release's sync moves it without a cached redirect in the way.
+ */
+function downloadRedirects(
+  products: Awaited<ReturnType<typeof productReleases>>,
+): Record<string, string> {
+  return Object.fromEntries(
+    products.flatMap(({ project, release }) =>
+      productDownloads(project, release).map((download) => [
+        `/${project.name}/download/${download.os}`,
+        download.url,
+      ]),
+    ),
+  );
+}
+
+/**
  * Each project page's README, as scripts/sync-docs.ts left it in content/docs.
  * A missing snapshot fails the build with the command that makes one, rather
  * than shipping a page with nothing on it.
@@ -250,35 +335,49 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     cssHome,
     cssCv,
     cssProject,
+    cssProduct,
     theme,
     cv,
     stats,
     artJs,
     projectJs,
+    productJs,
     art,
     projects,
+    products,
   ] = await Promise.all([
     buildCss("home"),
     buildCss("cv"),
     buildCss("project"),
+    buildCss("product"),
     buildScript("src/client/theme.ts", "theme"),
     buildScript("src/client/cv.ts", "cv"),
     buildScript("src/client/stats.ts", "stats"),
     buildScript("src/client/art.ts", "art"),
     buildScript("src/client/project.ts", "project"),
+    buildScript("src/client/product.ts", "product"),
     // The homepage masthead's picture, rendered from the photograph the CV
     // serves. Built here rather than committed so the two cannot drift — see
     // src/ascii.ts, which is also where the decoder in the devDependencies
     // comes from.
     portraitArt(),
     projectDocs(content),
+    productReleases(content),
   ]);
 
   // Same scripts, different stylesheet: each page links only its own.
-  const scripts = { theme, cv, stats, art: artJs, project: projectJs };
+  const scripts = {
+    theme,
+    cv,
+    stats,
+    art: artJs,
+    project: projectJs,
+    product: productJs,
+  };
   const homeAssets: Assets = { css: cssHome, ...scripts };
   const cvAssets: Assets = { css: cssCv, ...scripts };
   const projectAssets: Assets = { css: cssProject, ...scripts };
+  const productAssets: Assets = { css: cssProduct, ...scripts };
 
   // Each project page and the images its README names, served beside it.
   const projectFiles: string[] = [];
@@ -296,7 +395,23 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
       );
     }
   }
-  const projectPaths = projects.map(({ project }) => `/${project.name}`);
+  // Each product page and its icon. Its screenshots are under src/images,
+  // copied below with the portrait.
+  for (const { project, release, sizes } of products) {
+    projectFiles.push(
+      await write(
+        `${project.name}/index.html`,
+        productPage(content, productAssets, project, release, sizes),
+      ),
+    );
+    await cp(
+      `${DOCS_DIR}/${project.name}/${project.product.logo}`,
+      `${OUT}/${project.name}/${project.product.logo}`,
+    );
+  }
+  const projectPaths = [...projects, ...products].map(
+    ({ project }) => `/${project.name}`,
+  );
 
   // Fonts are already subset and hashed by content only in the sense that they
   // never change; keep the readable names and rely on immutable caching.
@@ -332,6 +447,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
       JSON.stringify({
         ...sectionRedirects(site),
         ...releaseRedirects(content),
+        ...downloadRedirects(products),
       }),
     ),
     // Same arrangement, for the same reason: /stats.json needs to know what to
@@ -350,10 +466,12 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     cssHome,
     cssCv,
     cssProject,
+    cssProduct,
     theme,
     cv,
     artJs,
     projectJs,
+    productJs,
   ];
 
   // The print copies: identical markup plus the contact line, written outside

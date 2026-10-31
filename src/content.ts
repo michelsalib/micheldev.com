@@ -168,6 +168,7 @@ export type ActiveProject = {
   blurb: string;
   subdomains?: Subdomain[];
   page?: ProjectPage;
+  product?: ProductPage;
 };
 
 /** One tab of the install box on a project page. */
@@ -182,8 +183,46 @@ export type ProjectPage = {
   install: InstallMethod[];
 };
 
+/** One installer on a product page, picked out of the latest release by `asset`. */
+export type ProductDownload = {
+  /** Also the short URL: /<name>/download/<os>. */
+  os: "windows" | "mac";
+  label: string;
+  /** A regular expression matched against the release's asset names. */
+  asset: string;
+  note: string;
+};
+
+/**
+ * A page of its own at /<name> for an application rather than a tool: written
+ * here for the people who will use it, not rendered from a README written for
+ * the people who build it. The release it offers is synced the way a README is.
+ */
+export type ProductPage = {
+  /** 1–6, shared with `page.hue`: no two pages paint in the same one. */
+  hue: number;
+  /** The app's name as its users see it, which is not always the repo's. */
+  title: string;
+  /** Its icon, at this path in the repository, synced at the release tag. */
+  logo: string;
+  headline: string;
+  lede: string;
+  downloads: ProductDownload[];
+  /** `src/images/<name>/<shot>-light.webp` and `-dark.webp`. The first leads. */
+  screenshots: { shot: string; alt: string; caption?: string }[];
+  steps: { title: string; text: string }[];
+  features: { title: string; text: string }[];
+  first_run: { title: string; points: string[] }[];
+  questions: { q: string; a: string }[];
+};
+
 /** The release a project page was rendered from, as scripts/sync-docs.ts saw it. */
-export type DocsRelease = { tag: string; published_at: string };
+export type DocsRelease = {
+  tag: string;
+  published_at: string;
+  /** A product page's installers. Not kept for a README page, which links none. */
+  assets?: { name: string; size: number }[];
+};
 
 /** Where scripts/sync-docs.ts keeps each page's README and the images it names. */
 export const DOCS_DIR = "content/docs";
@@ -195,6 +234,18 @@ export function pageProjects(
   return projects.active.filter(
     (project): project is ActiveProject & { page: ProjectPage; repo: string } =>
       Boolean(project.page && project.repo),
+  );
+}
+
+/** Active projects with a product page: a `product` block and a repo. */
+export function productProjects(
+  projects: Projects,
+): (ActiveProject & { product: ProductPage; repo: string })[] {
+  return projects.active.filter(
+    (
+      project,
+    ): project is ActiveProject & { product: ProductPage; repo: string } =>
+      Boolean(project.product && project.repo),
   );
 }
 

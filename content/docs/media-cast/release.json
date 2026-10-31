@@ -1,0 +1,38 @@
+{
+  "tag": "v2.4.0",
+  "published_at": "2026-10-31T13:16:07Z",
+  "assets": [
+    {
+      "name": "latest-mac.yml",
+      "size": 516
+    },
+    {
+      "name": "latest.yml",
+      "size": 349
+    },
+    {
+      "name": "media-cast-2.4.0-setup.exe",
+      "size": 180902191
+    },
+    {
+      "name": "media-cast-2.4.0-setup.exe.blockmap",
+      "size": 192051
+    },
+    {
+      "name": "Media-Cast-2.4.0-universal-mac.zip",
+      "size": 358821459
+    },
+    {
+      "name": "media-cast-2.4.0.dmg",
+      "size": 358542692
+    },
+    {
+      "name": "media-cast-2.4.0.dmg.blockmap",
+      "size": 374698
+    },
+    {
+      "name": "Media.Cast-2.4.0-universal-mac.zip.blockmap",
+      "size": 370049
+    }
+  ]
+}

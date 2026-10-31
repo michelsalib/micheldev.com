@@ -137,13 +137,154 @@ active:
           note: Node ≥ 20 or Bun · or npx, with nothing to install
 
   - name: media-cast
-    url: https://github.com/michelsalib/media-cast
+    url: /media-cast
     repo: https://github.com/michelsalib/media-cast
     live: false
-    tags: [typescript, chromecast]
+    tags: [typescript, electron]
     blurb: >-
-      Streams local media straight to a Chromecast, without uploading it
-      anywhere first.
+      Plays the videos on your computer on a Chromecast or a smart TV,
+      subtitles included — a desktop app for people who just want to watch.
+    # Not a README page: media-cast is used by people who will never open a
+    # terminal, so its page is written for them, here. Only the release and the
+    # icon come from the repository.
+    product:
+      hue: 4
+      title: Media Cast
+      logo: build/icon.svg
+      headline: Your videos, on your TV.
+      lede: >-
+        Drop a movie or an episode from your computer, pick the TV, press Play.
+        Media Cast plays it on a Chromecast or a smart TV at home, subtitles
+        included — nothing to set up on the TV, no account, and nothing
+        uploaded anywhere.
+      downloads:
+        - os: windows
+          label: Windows
+          asset: '-setup\.exe$'
+          note: Windows 10 and 11
+        - os: mac
+          label: macOS
+          asset: '\.dmg$'
+          note: macOS 13 or later, any Mac
+      screenshots:
+        - shot: ready
+          alt: >-
+            Media Cast with Big Buck Bunny ready to play: its audio track, its
+            subtitles, and the two screens it found on the network.
+        - shot: playing
+          alt: >-
+            Media Cast while a video plays on the living-room Chromecast: the
+            progress bar, pause, skip ten seconds, and the audio and subtitles
+            button.
+          caption: >-
+            While it plays: pause, skip, switch the subtitles or fix their
+            timing — from the computer, or from your phone.
+      steps:
+        - title: Open Media Cast
+          text: >-
+            It finds the Chromecasts and smart TVs on your network by itself.
+            Nothing to set up on the TV: just have it switched on.
+        - title: Drop a video
+          text: >-
+            Drag a movie or an episode onto the window, or click Choose a video.
+            MP4, MKV and AVI. Its audio and subtitles are listed straight away.
+        - title: Pick the screen
+          text: Click the TV or the Chromecast you want to watch on.
+        - title: Press Play
+          text: >-
+            The video starts on the TV. Keep the computer awake while you
+            watch: it is the one sending the video.
+      features:
+        - title: Chromecast and smart TVs
+          text: >-
+            Plays on Chromecast and Google TV, and on most smart TVs through
+            DLNA, the standard they share. When a TV can't read a file as it
+            is, Media Cast converts it while it plays.
+        - title: Subtitles that show up
+          text: >-
+            The subtitles inside the file, or a .srt, .ass or .vtt file you
+            drop along with it. TVs that ignore separate subtitles get them
+            drawn into the picture, so they always appear.
+        - title: Find subtitles online
+          text: >-
+            Search Addic7ed for TV episodes from inside the app. OpenSubtitles
+            and Subdl work too, once you paste a free API key from their site
+            into the settings.
+        - title: Fix out-of-sync subtitles
+          text: >-
+            Subtitles early or late? Shift them while you watch, or line them up
+            against a preview before you start. Make them bigger or smaller too.
+        - title: Your phone as the remote
+          text: >-
+            Switch on the phone remote and scan the QR code: your phone's
+            browser becomes the remote, with play and pause on its lock screen.
+            Nothing to install on the phone.
+        - title: Pick the language
+          text: >-
+            A film with several audio tracks? Choose the one to hear, and switch
+            to another while it plays.
+        - title: Torrents too
+          text: >-
+            Paste a magnet link or drop a .torrent file: it starts playing while
+            it downloads, fetching only the part you are watching.
+        - title: Stays at home
+          text: >-
+            Your file goes from your computer to the TV over your own network.
+            No account, no cloud, no ads.
+      first_run:
+        - title: On a Mac
+          points:
+            - Open the .dmg and drag Media Cast into Applications.
+            - >-
+              The first time, macOS refuses to open it, because Media Cast is
+              not notarised by Apple. Open System Settings → Privacy &
+              Security, scroll down, and click Open Anyway.
+            - >-
+              When it asks to find devices on your local network, click Allow.
+              Without that, no TV shows up.
+        - title: On Windows
+          points:
+            - >-
+              Run the installer. If SmartScreen says it protected your PC,
+              click More info, then Run anyway: the installer is not signed
+              with a paid certificate.
+            - >-
+              When the firewall asks, allow Media Cast on private networks.
+              That is how the TV reaches the video.
+      questions:
+        - q: Is it free?
+          a: >-
+            Yes. No account, no ads, no subscription, and its source code is on
+            GitHub.
+        - q: Is my video uploaded anywhere?
+          a: >-
+            No. It goes from your computer straight to the TV over your home
+            network. The internet is only used to look for updates, for the
+            subtitles you search for, and for the torrents you open.
+        - q: My TV doesn't show up.
+          a: >-
+            Check that the TV is on and on the same network as the computer,
+            then click Look again. On a Mac, allow local network access in
+            System Settings → Privacy & Security → Local Network. On Windows,
+            the firewall must let Media Cast through on private networks. A VPN
+            can hide the TV too.
+        - q: Which videos does it play?
+          a: >-
+            MP4 and MKV everywhere, and AVI on smart TVs but not on a
+            Chromecast. A Chromecast plays the file as it is, so H.264 video is
+            the safe choice there. A smart TV that can't read a file gets a
+            converted copy as it plays, in up to Full HD.
+        - q: Why are the subtitles part of the picture on my TV?
+          a: >-
+            Most smart TVs ignore subtitles sent alongside the video, so Media
+            Cast draws them into it. A Chromecast shows them the usual way.
+        - q: Can I change the volume from the app?
+          a: >-
+            No, use the TV's remote. Many TVs, and most soundbars, don't let an
+            app change their volume.
+        - q: Is there a Linux version?
+          a: >-
+            No. Media Cast is made for Windows and macOS.
 
   - name: audio-tray
     url: https://github.com/michelsalib/audio-tray

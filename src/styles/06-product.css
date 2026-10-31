@@ -1,0 +1,273 @@
+/* ── Product pages ─────────────────────────────────────────────────────────
+   /media-cast: an application, for the people who use it. Loaded after
+   05-project.css, whose plate, tiles, release line, contents rail and type
+   scale it keeps; this sheet adds what a README page has no use for — download
+   buttons, screenshots, steps, feature cards and questions.               */
+
+/* ── Masthead ──────────────────────────────────────────────────────────── */
+
+/* The screenshot is the picture here, and wider than a README's transcript:
+   it is a whole window, and shrunk to half the plate its text is unreadable.
+   Above the breakpoint only — 05-project.css stacks the two below it. */
+@media (min-width: 881px) {
+  .product .proj-mast {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr);
+    align-items: center;
+  }
+}
+
+/* The name is small here: the headline says what the app is for, and the
+   name sits beside its icon the way it does in a dock or a Start menu. */
+.product .proj-id img {
+  width: 56px;
+  height: 56px;
+}
+.product .proj-id .name {
+  margin: 4px 0 0;
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 21px;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--p-ink);
+}
+.product h1 {
+  margin: 26px 0 0;
+  font-size: clamp(38px, 5.4vw, 62px);
+  line-height: 1.02;
+  color: var(--p-ink);
+}
+
+/* Download buttons, cut at the corner like the tiles. All solid without JS;
+   the client script marks the reader's own system `.primary` and the box
+   `.picked`, which turns the others into quiet outlines. */
+.get {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.get-btn {
+  --btn-cut: 14px;
+  display: grid;
+  gap: 3px;
+  padding: 12px 26px 13px 18px;
+  background: var(--hue);
+  color: var(--paper);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - var(--btn-cut)),
+    calc(100% - var(--btn-cut)) 100%,
+    0 100%
+  );
+  transition: background 0.16s ease;
+}
+.get-btn:hover {
+  background: color-mix(in srgb, var(--hue) 84%, var(--ink));
+}
+.get-l {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 17px;
+  line-height: 1.2;
+}
+.get-n {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  opacity: 0.86;
+}
+.get.picked .get-btn:not(.primary) {
+  clip-path: none;
+  background: none;
+  color: var(--ink-2);
+  border: 1px solid var(--rule-strong);
+  padding: 11px 17px 12px;
+}
+.get.picked .get-btn:not(.primary):hover {
+  color: var(--ink);
+  border-color: var(--hue);
+}
+.get-other {
+  margin: 12px 0 0;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+  max-width: 44em;
+}
+.get-other a {
+  color: var(--ink);
+  border-bottom: 1px solid color-mix(in srgb, var(--hue) 45%, transparent);
+}
+
+/* ── Screenshots ───────────────────────────────────────────────────────── */
+
+.shot {
+  margin: 0;
+  min-width: 0;
+}
+.shot .frame {
+  border: 1px solid var(--rule-strong);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  line-height: 0;
+}
+.shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.shot figcaption {
+  margin-top: 10px;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--ink-3);
+}
+.readme .shot {
+  margin-top: 34px;
+}
+.readme .shot img {
+  margin: 0;
+  border: 0;
+}
+
+/* The app follows the system theme, so it is shown in the one the site is
+   in. Same three states as the theme toggle's icons (02-base.css). */
+.shot .dark {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shot .light {
+    display: none;
+  }
+  :root:not([data-theme="light"]) .shot .dark {
+    display: block;
+  }
+}
+:root[data-theme="dark"] .shot .light {
+  display: none;
+}
+:root[data-theme="dark"] .shot .dark {
+  display: block;
+}
+
+/* ── Steps ─────────────────────────────────────────────────────────────── */
+
+.readme .steps {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  max-width: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 22px;
+}
+.readme .steps li {
+  margin: 0;
+  padding-top: 14px;
+  border-top: 2px solid var(--hue);
+}
+.steps .k {
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--hue);
+}
+.readme .steps h3 {
+  margin: 4px 0 0;
+}
+.readme .steps p {
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+/* ── Features ──────────────────────────────────────────────────────────── */
+
+.readme .features {
+  list-style: none;
+  margin: 22px 0 0;
+  padding: 0;
+  max-width: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+.readme .features li {
+  margin: 0;
+  padding: 18px 20px 20px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+}
+.readme .features h3,
+.readme .system h3 {
+  margin: 0;
+  font-size: 17px;
+}
+.readme .features p {
+  margin-top: 8px;
+  font-size: 15px;
+}
+
+/* ── First launch ──────────────────────────────────────────────────────── */
+
+.systems {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+.system {
+  padding: 18px 20px 20px;
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--hue);
+}
+.readme .system ol {
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+/* ── Questions ─────────────────────────────────────────────────────────── */
+
+.faq {
+  margin-top: 16px;
+  max-width: 70ch;
+  border-top: 1px solid var(--rule);
+}
+.faq details {
+  border-bottom: 1px solid var(--rule);
+}
+.faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  color: var(--ink);
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq summary::after {
+  content: "+";
+  font-family: var(--f-mono);
+  color: var(--hue);
+}
+.faq details[open] summary::after {
+  content: "−";
+}
+.faq summary:hover {
+  color: var(--hue);
+}
+.readme .faq p {
+  margin: 0 0 16px;
+}
+
+/* ── Narrow ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 560px) {
+  .get-btn {
+    flex: 1 1 100%;
+  }
+}
