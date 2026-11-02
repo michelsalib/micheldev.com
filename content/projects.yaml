@@ -312,19 +312,19 @@ active:
           label: Windows
           asset: '^AudioTray-.+-Setup\.exe$'
           note: Windows 11, 64-bit
-      # PLACEHOLDERS: src/images/audio-tray/*.webp are grey cards saying what
-      # to capture, not the app. Replace each pair (light and dark, same size)
-      # with real screenshots before this goes live.
+      # The app itself, staged on a plain backdrop with invented songs and
+      # covers (nothing anyone published), one pair per theme, same size.
       screenshots:
         - shot: flyout
           alt: >-
-            The Audio Tray flyout above the taskbar: the song playing, the
-            output and input volume, the devices, and a volume for each app.
+            The Audio Tray flyout above the taskbar: the output and input
+            volume, the headphones and microphone in use, and a volume for
+            each app.
         - shot: pill
           alt: >-
-            The edge pill on the side of the screen: the song's cover in its
-            progress ring, a call with the person talking lit green, and the
-            output and input devices.
+            The edge pill opened on the side of the screen: a song and a live
+            stream, each with its cover and controls, and the output and input
+            devices below.
           caption: >-
             The edge pill: what plays, who talks and whether your mic is live,
             without opening anything. Point at it for the controls.
