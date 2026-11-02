@@ -287,13 +287,173 @@ active:
             No. Media Cast is made for Windows and macOS.
 
   - name: audio-tray
-    url: https://github.com/michelsalib/audio-tray
+    url: /audio-tray
     repo: https://github.com/michelsalib/audio-tray
     live: false
     tags: [rust, desktop]
     blurb: >-
-      A tray app for switching audio devices — and my excuse to write Rust in
-      anger rather than in tutorials.
+      Switches your sound between speakers and headset in a click, and shows
+      what is playing, who is talking and whether your mic is live — on
+      Windows 11, in native Rust.
+    # A product page, like media-cast's: its users switch headsets, they don't
+    # read READMEs. Only the release and the logo come from the repository.
+    product:
+      hue: 2
+      title: Audio Tray
+      logo: assets/logo/audio-tray.svg
+      headline: Your sound, one click away.
+      lede: >-
+        Switch between speakers and headset in one click, scroll on the taskbar
+        for the volume, and see at a glance what is playing, who is talking in
+        your call and whether your mic is live. A small app for Windows 11 that
+        stays out of the way until something needs you.
+      downloads:
+        - os: windows
+          label: Windows
+          asset: '^AudioTray-.+-Setup\.exe$'
+          note: Windows 11, 64-bit
+      # PLACEHOLDERS: src/images/audio-tray/*.webp are grey cards saying what
+      # to capture, not the app. Replace each pair (light and dark, same size)
+      # with real screenshots before this goes live.
+      screenshots:
+        - shot: flyout
+          alt: >-
+            The Audio Tray flyout above the taskbar: the song playing, the
+            output and input volume, the devices, and a volume for each app.
+        - shot: pill
+          alt: >-
+            The edge pill on the side of the screen: the song's cover in its
+            progress ring, a call with the person talking lit green, and the
+            output and input devices.
+          caption: >-
+            The edge pill: what plays, who talks and whether your mic is live,
+            without opening anything. Point at it for the controls.
+        - shot: settings
+          alt: >-
+            The Audio Tray Settings window, with a map of the displays to put
+            the edge pill on the left, right or top edge of any of them.
+          caption: >-
+            Settings: the taskbar buttons, where the pill sits, each device's
+            icon, and the apps it connects to.
+      steps:
+        - title: Install it
+          text: >-
+            Run the installer. It installs for you only, with no administrator
+            rights, and can start Audio Tray each time you sign in.
+        - title: Open the flyout
+          text: >-
+            Audio Tray sits by the clock. Click it: volume, mute, your
+            output and input devices, a volume for each app, and what is
+            playing.
+        - title: Put it on the taskbar
+          text: >-
+            In Settings, turn on the taskbar buttons: one for the output, one
+            for the input. Click one to switch to the next device, scroll it
+            for the volume.
+        - title: Glance at the edge
+          text: >-
+            The pill on the edge of the screen shows the song, your call and
+            your mic. It stays a thin sliver until something happens.
+      features:
+        - title: Switch in one click
+          text: >-
+            Speakers, headset, the TV over HDMI: click the output or input
+            button for the next one, or pick it in the flyout. Give each device
+            the icon you recognise it by.
+        - title: Volume from the taskbar
+          text: >-
+            With the taskbar buttons on, scroll anywhere on the taskbar to
+            change the volume, or over the buttons with the touchpad. Over the
+            input button, it sets the microphone's.
+        - title: A better sound flyout
+          text: >-
+            An acrylic panel in Windows 11's style: output and input volume,
+            mute, your devices, the battery of Bluetooth headsets, a volume for
+            each app, and what is playing with its controls.
+        - title: The edge pill
+          text: >-
+            A small pill on the edge of the screen: the song in a progress
+            ring, the faces in your call with whoever talks lit up, your mic
+            and its live dot. Click a device on it to switch.
+        - title: Warns you when it matters
+          text: >-
+            Amber when you talk while muted, or when the sound moved because
+            your headphones disconnected. Red when an app starts listening
+            outside a call: click to mute.
+        - title: Where you want it
+          text: >-
+            Put the pill on the left, right or top edge of any display, from a
+            map of your screens in Settings. It hides behind fullscreen apps
+            and never takes the focus.
+        - title: Discord and Teams calls
+          text: >-
+            Connect Discord to see who is in the call, with their avatars, and
+            who is talking, and to mute from the pill. Teams meetings show
+            whether you are muted.
+        - title: Every tab that plays
+          text: >-
+            A browser extension for Edge and Chrome shows each tab playing
+            media — two Twitch streams, a YouTube video — from every site or
+            only the ones you choose. MPC-HC shows up too.
+        - title: Keeps itself up to date
+          text: >-
+            It checks for a new version when it starts and installs it the
+            next time, or straight away from the flyout.
+      first_run:
+        - title: Installing
+          points:
+            - >-
+              Run AudioTray-…-Setup.exe. If SmartScreen says it protected your
+              PC, click More info, then Run anyway: the installer is not signed
+              with a paid certificate.
+            - >-
+              Tick “Start Audio Tray automatically when I sign in” to have it
+              there every day. No administrator rights are needed.
+        - title: Connecting apps
+          points:
+            - >-
+              Discord: create a free application at discord.com/developers and
+              paste its id and secret in Settings → Connectors. Discord then
+              asks once to authorise it.
+            - >-
+              Teams: turn on the third-party app API in Teams' Settings →
+              Privacy, then accept Audio Tray when Teams asks.
+            - >-
+              Browser: Settings → Connectors → Install the extension, then load
+              it from edge://extensions or chrome://extensions with Developer
+              mode on.
+            - >-
+              MPC-HC: turn on Options → Player → Control via Windows UI.
+      questions:
+        - q: Is it free?
+          a: >-
+            Yes. No account, no ads, no subscription, and its source code is on
+            GitHub.
+        - q: Which Windows does it need?
+          a: >-
+            Windows 11, 64-bit. Its taskbar buttons and its look are made for
+            Windows 11's taskbar.
+        - q: Is there a Mac or Linux version?
+          a: No. Audio Tray is made for Windows only.
+        - q: Does it listen to my microphone?
+          a: >-
+            It never records. It reads which apps use the microphone, from the
+            same place as Windows' own indicator, and, while you are muted in a
+            call, how loud the mic is, to warn you when you talk.
+        - q: The taskbar buttons don't show.
+          a: >-
+            They are off until you turn them on in Settings. Audio Tray's icon
+            must be on the taskbar, not hidden behind the arrow. Taskbar tools
+            such as TranslucentTB or Windhawk can get in their way. Without
+            them, Audio Tray stays a plain tray icon that does everything else.
+        - q: Does it change my taskbar for good?
+          a: >-
+            No. While the buttons show, Windows' own volume and mic icons are
+            hidden, since the buttons say the same. Quit Audio Tray and the
+            taskbar is exactly as it was.
+        - q: How do I uninstall it?
+          a: >-
+            Windows Settings → Apps → Installed apps → Audio Tray → Uninstall.
 
   - name: updater
     url: https://github.com/michelsalib/updater

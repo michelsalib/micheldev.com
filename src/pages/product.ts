@@ -84,15 +84,29 @@ function megabytes(bytes: number): string {
 }
 
 /**
+ * What a page says about each system it may offer: the computer to open it on
+ * from a phone, who would have signed the installer, and the name a missing
+ * version goes by.
+ */
+const SYSTEMS = {
+  windows: { computer: "a Windows PC", vendor: "Microsoft", name: "Windows" },
+  mac: { computer: "a Mac", vendor: "Apple", name: "macOS" },
+  linux: { computer: "", vendor: "", name: "Linux" },
+} as const;
+
+/**
  * The download buttons. Without JS they are equals, in the YAML's order;
  * src/client/product.ts puts the reader's own system first and quietens the
- * rest, or says so when the reader is on a phone or on Linux.
+ * rest, or says so when the reader is on a phone or on a system the app does
+ * not run on.
  */
 function downloadBox(
   project: ProductProject,
   release: DocsRelease,
   downloads: ResolvedDownload[],
 ): Renderable {
+  const offered = new Set<string>(downloads.map((download) => download.os));
+  const missing = (["mac", "linux"] as const).filter((os) => !offered.has(os));
   return html`<div class="get" id="download" data-downloads>
       ${downloads.map(
         (download) =>
@@ -109,13 +123,17 @@ function downloadBox(
       )}
     </div>
     <p class="get-other" data-other="mobile" hidden>
-      ${project.product.title} runs on a computer: open this page on a Windows
-      PC or a Mac to download it.
+      ${project.product.title} runs on a computer: open this page on
+      ${downloads.map((download) => SYSTEMS[download.os].computer).join(" or ")}
+      to download it.
     </p>
-    <p class="get-other" data-other="linux" hidden>
-      There is no Linux version yet — see
-      <a href="#questions">the questions</a>.
-    </p>`;
+    ${missing.map(
+      (os) =>
+        html`<p class="get-other" data-other="${os}" hidden>
+          There is no ${SYSTEMS[os].name} version — see
+          <a href="#questions">the questions</a>.
+        </p>`,
+    )}`;
 }
 
 /** Image sizes, read from the files by the build. Keyed by the shot's name. */
@@ -201,6 +219,10 @@ export function productPage(
   const downloads = productDownloads(project, release);
   const [lead, ...more] = product.screenshots;
   const systems = downloads.map((download) => download.label).join(" and ");
+  const vendors = downloads
+    .map((download) => SYSTEMS[download.os].vendor)
+    .sort()
+    .join(" or ");
 
   return String(
     html`${documentHead({
@@ -309,7 +331,7 @@ export function productPage(
               ${rail("first-launch")}
               <p>
                 ${product.title} is not signed with a paid certificate from
-                Apple or Microsoft, so the first time, your computer asks you
+                ${vendors}, so the first time, your computer asks you
                 to confirm. It is a one-time thing.
               </p>
               <div class="systems">

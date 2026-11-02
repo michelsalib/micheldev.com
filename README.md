@@ -172,7 +172,15 @@ server 302s to the matching installer of that release. Not
 carries its version, so "latest" has no fixed name to resolve. An installer
 pattern (`asset`) that matches nothing fails the build rather than shipping a
 dead button. Without JS the buttons are equals; `src/client/product.ts` puts the
-reader's own system first, and says so on a phone or on Linux.
+reader's own system first, and says so on a phone or on a system the app does
+not run on.
+
+`/audio-tray` is the second one, Windows only: one button, and a note for a Mac
+or Linux reader instead of a second. Its logo is `assets/logo/audio-tray.svg`
+in its repository, synced at the release tag like media-cast's icon, so a sync
+fails for it (and `--keep-going` keeps the committed snapshot) until a release
+carries that file. Its screenshots in `src/images/audio-tray/` are still
+**placeholders**: grey cards naming the shot to take.
 
 The screenshots are the app itself, in `src/images/media-cast/`, one copy per
 theme (`ready-light.webp`, `ready-dark.webp`…). The page shows the one matching

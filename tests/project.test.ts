@@ -245,7 +245,7 @@ describe("the built project pages", () => {
 });
 
 describe("the built product pages", () => {
-  const pages: { name: string; html: string }[] = [];
+  const pages: { name: string; html: string; systems: string[] }[] = [];
 
   beforeAll(async () => {
     await build();
@@ -253,12 +253,16 @@ describe("the built product pages", () => {
       pages.push({
         name: project.name,
         html: await Bun.file(`dist/${project.name}/index.html`).text(),
+        systems: project.product.downloads.map((download) => download.os),
       });
     }
   });
 
   test("every project with a product block gets one", () => {
-    expect(pages.map((page) => page.name)).toEqual(["media-cast"]);
+    expect(pages.map((page) => page.name)).toEqual([
+      "media-cast",
+      "audio-tray",
+    ]);
   });
 
   test("they are in the sitemap, and the homepage links them here", async () => {
@@ -310,9 +314,10 @@ describe("the built product pages", () => {
   });
 
   test("the download buttons use the short URLs, and work without JS", () => {
-    for (const { name, html } of pages) {
-      expect(html).toContain(`href="/${name}/download/windows"`);
-      expect(html).toContain(`href="/${name}/download/mac"`);
+    for (const { name, html, systems } of pages) {
+      for (const os of systems) {
+        expect(html).toContain(`href="/${name}/download/${os}"`);
+      }
       // Nothing is picked until the client script has looked at the system.
       expect(html).not.toContain("get-btn primary");
       expect(html).toContain(`data-project="${name}"`);
@@ -397,6 +402,25 @@ describe("the short install URLs", () => {
       /^https:\/\/github\.com\/michelsalib\/media-cast\//,
     );
     expect(response.headers.get("location")).toMatch(target);
+  });
+
+  test("/audio-tray/download/windows 302s to its installer", async () => {
+    const response = await get("/audio-tray/download/windows");
+    expect(response.status).toBe(302);
+    expect(response.headers.get("location")).toMatch(
+      /^https:\/\/github\.com\/michelsalib\/audio-tray\/releases\/download\/v[^/]+\/AudioTray-[^/]+-Setup\.exe$/,
+    );
+  });
+
+  test("a product page offers what its app runs on, and says so for the rest", async () => {
+    const html = await Bun.file("dist/audio-tray/index.html").text();
+    expect(html).not.toContain('href="/audio-tray/download/mac"');
+    expect(html).toContain('data-other="mac"');
+    expect(html).toContain('data-other="linux"');
+    expect(html).toMatch(/certificate from\s+Microsoft,/);
+    const cast = await Bun.file("dist/media-cast/index.html").text();
+    expect(cast).not.toContain('data-other="mac"');
+    expect(cast).toMatch(/certificate from\s+Apple or Microsoft,/);
   });
 
   test("the page itself is served, and the section redirects still 301", async () => {

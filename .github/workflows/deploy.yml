@@ -5,8 +5,9 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
-  # A release of a project with a page (nethound, envhound, media-cast) sends
-  # this, so its page shows the new README or installers within minutes. The weekly run catches a release
+  # A release of a project with a page (nethound, envhound, media-cast,
+  # audio-tray) sends this, so its page shows the new README or installers
+  # within minutes. The weekly run catches a release
   # whose dispatch never arrived.
   repository_dispatch:
     types: [project-released]
@@ -202,7 +203,7 @@ jobs:
         run: |
           URL="$(terraform output -raw service_url)"
           echo "checking ${URL}"
-          for path in / /cv /cv/fr /michel-salib-cv-en.pdf /nethound /envhound /media-cast; do
+          for path in / /cv /cv/fr /michel-salib-cv-en.pdf /nethound /envhound /media-cast /audio-tray; do
             code="$(curl -s -o /dev/null -w '%{http_code}' "${URL}${path}")"
             echo "  ${path} -> ${code}"
             [ "${code}" = "200" ] || exit 1
@@ -225,6 +226,9 @@ jobs:
           # And a download button to the installer in the synced release.
           code="$(curl -s -o /dev/null -w '%{http_code}' "${URL}/media-cast/download/windows")"
           echo "  /media-cast/download/windows -> ${code}"
+          [ "${code}" = "302" ] || exit 1
+          code="$(curl -s -o /dev/null -w '%{http_code}' "${URL}/audio-tray/download/windows")"
+          echo "  /audio-tray/download/windows -> ${code}"
           [ "${code}" = "302" ] || exit 1
 
       - name: Deployed
