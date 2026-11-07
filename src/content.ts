@@ -217,15 +217,34 @@ export type ProductPage = {
   questions: { q: string; a: string }[];
   /** Present, the page takes the cinema layout (src/pages/cinema.ts). */
   cinema?: CinemaCopy;
+  /** Present, the page takes the desk layout (src/pages/desk.ts). */
+  desk?: DeskCopy;
 };
 
-/** A feature. With `show`, the cinema layout gives it a scene, not a card. */
+/** The scenes the cinema layout draws. */
+export type CinemaShow = "subtitles" | "remote" | "torrents" | "trip";
+/** The scenes the desk layout draws. */
+export type DeskShow = "taskbar" | "pill" | "warnings";
+
+/**
+ * A feature. With `show`, the page's layout gives it a scene, not a card. Each
+ * layout draws only its own scenes and fails the build on another's.
+ */
 export type ProductFeature = {
   title: string;
   text: string;
-  show?: "subtitles" | "remote" | "torrents" | "trip";
+  show?: CinemaShow | DeskShow;
   eyebrow?: string;
   headline?: string;
+};
+
+/** The words only the desk layout uses, one line per list item. */
+export type DeskCopy = {
+  /** The masthead's headline, a line each; the last is lit. */
+  headline: string[];
+  /** The row of names under the masthead. */
+  works_with: string[];
+  cta: string[];
 };
 
 /** The words only the cinema layout uses, one line per list item. */

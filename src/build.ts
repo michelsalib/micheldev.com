@@ -22,6 +22,7 @@ import {
 } from "./content.ts";
 import { cinemaPage } from "./pages/cinema.ts";
 import { cvPage } from "./pages/cv.ts";
+import { deskPage } from "./pages/desk.ts";
 import { homePage } from "./pages/home.ts";
 import { notFoundPage } from "./pages/not-found.ts";
 import { ogCard } from "./pages/og.ts";
@@ -75,6 +76,8 @@ const PAGE_CSS = {
   // The cinema layout shares nothing below the top bar with a project page,
   // so it takes neither of those sheets: see src/pages/cinema.ts.
   cinema: [...SHARED_CSS, "src/styles/07-cinema.css"],
+  // The desk layout, likewise: see src/pages/desk.ts.
+  desk: [...SHARED_CSS, "src/styles/08-desk.css"],
 } as const;
 
 /** Short, stable, content-addressed suffix. */
@@ -341,6 +344,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     cssProject,
     cssProduct,
     cssCinema,
+    cssDesk,
     theme,
     cv,
     stats,
@@ -356,6 +360,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     buildCss("project"),
     buildCss("product"),
     buildCss("cinema"),
+    buildCss("desk"),
     buildScript("src/client/theme.ts", "theme"),
     buildScript("src/client/cv.ts", "cv"),
     buildScript("src/client/stats.ts", "stats"),
@@ -385,6 +390,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
   const projectAssets: Assets = { css: cssProject, ...scripts };
   const productAssets: Assets = { css: cssProduct, ...scripts };
   const cinemaAssets: Assets = { css: cssCinema, ...scripts };
+  const deskAssets: Assets = { css: cssDesk, ...scripts };
 
   // Each project page and the images its README names, served beside it.
   const projectFiles: string[] = [];
@@ -403,14 +409,17 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     }
   }
   // Each product page and its icon. Its screenshots are under src/images,
-  // copied below with the portrait. A `cinema` block picks that layout.
+  // copied below with the portrait. A `cinema` or `desk` block picks that
+  // layout.
   for (const { project, release, sizes } of products) {
     projectFiles.push(
       await write(
         `${project.name}/index.html`,
         project.product.cinema
           ? cinemaPage(content, cinemaAssets, project, release, sizes)
-          : productPage(content, productAssets, project, release, sizes),
+          : project.product.desk
+            ? deskPage(content, deskAssets, project, release)
+            : productPage(content, productAssets, project, release, sizes),
       ),
     );
     await cp(
@@ -477,6 +486,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     cssProject,
     cssProduct,
     cssCinema,
+    cssDesk,
     theme,
     cv,
     artJs,

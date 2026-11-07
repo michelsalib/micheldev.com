@@ -1,0 +1,1498 @@
+/* ── The desk layout ───────────────────────────────────────────────────────
+   /audio-tray: the app itself is the hero, drawn on a Windows desktop. See
+   src/pages/desk.ts for what each part is. Loaded on its own after the shared
+   tokens and base, like 07-cinema.css.
+
+   The page is site tokens and the page's hue (`.hue-N` on <main>). The app is
+   not: its pill, flyout and banners are dark in both themes, as the app's own
+   are, and drawn to its measures (audio-tray's flyout/theme.rs, pill/draw.rs,
+   the TAP's decorate.rs). Only the desktop behind them — the wallpaper and the
+   taskbar — follows the site's theme, as Windows' does.                    */
+
+/* ── The desktop's palette ───────────────────────────────────────────────
+   Three theme states, like 01-tokens.css. --acc is the Windows accent the
+   app paints with: the lavender of its screenshots.                       */
+.desk {
+  --acc: #d88fe4;
+  --wall: linear-gradient(135deg, #dbe3f5 0%, #e3ddf3 50%, #eedcef 100%);
+  --taskbar: rgb(238 238 243 / 0.88);
+  --tb-ink: #1b1b1b;
+  --tb-line: rgb(0 0 0 / 0.06);
+  --screen-shadow:
+    0 30px 80px -30px rgb(40 20 80 / 0.4), 0 0 0 1px rgb(20 18 32 / 0.08);
+  --app-font: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .desk {
+    --wall: linear-gradient(135deg, #1b1630 0%, #2a1d48 55%, #3a2052 100%);
+    --taskbar: rgb(28 28 30 / 0.9);
+    --tb-ink: #ffffff;
+    --tb-line: rgb(255 255 255 / 0.06);
+    --screen-shadow:
+      0 40px 120px -30px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(255 255 255 / 0.08);
+  }
+}
+:root[data-theme="dark"] .desk {
+  --wall: linear-gradient(135deg, #1b1630 0%, #2a1d48 55%, #3a2052 100%);
+  --taskbar: rgb(28 28 30 / 0.9);
+  --tb-ink: #ffffff;
+  --tb-line: rgb(255 255 255 / 0.06);
+  --screen-shadow:
+    0 40px 120px -30px rgb(0 0 0 / 0.9), 0 0 0 1px rgb(255 255 255 / 0.08);
+}
+
+/* The scroll readout's level, registered so it interpolates as an integer
+   and prints through a counter. Rests at the end of its motion. Top level:
+   @property cannot be nested in @media. */
+@property --vol {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 72;
+}
+
+/* ── Page ──────────────────────────────────────────────────────────────── */
+
+/* The top bar's two rules from 05-project.css, which this page does not load. */
+.bar .here.hue {
+  color: var(--hue);
+  white-space: nowrap;
+}
+@media (max-width: 880px) {
+  .bar nav a.hide-s {
+    display: none;
+  }
+}
+
+/* clip, not hidden: hidden would capture every view() timeline below. */
+.desk {
+  overflow-x: clip;
+}
+.desk h1,
+.desk h2,
+.desk h3 {
+  color: var(--ink);
+}
+.desk-eyebrow {
+  margin: 0 0 14px;
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hue);
+}
+.desk-h2 {
+  margin: 0;
+  font-weight: 800;
+  font-size: clamp(34px, 4.4vw, 50px);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+.desk-glow {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--acc);
+  filter: blur(120px);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+/* ── Masthead ──────────────────────────────────────────────────────────── */
+
+.desk-hero {
+  position: relative;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 80px 24px 96px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 56px;
+  align-items: center;
+}
+.desk-hero > .desk-glow {
+  right: -10%;
+  top: -10%;
+  width: 70%;
+  height: 80%;
+}
+.desk-hero-copy {
+  position: relative;
+}
+.desk-new {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 5px 14px 5px 5px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-family: var(--f-mono);
+  font-size: 12.5px;
+  color: var(--ink-2);
+  transition:
+    border-color 0.2s,
+    color 0.2s;
+}
+.desk-new b {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--hue);
+  color: var(--paper);
+  font-weight: 600;
+}
+.desk-new .more {
+  color: var(--ink);
+}
+.desk-new:hover {
+  border-color: var(--hue);
+  color: var(--ink);
+}
+.desk-title {
+  margin: 26px 0 0;
+  font-weight: 800;
+  font-size: clamp(48px, 6vw, 80px);
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+}
+.desk-title span {
+  display: block;
+}
+.desk-title .lit {
+  color: var(--hue);
+}
+.desk-lede {
+  margin: 24px 0 0;
+  max-width: 34em;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.desk-meta {
+  margin: 16px 0 0;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.desk-meta a {
+  color: var(--ink-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--hue) 45%, transparent);
+}
+
+/* Download buttons, as on the cinema page. */
+.desk .get {
+  margin-top: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.desk .get-btn {
+  display: grid;
+  gap: 2px;
+  padding: 14px 26px 15px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  background: var(--ink);
+  color: var(--paper);
+  transition:
+    translate 0.25s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.25s;
+}
+.desk .get-btn:hover {
+  translate: 0 -2px;
+  box-shadow: 0 14px 34px -12px color-mix(in srgb, var(--hue) 70%, transparent);
+}
+.desk .get.picked .get-btn:not(.primary) {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--rule-strong);
+}
+.desk .get-l {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.25;
+}
+.desk .get-n {
+  font-family: var(--f-mono);
+  font-size: 11px;
+  opacity: 0.75;
+}
+.desk .get-other {
+  margin: 14px 0 0;
+  max-width: 44em;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+.desk .get-other a {
+  color: var(--ink);
+  border-bottom: 1px solid color-mix(in srgb, var(--hue) 45%, transparent);
+}
+
+/* The desktop: drawn at 700 × 640 and zoomed to fit (Narrow, below). */
+.desk-screen {
+  position: relative;
+  margin: 0;
+  width: 700px;
+  height: 640px;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--screen-shadow);
+}
+.desk-screen .wall {
+  position: absolute;
+  inset: 0;
+}
+.wall {
+  background: var(--wall);
+}
+.in-pill {
+  position: absolute;
+  left: 0;
+  top: 96px;
+}
+.in-flyout {
+  position: absolute;
+  right: 12px;
+  bottom: 60px;
+}
+
+.desk-works {
+  list-style: none;
+  margin: 0;
+  padding: 26px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 48px;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface-2);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.01em;
+  color: var(--ink-3);
+}
+
+/* ── The app's surfaces ──────────────────────────────────────────────────
+   Dark in both themes, in the app's face. Colours from the app's source:
+   the flyout's tint #2C2C2C, the pill's quiet #1C1C1C and normal #202020,
+   the speaking green #3DD68C, the live red #FF4D4D, the disc #3A3A3A.     */
+
+.acrylic,
+.quiet,
+.normal,
+.banner,
+.taskbar,
+.stage {
+  font-family: var(--app-font);
+}
+.acrylic {
+  background: rgb(44 44 44 / 0.86);
+  backdrop-filter: blur(30px) saturate(140%);
+  border: 1px solid rgb(255 255 255 / 0.09);
+  border-radius: 8px;
+  box-shadow: 0 32px 64px -16px rgb(0 0 0 / 0.6);
+  color: #fff;
+}
+.quiet {
+  background: rgb(28 28 28 / 0.72);
+  backdrop-filter: blur(20px);
+  color: #fff;
+}
+.normal {
+  background: rgb(32 32 32 / 0.96);
+  color: #fff;
+}
+.desk svg {
+  display: block;
+  flex: none;
+}
+
+/* Covers: invented art, as in the screenshots. */
+.cover {
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: #bff3ea;
+}
+.cover-a {
+  background: radial-gradient(
+    circle at 50% 50%,
+    #ffe3c8 0 9%,
+    #ff9b6b 10% 22%,
+    #f3747a 23% 34%,
+    #e65a82 35% 50%,
+    #d2467f 51% 70%,
+    #b8337d 71%
+  );
+}
+.cover-b {
+  background: linear-gradient(140deg, #155d6c, #2aa89a);
+}
+.badge {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 3px;
+  background: #ff4d4d;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 11px;
+}
+
+.disc {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #3a3a3a;
+  color: #fff;
+}
+.disc svg {
+  width: 16px;
+  height: 16px;
+}
+.disc.leave {
+  background: #c42b1c;
+}
+.live {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff4d4d;
+}
+
+/* Faces: initials on the pill's palette, the talker ringed in green, the
+   others dimmed, each rimmed so overlaps read. */
+.faces {
+  display: flex;
+}
+.face {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 0 0 2px #202020;
+}
+.faces-s .face {
+  width: 26px;
+  height: 26px;
+  font-size: 12px;
+}
+.faces-m .face {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+}
+.faces-s .face + .face,
+.faces-m .face + .face {
+  margin-left: -8px;
+}
+.faces-l {
+  flex-direction: column;
+  align-items: center;
+}
+.faces-l .face {
+  width: 34px;
+  height: 34px;
+  font-size: 15px;
+}
+.faces-l .face + .face {
+  margin-top: -8px;
+}
+.face.lit {
+  z-index: 1;
+  box-shadow:
+    0 0 0 2px #202020,
+    0 0 0 4.5px #3dd68c;
+}
+.face.dim::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgb(0 0 0 / 0.45);
+}
+.tone-1 {
+  background: #5865f2;
+}
+.tone-3 {
+  background: #8e44ad;
+}
+.tone-5 {
+  background: #16a085;
+}
+
+/* ── The pill's quiet column ─────────────────────────────────────────────
+   52 wide, tucked against the edge: square on the edge side, round on the
+   other. Covers 30 in a ring of radius 19.5; devices 32 on a 40 step.     */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.col-pill {
+  width: 52px;
+  padding: 4px 0;
+  border-radius: 0 26px 26px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.col-cover {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 44px;
+  margin: -4px 0;
+}
+.col-cover:first-child {
+  margin-top: 0;
+}
+.col-cover .cover {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+.col-cover .badge {
+  position: absolute;
+  left: 13px;
+  top: 31px;
+  font-size: 7.5px;
+}
+.ring {
+  position: absolute;
+  left: 3.5px;
+  top: -0.5px;
+  width: 45px;
+  height: 45px;
+}
+.ring circle {
+  fill: none;
+  stroke-width: 3;
+}
+.ring-bg {
+  stroke: rgb(255 255 255 / 0.22);
+}
+.ring-fg {
+  stroke: var(--acc);
+  stroke-linecap: round;
+  stroke-dasharray: 122.5;
+  stroke-dashoffset: 46;
+}
+.col-call {
+  position: relative;
+}
+.col-call .col-pill {
+  padding: 8px 0 6px;
+  gap: 0;
+}
+.col-call .disc {
+  margin-top: 14px;
+}
+.speaker {
+  position: absolute;
+  left: 9px;
+  top: 8px;
+  width: 34px;
+  height: 34px;
+}
+.pulse {
+  position: absolute;
+  inset: 0;
+  border: 2px solid #3dd68c;
+  border-radius: 50%;
+  opacity: 0;
+}
+.tag {
+  position: absolute;
+  left: 58px;
+  top: 14px;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 11px;
+  font-size: 12px;
+  line-height: 22px;
+}
+
+/* ── The flyout ──────────────────────────────────────────────────────────
+   340 wide; rows 76, 60, 36, 48, 44, 40 and the 52 footer, as layout.rs. */
+.flyout {
+  width: 340px;
+  padding-top: 6px;
+  font-size: 14px;
+}
+.fl-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+}
+.fl-text b {
+  font-weight: 600;
+}
+.fl-text small {
+  font-size: 12.5px;
+  color: rgb(255 255 255 / 0.72);
+}
+.fl-now {
+  height: 76px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+}
+.fl-now .cover {
+  width: 52px;
+  height: 52px;
+  border-radius: 6px;
+}
+.fl-btns {
+  display: flex;
+}
+.fl-btns svg {
+  width: 32px;
+  height: 15px;
+}
+.fl-voice {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+}
+.fl-voice .disc {
+  width: 36px;
+  height: 36px;
+}
+.fl-hdr {
+  height: 36px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 16px 6px 15px;
+  font-weight: 600;
+}
+.fl-hdr small {
+  font-weight: 400;
+  font-size: 13px;
+  color: rgb(255 255 255 / 0.62);
+}
+.fl-slider,
+.fl-app {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 0 16px 0 14px;
+}
+.fl-slider {
+  height: 48px;
+}
+.fl-app {
+  height: 40px;
+  gap: 14px;
+}
+.fl-slider svg {
+  width: 20px;
+  height: 20px;
+}
+.track {
+  position: relative;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.28);
+}
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 2px;
+  background: var(--acc);
+}
+.fill::after {
+  content: "";
+  position: absolute;
+  right: -7px;
+  top: -5px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--acc);
+}
+.fill.v30 {
+  width: 30%;
+}
+.fill.v70 {
+  width: 70%;
+}
+.fill.v100 {
+  width: 100%;
+}
+.val {
+  width: 28px;
+  text-align: right;
+}
+.app-ic {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+}
+.app-green {
+  background: linear-gradient(135deg, #1db954, #168d40);
+}
+.app-blurple {
+  background: linear-gradient(135deg, #5865f2, #404eed);
+}
+.app-name {
+  width: 102px;
+}
+.fl-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 44px;
+  margin: 0 4px;
+  padding: 0 16px 0 14px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+.fl-row svg {
+  width: 20px;
+  height: 20px;
+}
+.fl-row.sel {
+  background: rgb(255 255 255 / 0.09);
+}
+.fl-row.sel::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--acc);
+}
+.fl-name {
+  flex: 1;
+  min-width: 0;
+  margin-left: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fl-row small {
+  font-size: 13px;
+  color: rgb(255 255 255 / 0.8);
+}
+.fl-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 52px;
+  margin-top: 6px;
+  padding: 0 9px 0 16px;
+  border-top: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 0 0 8px 8px;
+  background: rgb(0 0 0 / 0.18);
+  font-size: 13.5px;
+}
+.fl-foot svg {
+  width: 16px;
+  height: 16px;
+}
+.fl-gear {
+  margin-left: auto;
+  width: 32px;
+  display: grid;
+  place-items: center;
+}
+
+/* ── The taskbar and its strip ───────────────────────────────────────────
+   Two 32-px segments on a 32-px pill of radius 6, on the accent; the one
+   under the pointer lit in the accent itself (decorate.rs).              */
+.taskbar {
+  position: absolute;
+  inset: auto 0 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 12px;
+  border-top: 1px solid var(--tb-line);
+  background: var(--taskbar);
+  backdrop-filter: blur(30px);
+  color: var(--tb-ink);
+  font-size: 12px;
+}
+.clock {
+  padding-left: 6px;
+  text-align: right;
+  line-height: 1.3;
+}
+.strip {
+  display: flex;
+  height: 32px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--acc) 72%, transparent);
+  color: #12161c;
+}
+.seg {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+}
+.seg svg {
+  width: 16px;
+  height: 16px;
+}
+.seg.hover {
+  border-radius: 6px 0 0 6px;
+  background: var(--acc);
+}
+.rec {
+  position: absolute;
+  right: 6px;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e81123;
+  box-shadow: 0 0 0 1.5px #fff;
+}
+
+/* ── How it works ──────────────────────────────────────────────────────── */
+
+.desk-steps {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 110px 24px 20px;
+}
+.desk-steps ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+.desk-steps li {
+  padding: 26px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 18px;
+  background: var(--surface);
+}
+.desk-steps .k {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--hue) 14%, transparent);
+  color: var(--hue);
+  font-family: var(--f-mono);
+  font-weight: 600;
+}
+.desk-steps h3 {
+  margin: 16px 0 8px;
+  font-size: 19px;
+}
+.desk-steps p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+/* ── Scenes ────────────────────────────────────────────────────────────── */
+
+.desk-scenes {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 24px 20px;
+  display: grid;
+  gap: 120px;
+}
+.desk-scene {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 64px;
+  align-items: center;
+}
+.desk-scene.flip > :first-child {
+  order: 2;
+}
+.desk-copy p:last-child {
+  max-width: 30em;
+  margin: 20px 0 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 22px;
+  box-shadow: var(--screen-shadow);
+  color: #fff;
+}
+.stage-label,
+.stage-note {
+  position: absolute;
+  margin: 0;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink-2);
+}
+
+/* Taskbar: the devices it cycles through, the wheel, the scroll readout
+   (128 × 32, 12 above the strip, which sits 120 from the right). */
+.stage-taskbar {
+  height: 340px;
+}
+.stage-taskbar .stage-label {
+  left: 28px;
+  top: 26px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+}
+.cycle {
+  position: absolute;
+  left: 28px;
+  top: 54px;
+  width: 280px;
+  height: 52px;
+  overflow: hidden;
+}
+.cycle .fl-row {
+  position: absolute;
+  inset: 4px 0;
+}
+.cyc + .cyc {
+  opacity: 0;
+}
+.stage-taskbar .taskbar .strip {
+  margin-right: 108px;
+}
+.osd {
+  position: absolute;
+  right: 88px;
+  bottom: 60px;
+  width: 128px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+}
+.osd > svg {
+  width: 15px;
+  height: 15px;
+  margin-left: 12px;
+}
+.osd-track {
+  position: absolute;
+  left: 34px;
+  right: 36px;
+  top: 14px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.28);
+}
+.osd-fill {
+  display: block;
+  width: 72%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--acc);
+}
+.osd-num {
+  position: absolute;
+  right: 11px;
+  font-size: 12.5px;
+  counter-reset: vol var(--vol);
+}
+.osd-num::after {
+  content: counter(vol);
+}
+.wheel {
+  position: absolute;
+  right: 240px;
+  bottom: 62px;
+  color: var(--ink-2);
+}
+.wheel svg {
+  width: 22px;
+  height: 32px;
+}
+.wheel .tick {
+  stroke: var(--acc);
+}
+
+/* Pill: the quiet column, and the card it opens to (300 wide, rows of 108
+   with 80-px covers, the call's 60, the devices' 52). */
+.stage-pill {
+  height: 440px;
+}
+.stage-col {
+  position: absolute;
+  left: 0;
+  top: 120px;
+}
+.card {
+  position: absolute;
+  left: 0;
+  top: 40px;
+  width: 300px;
+  border-radius: 0 20px 20px 0;
+  box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.6);
+}
+.card-row {
+  display: flex;
+  gap: 14px;
+  height: 108px;
+  padding: 14px;
+  box-sizing: border-box;
+}
+.card-row + .card-row,
+.card-call,
+.card-devs {
+  border-top: 1px solid rgb(255 255 255 / 0.1);
+}
+.card-row .cover {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+}
+.card-row .cover svg {
+  width: 56px;
+  height: 24px;
+}
+.card-text {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+}
+.card-text b {
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-text > span:not(.card-btns) {
+  font-size: 14px;
+  color: rgb(255 255 255 / 0.72);
+}
+.card-text small {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.55);
+}
+.card-btns {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+}
+.card-btns svg {
+  width: 18px;
+  height: 18px;
+}
+.card-btns .off {
+  opacity: 0.3;
+}
+.card-call {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 60px;
+  padding: 0 14px;
+  font-size: 14px;
+}
+.card-call .fl-text small {
+  font-size: 12px;
+}
+.card-devs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 52px;
+  padding: 0 12px;
+  font-size: 13px;
+  color: rgb(255 255 255 / 0.85);
+}
+.card-devs span:not(.disc) {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.stage-note {
+  right: 24px;
+  bottom: 22px;
+  text-align: right;
+  line-height: 1.6;
+}
+
+/* Warnings: the pill turned banner, tucked against the edge, 44 high.
+   Amber #F7B32B on near-black, Windows' error red #C42B1C on white. */
+.stage-warn {
+  height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 18px;
+}
+.banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 18px 0 16px;
+  border-radius: 0 22px 22px 0;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.banner svg {
+  width: 20px;
+  height: 20px;
+}
+.banner.warn {
+  background: #f7b32b;
+  color: #1a1a1a;
+}
+.banner.alert {
+  background: #c42b1c;
+  color: #fff;
+}
+
+/* ── The rest, first launch, questions, call to action ─────────────────── */
+
+.desk-rest {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 120px 24px 100px;
+}
+.desk-cards {
+  list-style: none;
+  margin: 36px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+.desk-card {
+  padding: 28px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 18px;
+  background: var(--surface);
+  transition: border-color 0.3s;
+}
+.desk-card:hover {
+  border-color: var(--hue);
+}
+.desk-card h3 {
+  margin: 0 0 10px;
+  font-size: 19px;
+}
+.desk-card p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.desk-first,
+.desk-faq {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+}
+.desk-first-lede {
+  max-width: 62ch;
+  margin: 22px 0 0;
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.desk-systems {
+  margin-top: 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+.desk-system {
+  padding: 26px 28px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 18px;
+  background: var(--surface);
+}
+.desk-system h3 {
+  margin: 0;
+  font-size: 19px;
+}
+.desk-system ol {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.desk-system li + li {
+  margin-top: 8px;
+}
+.desk-faq-list {
+  max-width: 760px;
+  margin-top: 28px;
+  border-top: 1px solid var(--rule-strong);
+}
+.desk-faq details {
+  border-bottom: 1px solid var(--rule-strong);
+}
+.desk-faq summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  list-style: none;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.desk-faq summary::-webkit-details-marker {
+  display: none;
+}
+.desk-faq summary::after {
+  content: "+";
+  font-family: var(--f-mono);
+  color: var(--hue);
+}
+.desk-faq details[open] summary::after {
+  content: "−";
+}
+.desk-faq summary:hover {
+  color: var(--hue);
+}
+.desk-faq details p {
+  margin: 0 0 20px;
+  max-width: 65ch;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.desk-cta-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+}
+.desk-cta {
+  position: relative;
+  overflow: hidden;
+  padding: 72px 32px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 28px;
+  background: var(--surface-2);
+  text-align: center;
+}
+.desk-cta > .desk-glow {
+  left: 20%;
+  right: 20%;
+  bottom: -60%;
+  height: 100%;
+}
+.desk-cta h2 {
+  position: relative;
+  margin: 0;
+  font-weight: 800;
+  font-size: clamp(38px, 5vw, 58px);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+.desk-cta h2 span {
+  display: block;
+}
+.desk-cta .get {
+  position: relative;
+  justify-content: center;
+}
+.desk-cta .desk-meta {
+  position: relative;
+}
+
+.desk-source {
+  margin: 0 auto;
+  padding: 0 24px 64px;
+  text-align: center;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.desk-source a {
+  color: var(--ink-2);
+  border-bottom: 1px solid color-mix(in srgb, var(--hue) 45%, transparent);
+}
+
+/* ── Narrow ──────────────────────────────────────────────────────────────
+   The drawn desktop keeps its pixels and is zoomed as a whole. */
+@media (max-width: 1240px) {
+  .desk-screen {
+    zoom: 0.84;
+  }
+}
+@media (max-width: 1020px) {
+  .desk-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+  }
+  .desk-hero-pic {
+    justify-self: center;
+  }
+  .desk-screen {
+    zoom: 1;
+  }
+  .desk-scene {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 32px;
+  }
+  .desk-scene.flip > :first-child {
+    order: 0;
+  }
+}
+@media (max-width: 760px) {
+  .desk-screen {
+    zoom: 0.66;
+  }
+}
+@media (max-width: 520px) {
+  .desk-hero {
+    padding-top: 56px;
+  }
+  .desk-new .more {
+    display: none;
+  }
+  .desk-screen {
+    zoom: 0.48;
+  }
+  .desk .get-btn {
+    flex: 1 1 100%;
+  }
+  .stage-warn,
+  .stage-taskbar,
+  .stage-pill {
+    zoom: 0.8;
+  }
+  .desk-cta {
+    padding: 48px 20px;
+  }
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────────
+   Everything rests where its motion ends: the declarations above are the
+   final state, so without scroll timelines, under reduced motion or in
+   print, the page is simply finished. On load the desktop tilts up, the
+   pill slides in from its edge and the flyout rises, as the app's do. A
+   few things keep going, as they do in the app: the song's ring, the
+   talker's pulse, the live dots, and the devices the taskbar cycles. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes desk-rise {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+      filter: blur(12px);
+    }
+  }
+  .rise {
+    animation: desk-rise 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .rise.d1 {
+    animation-delay: 0.05s;
+  }
+  .rise.d2 {
+    animation-delay: 0.18s;
+  }
+  .rise.d3 {
+    animation-delay: 0.34s;
+  }
+  .rise.d4 {
+    animation-delay: 0.48s;
+  }
+  .rise.d5 {
+    animation-delay: 0.6s;
+  }
+
+  @keyframes desk-screen {
+    from {
+      opacity: 0;
+      transform: perspective(1400px) rotateX(14deg) translateY(40px) scale(0.96);
+    }
+  }
+  .desk-screen {
+    animation: desk-screen 1s 0.1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes desk-from-edge {
+    from {
+      transform: translateX(-105%);
+    }
+  }
+  .in-pill {
+    animation: desk-from-edge 0.6s 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+  @keyframes desk-fly {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+  }
+  .in-flyout {
+    animation: desk-fly 0.5s 1.2s cubic-bezier(0.1, 0.9, 0.2, 1) both;
+  }
+
+  @keyframes desk-ring {
+    from {
+      stroke-dashoffset: 110;
+    }
+    to {
+      stroke-dashoffset: 20;
+    }
+  }
+  .ring-fg {
+    animation: desk-ring 40s linear infinite alternate;
+  }
+  @keyframes desk-pulse {
+    from {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    to {
+      transform: scale(1.7);
+      opacity: 0;
+    }
+  }
+  .pulse {
+    animation: desk-pulse 1.6s ease-out infinite;
+  }
+  @keyframes desk-blink {
+    50% {
+      opacity: 0.35;
+    }
+  }
+  .live {
+    animation: desk-blink 1.4s ease-in-out infinite;
+  }
+  @keyframes desk-cycle {
+    0% {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    4%,
+    30% {
+      opacity: 1;
+      transform: none;
+    }
+    34%,
+    100% {
+      opacity: 0;
+    }
+  }
+  .cyc,
+  .cyc + .cyc {
+    animation: desk-cycle 7.5s ease-out infinite both;
+  }
+  .cyc:nth-child(2) {
+    animation-delay: 2.5s;
+  }
+  .cyc:nth-child(3) {
+    animation-delay: 5s;
+  }
+  @keyframes desk-tick {
+    to {
+      transform: translateY(-8px);
+      opacity: 0;
+    }
+  }
+  .wheel .tick {
+    animation: desk-tick 1s ease-out infinite;
+  }
+
+  @supports (animation-timeline: view()) {
+    /* Entrances finish once the element is well in view. */
+    @keyframes desk-reveal {
+      from {
+        opacity: 0;
+        transform: translateY(56px);
+      }
+    }
+    .reveal {
+      animation: desk-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 25%;
+    }
+
+    /* The card and the banners come in from the screen's edge, one after
+       another, all in place while still in the lower quarter of the
+       window: wherever the reader stops, none is left half out. */
+    .edge-in {
+      animation: desk-from-edge ease-out both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 12%;
+    }
+    .edge-in.d2 {
+      animation-range: entry 50% cover 18%;
+    }
+    .edge-in.d3 {
+      animation-range: entry 100% cover 24%;
+    }
+
+    /* Scrolling the page turns the volume up, as scrolling the taskbar does. */
+    @keyframes desk-vol-fill {
+      from {
+        width: 30%;
+      }
+    }
+    @keyframes desk-vol {
+      from {
+        --vol: 30;
+      }
+    }
+    .osd-fill,
+    .osd-num {
+      animation-timeline: view();
+      animation-range: cover 25% cover 60%;
+      animation-fill-mode: both;
+      animation-timing-function: linear;
+    }
+    .osd-fill {
+      animation-name: desk-vol-fill;
+    }
+    .osd-num {
+      animation-name: desk-vol;
+    }
+  }
+}
+
+@media print {
+  .desk *,
+  .desk *::before,
+  .desk *::after {
+    animation: none !important;
+  }
+}

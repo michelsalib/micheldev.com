@@ -332,8 +332,19 @@ active:
       Windows 11, in native Rust.
     # A product page, like media-cast's: its users switch headsets, they don't
     # read READMEs. Only the release and the logo come from the repository.
+    # The desk layout draws the app itself, so the screenshots below are kept
+    # for the alt text's sake and for a return to the product layout.
     product:
       hue: 2
+      desk:
+        headline: ["Your sound,", "one click away."]
+        works_with:
+          - Discord
+          - Teams
+          - Edge & Chrome
+          - MPC-HC
+          - Bluetooth headsets
+        cta: ["Stop digging for", "the sound settings."]
       title: Audio Tray
       logo: assets/logo/audio-tray.svg
       headline: Your sound, one click away.
@@ -396,6 +407,9 @@ active:
             button for the next one, or pick it in the flyout. Give each device
             the icon you recognise it by.
         - title: Volume from the taskbar
+          show: taskbar
+          eyebrow: On the taskbar
+          headline: Click to switch. Scroll for volume.
           text: >-
             With the taskbar buttons on, scroll anywhere on the taskbar to
             change the volume, or over the buttons with the touchpad. Over the
@@ -406,11 +420,17 @@ active:
             mute, your devices, the battery of Bluetooth headsets, a volume for
             each app, and what is playing with its controls.
         - title: The edge pill
+          show: pill
+          eyebrow: The edge pill
+          headline: Everything you hear, at a glance.
           text: >-
             A small pill on the edge of the screen: the song in a progress
             ring, the faces in your call with whoever talks lit up, your mic
             and its live dot. Click a device on it to switch.
         - title: Warns you when it matters
+          show: warnings
+          eyebrow: Quiet until it matters
+          headline: It speaks up before you embarrass yourself.
           text: >-
             Amber when you talk while muted, or when the sound moved because
             your headphones disconnected. Red when an app starts listening

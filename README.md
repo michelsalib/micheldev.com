@@ -195,7 +195,7 @@ current ones are Big Buck Bunny, © Blender Foundation, CC BY 3.0).
 
 `/media-cast` itself is in a third layout, `src/pages/cinema.ts` with its own
 sheet `07-cinema.css` (no 05/06), picked by a `cinema` block in its product
-YAML; `/audio-tray` keeps the product layout. Same facts from the same block,
+YAML. Same facts from the same block,
 dressed as a film page: the app playing inside a TV that straightens and lights
 as it scrolls in, a pinned tour of the steps, a scene per feature with `show`
 (subtitles, remote, torrents, trip) and cards for the rest, then the promise,
@@ -216,6 +216,27 @@ Two traps. The pinned box must fit one screen at every size, or what overflows
 it slides over the next section while pinned; only the lit step shows its text
 for that reason. And `bun run dev` rebuilds CSS and content on save but keeps
 the page modules it imported at startup: after editing a template, restart it.
+
+### The desk layout
+
+`/audio-tray` is in a fourth, `src/pages/desk.ts` with `08-desk.css`, picked by
+a `desk` block. The app is the hero, drawn in HTML on a Windows desktop rather
+than shown in screenshots: the edge pill on the left edge, the flyout above the
+taskbar, the two taskbar buttons by the clock. A feature with `show` (taskbar,
+pill, warnings) gets a scene; the rest are cards; then first launch, the
+questions and the downloads again. Each layout draws only its own scenes and
+fails the build on another's.
+
+The drawings follow the app's source, not memory: the measures and colours of
+audio-tray's `flyout/theme.rs`, `pill/draw.rs` and the TAP's `decorate.rs`,
+and the banners' exact wording. Its surfaces are dark in both of the site's
+themes, as the app's are; only the wallpaper and the taskbar follow the theme.
+The desktop is drawn at 700 × 640 and zoomed as a whole on narrower screens.
+Motion is an entrance on load, a few loops the app has too (the song's ring,
+the talker's pulse, the live dots), and view timelines: sections rise in, the
+banners slide from the edge, and scrolling the page turns the volume readout
+up through a registered `--vol` printed by a counter. All of it rests where it
+ends without timelines, under reduced motion or in print.
 
 ## The PDFs and the OG card
 
@@ -265,9 +286,9 @@ src/
   html.ts         tagged templates; interpolation escapes by default
   partials.ts     head, top bar, footer, figure tiles
   readme.ts       takes a project's README apart for its page
-  pages/          home, cv, 404, og card, project, product, cinema
+  pages/          home, cv, 404, og card, project, product, cinema, desk
   styles/         00-fonts, 01-tokens, 02-base, 03-home, 04-cv, 05-project,
-                  06-product, 07-cinema
+                  06-product, 07-cinema, 08-desk
   client/         theme toggle, CV spine + summary strip, live figures, the
                   masthead's split-flap, a project page's install tabs
   server.ts       the Cloud Run runtime; imports one local module, no packages

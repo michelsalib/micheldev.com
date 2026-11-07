@@ -245,7 +245,13 @@ describe("the built project pages", () => {
 });
 
 describe("the built product pages", () => {
-  const pages: { name: string; html: string; systems: string[] }[] = [];
+  const pages: {
+    name: string;
+    html: string;
+    systems: string[];
+    /** False for the desk layout, which draws the app instead. */
+    shots: boolean;
+  }[] = [];
 
   beforeAll(async () => {
     await build();
@@ -254,6 +260,7 @@ describe("the built product pages", () => {
         name: project.name,
         html: await Bun.file(`dist/${project.name}/index.html`).text(),
         systems: project.product.downloads.map((download) => download.os),
+        shots: !project.product.desk,
       });
     }
   });
@@ -275,12 +282,12 @@ describe("the built product pages", () => {
   });
 
   test("every image is served from this origin, and exists", async () => {
-    for (const { html } of pages) {
+    for (const { html, shots } of pages) {
       const sources = [...html.matchAll(/<img[^>]+src="([^"]+)"/g)].map(
         (match) => match[1] as string,
       );
       // The icon, plus a light and a dark copy of each screenshot.
-      expect(sources.length).toBeGreaterThanOrEqual(3);
+      if (shots) expect(sources.length).toBeGreaterThanOrEqual(3);
       for (const src of sources) {
         expect(src.startsWith("/")).toBe(true);
         expect(await Bun.file(`dist${src}`).exists()).toBe(true);
@@ -289,10 +296,10 @@ describe("the built product pages", () => {
   });
 
   test("every screenshot comes in both themes, with its size stated", () => {
-    for (const { html } of pages) {
+    for (const { html, shots } of pages) {
       const light = html.match(/class="light"/g) ?? [];
       const dark = html.match(/class="dark"/g) ?? [];
-      expect(light.length).toBeGreaterThan(0);
+      if (shots) expect(light.length).toBeGreaterThan(0);
       expect(light.length).toBe(dark.length);
       expect(html).not.toMatch(/<img[^>]+width="0"/);
     }

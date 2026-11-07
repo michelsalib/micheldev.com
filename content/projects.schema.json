@@ -280,13 +280,48 @@
                     "title": { "type": "string" },
                     "text": { "type": "string" },
                     "show": {
-                      "enum": ["subtitles", "remote", "torrents", "trip"],
-                      "description": "Cinema layout only: the scene this feature gets instead of a card."
+                      "enum": [
+                        "subtitles",
+                        "remote",
+                        "torrents",
+                        "trip",
+                        "taskbar",
+                        "pill",
+                        "warnings"
+                      ],
+                      "description": "The scene this feature gets instead of a card. Cinema layout: subtitles, remote, torrents, trip. Desk layout: taskbar, pill, warnings."
                     },
                     "eyebrow": { "type": "string" },
                     "headline": { "type": "string" }
                   },
                   "dependentRequired": { "show": ["eyebrow", "headline"] }
+                }
+              },
+              "desk": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["headline", "works_with", "cta"],
+                "description": "Switches the page to the desk layout (src/pages/desk.ts) and holds the words only it uses. Each list is one line per item.",
+                "properties": {
+                  "headline": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "items": { "type": "string" },
+                    "description": "The masthead's headline, a line each; the last is lit."
+                  },
+                  "works_with": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string" },
+                    "description": "The row of names under the masthead."
+                  },
+                  "cta": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "items": { "type": "string" }
+                  }
                 }
               },
               "cinema": {

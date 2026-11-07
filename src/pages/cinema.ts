@@ -22,7 +22,12 @@
  * which the CSP voids — every varying value is a class.
  */
 
-import type { Content, DocsRelease, ProductFeature } from "../content.ts";
+import type {
+  CinemaShow,
+  Content,
+  DocsRelease,
+  ProductFeature,
+} from "../content.ts";
 import { html, type Renderable, raw } from "../html.ts";
 import {
   type Assets,
@@ -212,10 +217,7 @@ function tour(project: ProductProject, sizes: ShotSizes): Renderable {
 }
 
 /** The pictures the `show` scenes are drawn with. Decoration: the text says it. */
-const SCENES: Record<
-  Exclude<ProductFeature["show"], "trip" | undefined>,
-  () => Renderable
-> = {
+const SCENES: Record<Exclude<CinemaShow, "trip">, () => Renderable> = {
   subtitles: () => html`<div class="cine-subs slide" aria-hidden="true">
     <p class="cue">— Do you think he'll come?<br />— He always does.</p>
     <span class="cine-timing"><span>Timing</span> <b>−1.2 s</b></span>
@@ -249,6 +251,11 @@ const SCENES: Record<
 
 function scene(feature: ProductFeature, index: number): Renderable {
   const draw = SCENES[feature.show as keyof typeof SCENES];
+  if (!draw) {
+    throw new Error(
+      `"${feature.title}": the cinema layout draws no ${feature.show} scene`,
+    );
+  }
   return html`<div class="cine-scene${raw(index % 2 ? " flip" : "")}">
     <div class="cine-copy reveal">
       <p class="cine-eyebrow">${feature.eyebrow ?? ""}</p>
