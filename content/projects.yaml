@@ -148,10 +148,21 @@ active:
     # terminal, so its page is written for them, here. Only the release and the
     # icon come from the repository.
     product:
-      hue: 4
+      hue: 1
       title: Media Cast
       logo: build/icon.svg
       headline: Your videos, on your TV.
+      # The cinema layout (src/pages/cinema.ts): the TV is the hero and the
+      # page moves as it scrolls. Its own words only; everything else on it is
+      # the product block below.
+      cinema:
+        headline: [Your videos., Your TV.]
+        works_with: [Chromecast, Google TV, Smart TVs (DLNA), Windows, macOS]
+        promise: [No account., No cloud., No ads.]
+        promise_text: >-
+          Your file goes from your computer to your TV over your own Wi-Fi.
+          That's the whole trip.
+        cta: [Tonight's movie, on the big screen.]
       lede: >-
         Drop a movie or an episode from your computer, pick the TV, press Play.
         Media Cast plays it on a Chromecast or a smart TV at home, subtitles
@@ -179,32 +190,65 @@ active:
           caption: >-
             While it plays: pause, skip, switch the subtitles or fix their
             timing — from the computer, or from your phone.
+      # `screen` is what the cinema layout's pinned tour shows for the step: a
+      # screenshot by name, or one of the app's views it draws (empty, drop).
       steps:
         - title: Open Media Cast
+          screen: empty
           text: >-
             It finds the Chromecasts and smart TVs on your network by itself.
             Nothing to set up on the TV: just have it switched on.
         - title: Drop a video
+          screen: drop
           text: >-
             Drag a movie or an episode onto the window, or click Choose a video.
             MP4, MKV and AVI. Its audio and subtitles are listed straight away.
         - title: Pick the screen
+          screen: ready
           text: Click the TV or the Chromecast you want to watch on.
         - title: Press Play
+          screen: playing
           text: >-
             The video starts on the TV. Keep the computer awake while you
             watch: it is the one sending the video.
+      # `show` gives a feature its own scene on the cinema layout, with
+      # `eyebrow` and `headline` over its text; the rest are cards.
       features:
+        - title: Subtitles that show up
+          show: subtitles
+          eyebrow: Subtitles
+          headline: They always show up.
+          text: >-
+            The subtitles inside the file, or a .srt, .ass or .vtt file you
+            drop along with it. TVs that ignore separate subtitles get them
+            drawn into the picture, so they always appear.
+        - title: Your phone as the remote
+          show: remote
+          eyebrow: Phone remote
+          headline: Stay on the couch.
+          text: >-
+            Switch on the phone remote and scan the QR code: your phone's
+            browser becomes the remote, to pause, skip, or switch the language
+            or the subtitles. Nothing to install on the phone.
+        - title: Torrents too
+          show: torrents
+          eyebrow: Torrents
+          headline: Plays while it downloads.
+          text: >-
+            Paste a magnet link or drop a .torrent file: it starts playing while
+            it downloads, fetching only the part you are watching.
+        - title: Stays at home
+          show: trip
+          eyebrow: The whole trip
+          headline: Your computer to your TV.
+          text: >-
+            Media Cast sends the file straight from your computer to the TV,
+            over your own network. Nothing is uploaded anywhere.
         - title: Chromecast and smart TVs
           text: >-
             Plays on Chromecast and Google TV, and on most smart TVs through
             DLNA, the standard they share. When a TV can't read a file as it
             is, Media Cast converts it while it plays.
-        - title: Subtitles that show up
-          text: >-
-            The subtitles inside the file, or a .srt, .ass or .vtt file you
-            drop along with it. TVs that ignore separate subtitles get them
-            drawn into the picture, so they always appear.
         - title: Find subtitles online
           text: >-
             Search Addic7ed for TV episodes from inside the app. OpenSubtitles
@@ -214,23 +258,14 @@ active:
           text: >-
             Subtitles early or late? Shift them while you watch, or line them up
             against a preview before you start. Make them bigger or smaller too.
-        - title: Your phone as the remote
-          text: >-
-            Switch on the phone remote and scan the QR code: your phone's
-            browser becomes the remote, with play and pause on its lock screen.
-            Nothing to install on the phone.
         - title: Pick the language
           text: >-
             A film with several audio tracks? Choose the one to hear, and switch
             to another while it plays.
-        - title: Torrents too
+        - title: Even out volume
           text: >-
-            Paste a magnet link or drop a .torrent file: it starts playing while
-            it downloads, fetching only the part you are watching.
-        - title: Stays at home
-          text: >-
-            Your file goes from your computer to the TV over your own network.
-            No account, no cloud, no ads.
+            Whispered dialogue, deafening explosions? One switch evens out the
+            sound, so you stop reaching for the remote.
       first_run:
         - title: On a Mac
           points:

@@ -210,10 +210,32 @@ export type ProductPage = {
   downloads: ProductDownload[];
   /** `src/images/<name>/<shot>-light.webp` and `-dark.webp`. The first leads. */
   screenshots: { shot: string; alt: string; caption?: string }[];
-  steps: { title: string; text: string }[];
-  features: { title: string; text: string }[];
+  /** `screen`: what the cinema layout's tour shows for the step. */
+  steps: { title: string; text: string; screen?: string }[];
+  features: ProductFeature[];
   first_run: { title: string; points: string[] }[];
   questions: { q: string; a: string }[];
+  /** Present, the page takes the cinema layout (src/pages/cinema.ts). */
+  cinema?: CinemaCopy;
+};
+
+/** A feature. With `show`, the cinema layout gives it a scene, not a card. */
+export type ProductFeature = {
+  title: string;
+  text: string;
+  show?: "subtitles" | "remote" | "torrents" | "trip";
+  eyebrow?: string;
+  headline?: string;
+};
+
+/** The words only the cinema layout uses, one line per list item. */
+export type CinemaCopy = {
+  headline: string[];
+  /** The row of names under the masthead's TV. */
+  works_with: string[];
+  promise: string[];
+  promise_text: string;
+  cta: string[];
 };
 
 /** The release a project page was rendered from, as scripts/sync-docs.ts saw it. */

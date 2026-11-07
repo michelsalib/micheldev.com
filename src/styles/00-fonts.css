@@ -51,3 +51,25 @@
      — and the file is 1.6 KB and preloaded, so blocking is over in a frame. */
   font-display: block;
 }
+
+/* Figtree, the face Media Cast's own window is set in, for the app views the
+   /media-cast page draws in HTML (its tour's first two steps) so they read as
+   the app and sit beside its screenshots. Latin, 400 and 600, 23 KB together,
+   from @fontsource/figtree; SIL Open Font License 1.1, which permits embedding.
+   Declared here with the others, since only this sheet is concatenated
+   unbundled, but fetched only by the one page whose markup uses it. */
+@font-face {
+  font-family: "Figtree";
+  src: url("/assets/fonts/figtree-latin-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Figtree";
+  src: url("/assets/fonts/figtree-latin-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}

@@ -20,6 +20,7 @@ import {
   productProjects,
   statsSources,
 } from "./content.ts";
+import { cinemaPage } from "./pages/cinema.ts";
 import { cvPage } from "./pages/cv.ts";
 import { homePage } from "./pages/home.ts";
 import { notFoundPage } from "./pages/not-found.ts";
@@ -71,6 +72,9 @@ const PAGE_CSS = {
     "src/styles/05-project.css",
     "src/styles/06-product.css",
   ],
+  // The cinema layout shares nothing below the top bar with a project page,
+  // so it takes neither of those sheets: see src/pages/cinema.ts.
+  cinema: [...SHARED_CSS, "src/styles/07-cinema.css"],
 } as const;
 
 /** Short, stable, content-addressed suffix. */
@@ -336,6 +340,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     cssCv,
     cssProject,
     cssProduct,
+    cssCinema,
     theme,
     cv,
     stats,
@@ -350,6 +355,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     buildCss("cv"),
     buildCss("project"),
     buildCss("product"),
+    buildCss("cinema"),
     buildScript("src/client/theme.ts", "theme"),
     buildScript("src/client/cv.ts", "cv"),
     buildScript("src/client/stats.ts", "stats"),
@@ -378,6 +384,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
   const cvAssets: Assets = { css: cssCv, ...scripts };
   const projectAssets: Assets = { css: cssProject, ...scripts };
   const productAssets: Assets = { css: cssProduct, ...scripts };
+  const cinemaAssets: Assets = { css: cssCinema, ...scripts };
 
   // Each project page and the images its README names, served beside it.
   const projectFiles: string[] = [];
@@ -396,12 +403,14 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     }
   }
   // Each product page and its icon. Its screenshots are under src/images,
-  // copied below with the portrait.
+  // copied below with the portrait. A `cinema` block picks that layout.
   for (const { project, release, sizes } of products) {
     projectFiles.push(
       await write(
         `${project.name}/index.html`,
-        productPage(content, productAssets, project, release, sizes),
+        project.product.cinema
+          ? cinemaPage(content, cinemaAssets, project, release, sizes)
+          : productPage(content, productAssets, project, release, sizes),
       ),
     );
     await cp(
@@ -467,6 +476,7 @@ export async function build(): Promise<{ files: string[]; assets: Assets }> {
     cssCv,
     cssProject,
     cssProduct,
+    cssCinema,
     theme,
     cv,
     artJs,

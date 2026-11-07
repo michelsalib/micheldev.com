@@ -29,7 +29,10 @@ import {
   topBarProject,
 } from "../partials.ts";
 
-type ProductProject = ActiveProject & { product: ProductPage; repo: string };
+export type ProductProject = ActiveProject & {
+  product: ProductPage;
+  repo: string;
+};
 
 /** A download, resolved against the release: the file it serves, and where. */
 export type ResolvedDownload = ProductDownload & {
@@ -69,7 +72,7 @@ export function productDownloads(
 }
 
 /** "31 Oct 2026", or "31 Oct" for a tile whose label carries the year. */
-function released(iso: string, parts: "full" | "day" = "full"): string {
+export function released(iso: string, parts: "full" | "day" = "full"): string {
   return new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
@@ -79,7 +82,7 @@ function released(iso: string, parts: "full" | "day" = "full"): string {
 }
 
 /** Decimal megabytes, as both systems' file managers count them. */
-function megabytes(bytes: number): string {
+export function megabytes(bytes: number): string {
   return `${Math.round(bytes / 1e6)} MB`;
 }
 
@@ -88,7 +91,7 @@ function megabytes(bytes: number): string {
  * from a phone, who would have signed the installer, and the name a missing
  * version goes by.
  */
-const SYSTEMS = {
+export const SYSTEMS = {
   windows: { computer: "a Windows PC", vendor: "Microsoft", name: "Windows" },
   mac: { computer: "a Mac", vendor: "Apple", name: "macOS" },
   linux: { computer: "", vendor: "", name: "Linux" },
@@ -99,28 +102,35 @@ const SYSTEMS = {
  * src/client/product.ts puts the reader's own system first and quietens the
  * rest, or says so when the reader is on a phone or on a system the app does
  * not run on.
+ *
+ * A page may show the buttons twice (the cinema layout ends on them too): only
+ * the first, the `anchor`, carries the #download id and the notes, so neither
+ * is said twice. The client script orders every box.
  */
-function downloadBox(
+export function downloadBox(
   project: ProductProject,
   release: DocsRelease,
   downloads: ResolvedDownload[],
+  { anchor = true }: { anchor?: boolean } = {},
 ): Renderable {
   const offered = new Set<string>(downloads.map((download) => download.os));
   const missing = (["mac", "linux"] as const).filter((os) => !offered.has(os));
+  const buttons = downloads.map(
+    (download) =>
+      html`<a
+        class="get-btn"
+        href="/${project.name}/download/${download.os}"
+        data-os="${download.os}"
+        ><span class="get-l">Download for ${download.label}</span
+        ><span class="get-n"
+          >${release.tag} · ${megabytes(download.size)} ·
+          ${download.note}</span
+        ></a
+      >`,
+  );
+  if (!anchor) return html`<div class="get" data-downloads>${buttons}</div>`;
   return html`<div class="get" id="download" data-downloads>
-      ${downloads.map(
-        (download) =>
-          html`<a
-            class="get-btn"
-            href="/${project.name}/download/${download.os}"
-            data-os="${download.os}"
-            ><span class="get-l">Download for ${download.label}</span
-            ><span class="get-n"
-              >${release.tag} · ${megabytes(download.size)} ·
-              ${download.note}</span
-            ></a
-          >`,
-      )}
+      ${buttons}
     </div>
     <p class="get-other" data-other="mobile" hidden>
       ${project.product.title} runs on a computer: open this page on

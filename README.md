@@ -191,6 +191,32 @@ size. To retake them, drive the app with Playwright, stub `connect` and `load`
 in main so nothing reaches a real TV, and use a video you may publish (the
 current ones are Big Buck Bunny, © Blender Foundation, CC BY 3.0).
 
+### The cinema layout
+
+`/media-cast` itself is in a third layout, `src/pages/cinema.ts` with its own
+sheet `07-cinema.css` (no 05/06), picked by a `cinema` block in its product
+YAML; `/audio-tray` keeps the product layout. Same facts from the same block,
+dressed as a film page: the app playing inside a TV that straightens and lights
+as it scrolls in, a pinned tour of the steps, a scene per feature with `show`
+(subtitles, remote, torrents, trip) and cards for the rest, then the promise,
+the downloads again, first launch and the questions. The `cinema` block holds
+only the words no other layout uses.
+
+The tour is one tall section whose inner box is `position: sticky`; its scroll
+is a named view timeline (`--tour`) that drives a registered `--on` per step,
+which lights the step, opens its text and fades in what the app shows at that
+step. A step's `screen` is a screenshot, or one of two app views drawn in HTML
+for states with no screenshot (`empty`, `drop`), laid out in the screenshots'
+own pixels (`--u`, from container query units) and set in Figtree, the app's
+face, self-hosted for that one page. Everything rests where its motion ends:
+with no scroll timelines, reduced motion or in print, the tour is a plain
+section with every step lit.
+
+Two traps. The pinned box must fit one screen at every size, or what overflows
+it slides over the next section while pinned; only the lit step shows its text
+for that reason. And `bun run dev` rebuilds CSS and content on save but keeps
+the page modules it imported at startup: after editing a template, restart it.
+
 ## The PDFs and the OG card
 
 `/cv` and its PDF are the same document: the PDF is Chrome printing the page
@@ -239,9 +265,9 @@ src/
   html.ts         tagged templates; interpolation escapes by default
   partials.ts     head, top bar, footer, figure tiles
   readme.ts       takes a project's README apart for its page
-  pages/          home, cv, 404, og card, project, product
+  pages/          home, cv, 404, og card, project, product, cinema
   styles/         00-fonts, 01-tokens, 02-base, 03-home, 04-cv, 05-project,
-                  06-product
+                  06-product, 07-cinema
   client/         theme toggle, CV spine + summary strip, live figures, the
                   masthead's split-flap, a project page's install tabs
   server.ts       the Cloud Run runtime; imports one local module, no packages

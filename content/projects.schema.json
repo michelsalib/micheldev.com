@@ -260,7 +260,12 @@
                   "required": ["title", "text"],
                   "properties": {
                     "title": { "type": "string" },
-                    "text": { "type": "string" }
+                    "text": { "type": "string" },
+                    "screen": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9-]+$",
+                      "description": "Cinema layout only: what its pinned tour shows for this step. A screenshot's `shot`, or a view the page draws: empty, drop."
+                    }
                   }
                 }
               },
@@ -273,7 +278,54 @@
                   "required": ["title", "text"],
                   "properties": {
                     "title": { "type": "string" },
-                    "text": { "type": "string" }
+                    "text": { "type": "string" },
+                    "show": {
+                      "enum": ["subtitles", "remote", "torrents", "trip"],
+                      "description": "Cinema layout only: the scene this feature gets instead of a card."
+                    },
+                    "eyebrow": { "type": "string" },
+                    "headline": { "type": "string" }
+                  },
+                  "dependentRequired": { "show": ["eyebrow", "headline"] }
+                }
+              },
+              "cinema": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "headline",
+                  "works_with",
+                  "promise",
+                  "promise_text",
+                  "cta"
+                ],
+                "description": "Switches the page to the cinema layout (src/pages/cinema.ts) and holds the words only it uses. Each list is one line per item.",
+                "properties": {
+                  "headline": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "items": { "type": "string" },
+                    "description": "The masthead's headline, a line each; the last is lit."
+                  },
+                  "works_with": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string" },
+                    "description": "The row of names under the masthead's TV."
+                  },
+                  "promise": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 4,
+                    "items": { "type": "string" }
+                  },
+                  "promise_text": { "type": "string" },
+                  "cta": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 3,
+                    "items": { "type": "string" }
                   }
                 }
               },

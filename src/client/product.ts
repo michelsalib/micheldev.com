@@ -6,7 +6,8 @@
  * on a phone or on Linux, where no button fits, says so under them.
  */
 
-const box = document.querySelector<HTMLElement>("[data-downloads]");
+/** Usually one; the cinema layout ends on a second, which gets the same order. */
+const boxes = document.querySelectorAll<HTMLElement>("[data-downloads]");
 
 /** "windows", "mac", "mobile", "linux", or undefined when it cannot tell. */
 function system(): string | undefined {
@@ -20,16 +21,18 @@ function system(): string | undefined {
   return undefined;
 }
 
-if (box) {
-  const os = system();
+const os = system();
+for (const box of boxes) {
   const own = box.querySelector<HTMLElement>(`[data-os="${os}"]`);
   if (own) {
     box.prepend(own);
     own.classList.add("primary");
     box.classList.add("picked");
-  } else if (os) {
-    document
-      .querySelector<HTMLElement>(`[data-other="${os}"]`)
-      ?.removeAttribute("hidden");
   }
+}
+// The notes sit under the first box only, so they are looked up once.
+if (os && boxes.length && !boxes[0]?.querySelector(`[data-os="${os}"]`)) {
+  document
+    .querySelector<HTMLElement>(`[data-other="${os}"]`)
+    ?.removeAttribute("hidden");
 }
