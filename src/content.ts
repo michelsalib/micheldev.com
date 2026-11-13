@@ -224,7 +224,12 @@ export type ProductPage = {
 /** The scenes the cinema layout draws. */
 export type CinemaShow = "subtitles" | "remote" | "torrents" | "trip";
 /** The scenes the desk layout draws. */
-export type DeskShow = "taskbar" | "pill" | "warnings";
+export type DeskShow =
+  | "taskbar"
+  | "pill"
+  | "warnings"
+  | "batteries"
+  | "keyboards";
 
 /**
  * A feature. With `show`, the page's layout gives it a scene, not a card. Each

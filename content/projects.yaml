@@ -342,8 +342,11 @@ active:
           - Discord
           - Teams
           - Edge & Chrome
+          - YouTube Music
           - MPC-HC
-          - Bluetooth headsets
+          - Bluetooth devices
+          - Logitech receivers
+          - Razer headsets
         cta: ["Stop digging for", "the sound settings."]
       title: Audio Tray
       logo: assets/logo/audio-tray.svg
@@ -351,8 +354,9 @@ active:
       lede: >-
         Switch between speakers and headset in one click, scroll on the taskbar
         for the volume, and see at a glance what is playing, who is talking in
-        your call and whether your mic is live. A small app for Windows 11 that
-        stays out of the way until something needs you.
+        your call, whether your mic is live and which headset needs charging. A
+        small app for Windows 11 that stays out of the way until something needs
+        you.
       downloads:
         - os: windows
           label: Windows
@@ -394,8 +398,8 @@ active:
         - title: Put it on the taskbar
           text: >-
             In Settings, turn on the taskbar buttons: one for the output, one
-            for the input. Click one to switch to the next device, scroll it
-            for the volume.
+            for the input. Click one to switch to the next device, scroll over
+            it for the volume.
         - title: Glance at the edge
           text: >-
             The pill on the edge of the screen shows the song, your call and
@@ -404,21 +408,23 @@ active:
         - title: Switch in one click
           text: >-
             Speakers, headset, the TV over HDMI: click the output or input
-            button for the next one, or pick it in the flyout. Give each device
-            the icon you recognise it by.
+            button for the next one, or pick it in the flyout or on the pill.
+            Give each device the icon you recognise it by.
         - title: Volume from the taskbar
           show: taskbar
           eyebrow: On the taskbar
           headline: Click to switch. Scroll for volume.
           text: >-
-            With the taskbar buttons on, scroll anywhere on the taskbar to
-            change the volume, or over the buttons with the touchpad. Over the
-            input button, it sets the microphone's.
+            With the taskbar buttons on, scroll over them, with the wheel or
+            the touchpad, and the volume shows just above. Over the input
+            button, it sets the microphone's. A left click switches device,
+            mutes or opens the flyout: your pick.
         - title: A better sound flyout
           text: >-
             An acrylic panel in Windows 11's style: output and input volume,
-            mute, your devices, the battery of Bluetooth headsets, a volume for
-            each app, and what is playing with its controls.
+            mute, your devices, what is playing with its controls, and each
+            app with its own icon and volume, scrolled with the wheel. It folds
+            to fit however much is going on.
         - title: The edge pill
           show: pill
           eyebrow: The edge pill
@@ -426,7 +432,8 @@ active:
           text: >-
             A small pill on the edge of the screen: the song in a progress
             ring, the faces in your call with whoever talks lit up, your mic
-            and its live dot. Click a device on it to switch.
+            and its live dot. Point at it for covers, progress and controls;
+            point at a device and the others fan out to pick from.
         - title: Warns you when it matters
           show: warnings
           eyebrow: Quiet until it matters
@@ -435,21 +442,51 @@ active:
             Amber when you talk while muted, or when the sound moved because
             your headphones disconnected. Red when an app starts listening
             outside a call: click to mute.
+        - title: Batteries, before they die
+          show: batteries
+          eyebrow: Batteries
+          headline: Charge it before it dies mid-call.
+          text: >-
+            Your Bluetooth headset, mouse and keyboard show their level in the
+            flyout, the tray's tooltip and the pill, and so do the devices on a
+            Logitech receiver (Lightspeed, Unifying, Bolt) and a Razer
+            BlackShark V2 Pro. One running low warns you once, on the pill and
+            with a Windows notification.
+        - title: A layout per keyboard
+          show: keyboards
+          eyebrow: Keyboards
+          headline: Each keyboard types in its own layout.
+          text: >-
+            AZERTY on the laptop, QWERTY on the desk? Windows keeps one layout
+            for both. Give each keyboard its own in Settings, and Audio Tray
+            switches as you start typing on it, by cable, receiver or
+            Bluetooth, and says so on the pill.
+        - title: Motion in your style
+          text: >-
+            The progress ring, the track bar and the volume sliders move in the
+            style you pick: calm, Google's ripples or Samsung's layered waves,
+            in your accent or each cover's own colour. Live streams ripple, full
+            and endless.
         - title: Where you want it
           text: >-
             Put the pill on the left, right or top edge of any display, from a
-            map of your screens in Settings. It hides behind fullscreen apps
-            and never takes the focus.
+            map of your screens in Settings. It remembers the place for each set
+            of screens, hides behind fullscreen apps and never takes the focus.
         - title: Discord and Teams calls
           text: >-
             Connect Discord to see who is in the call, with their avatars, and
-            who is talking, and to mute from the pill. Teams meetings show
-            whether you are muted.
+            who is talking, and to mute or hang up from the pill. Teams meetings
+            show whether you are muted.
         - title: Every tab that plays
           text: >-
             A browser extension for Edge and Chrome shows each tab playing
             media — two Twitch streams, a YouTube video — from every site or
-            only the ones you choose. MPC-HC shows up too.
+            only the ones you choose. YouTube Music and MPC-HC show up too.
+        - title: Settings in pictures
+          text: >-
+            Settings opens on a Home that shows the pill as it looks and how
+            each part of the app is doing. Every choice is a picture to pick:
+            the pill's place and size, the motion, the taskbar's click.
         - title: Keeps itself up to date
           text: >-
             It checks for a new version when it starts and installs it the
@@ -495,6 +532,12 @@ active:
             It never records. It reads which apps use the microphone, from the
             same place as Windows' own indicator, and, while you are muted in a
             call, how loud the mic is, to warn you when you talk.
+        - q: Which devices show their battery?
+          a: >-
+            Bluetooth devices that report one to Windows: headsets, earbuds,
+            mice, keyboards, controllers. Also the mice, keyboards and headsets
+            on a Logitech Lightspeed, Unifying or Bolt receiver, or on their
+            charging cable, and the Razer BlackShark V2 Pro on its receiver.
         - q: The taskbar buttons don't show.
           a: >-
             They are off until you turn them on in Settings. Audio Tray's icon

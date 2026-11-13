@@ -1093,6 +1093,182 @@
   color: #fff;
 }
 
+/* The card's progress bar: 3 high under the buttons, its bottom on the
+   cover's, the accent while playing. A live stream's is full, with no
+   playhead; a track's ends on its knob. */
+.card-row {
+  position: relative;
+}
+.card-bar {
+  position: absolute;
+  left: 106px;
+  right: 16px;
+  top: 91px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.2);
+}
+.bar-fill {
+  position: relative;
+  display: block;
+  width: 38%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--acc);
+}
+.card-bar:not(.live-bar) .bar-fill::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  top: -3.5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+}
+.live-bar .bar-fill {
+  width: 100%;
+}
+
+/* Batteries: the banner on the edge, the card's devices and battery lines
+   (two to a line, 30 each, amber when low), and Windows' notification. */
+.stage-batt {
+  height: 400px;
+}
+.stage-batt > .banner {
+  position: absolute;
+  left: 0;
+  top: 30px;
+}
+.batt-card {
+  top: 104px;
+  border-radius: 0 20px 20px 0;
+  padding-bottom: 10px;
+}
+.batt-lines {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 0 8px;
+  border-top: 1px solid rgb(255 255 255 / 0.1);
+}
+.batt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px 0 8px;
+  font-size: 12px;
+  color: rgb(255 255 255 / 0.72);
+}
+.batt svg {
+  width: 15px;
+  height: 15px;
+}
+.batt-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.batt b {
+  font-weight: 400;
+  color: #fff;
+}
+.batt.low,
+.batt.low b {
+  color: #f7b32b;
+}
+.toast {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  width: 300px;
+  padding: 14px 16px 16px;
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  color: rgb(255 255 255 / 0.78);
+}
+.toast b {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+}
+.toast-app {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.toast-ic {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  background: var(--acc);
+}
+.toast-ic svg {
+  width: 13px;
+  height: 13px;
+}
+
+/* Keyboards: the layout banner on the edge (the pill's normal colour, for
+   1.5 s in the app), and the two keyboards it tells apart. Without motion
+   the first is lit and its banner shows. */
+.stage-keys {
+  height: 320px;
+}
+.kb-banners {
+  position: absolute;
+  left: 0;
+  top: 40px;
+  height: 44px;
+}
+.kb-banners .banner {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.kb-banners .kb-b {
+  opacity: 0;
+}
+.kb-desk {
+  position: absolute;
+  left: 28px;
+  right: 28px;
+  top: 128px;
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+}
+.kb-dev {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  width: 150px;
+  padding: 16px 0 14px;
+  border-radius: 14px;
+  background: rgb(32 32 32 / 0.9);
+  border: 1px solid rgb(255 255 255 / 0.1);
+  font-size: 13px;
+}
+.kb-dev svg {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 6px;
+}
+.kb-dev small {
+  color: rgb(255 255 255 / 0.6);
+  font-size: 12px;
+}
+.kb-dev.kb-a {
+  border-color: var(--acc);
+  box-shadow: 0 0 0 1px var(--acc);
+}
+
 /* ── The rest, first launch, questions, call to action ─────────────────── */
 
 .desk-rest {
@@ -1305,6 +1481,8 @@
     flex: 1 1 100%;
   }
   .stage-warn,
+  .stage-batt,
+  .stage-keys,
   .stage-taskbar,
   .stage-pill {
     zoom: 0.8;
@@ -1440,6 +1618,78 @@
   }
   .wheel .tick {
     animation: desk-tick 1s ease-out infinite;
+  }
+
+  /* A track's bar grows; a live stream's is full and shimmers instead. */
+  @keyframes desk-bar {
+    from {
+      width: 22%;
+    }
+    to {
+      width: 62%;
+    }
+  }
+  .card-bar:not(.live-bar) .bar-fill {
+    animation: desk-bar 40s linear infinite alternate;
+  }
+  @keyframes desk-shimmer {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 120px 0;
+    }
+  }
+  .live-bar .bar-fill {
+    background: repeating-linear-gradient(
+      90deg,
+      var(--acc) 0 40px,
+      color-mix(in srgb, var(--acc) 55%, #fff) 60px,
+      var(--acc) 120px
+    );
+    animation: desk-shimmer 2s linear infinite;
+  }
+
+  /* Typing on one keyboard, then the other: it lights, its banner shows. */
+  @keyframes desk-kb-lit {
+    0%,
+    46% {
+      border-color: var(--acc);
+      box-shadow: 0 0 0 1px var(--acc);
+    }
+    50%,
+    100% {
+      border-color: rgb(255 255 255 / 0.1);
+      box-shadow: none;
+    }
+  }
+  @keyframes desk-kb-banner {
+    0% {
+      opacity: 0;
+      transform: translateX(-105%);
+    }
+    6%,
+    40% {
+      opacity: 1;
+      transform: none;
+    }
+    46%,
+    100% {
+      opacity: 0;
+      transform: translateX(-105%);
+    }
+  }
+  .kb-dev {
+    animation: desk-kb-lit 8s step-end infinite both;
+  }
+  .kb-dev.kb-b {
+    animation-delay: -4s;
+  }
+  .kb-banners .kb {
+    animation: desk-kb-banner 8s ease-out infinite both;
+  }
+  .kb-banners .kb-b {
+    animation-delay: 4s;
   }
 
   @supports (animation-timeline: view()) {

@@ -287,9 +287,11 @@
                         "trip",
                         "taskbar",
                         "pill",
-                        "warnings"
+                        "warnings",
+                        "batteries",
+                        "keyboards"
                       ],
-                      "description": "The scene this feature gets instead of a card. Cinema layout: subtitles, remote, torrents, trip. Desk layout: taskbar, pill, warnings."
+                      "description": "The scene this feature gets instead of a card. Cinema layout: subtitles, remote, torrents, trip. Desk layout: taskbar, pill, warnings, batteries, keyboards."
                     },
                     "eyebrow": { "type": "string" },
                     "headline": { "type": "string" }

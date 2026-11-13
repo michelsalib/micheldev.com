@@ -1,14 +1,14 @@
 {
-  "tag": "v0.14.0",
-  "published_at": "2026-11-02T21:10:43Z",
+  "tag": "v0.26.1",
+  "published_at": "2026-11-12T10:06:03Z",
   "assets": [
     {
       "name": "audio-tray-x86_64-pc-windows-msvc.zip",
-      "size": 2967014
+      "size": 3279566
     },
     {
-      "name": "AudioTray-0.14.0-Setup.exe",
-      "size": 3995683
+      "name": "AudioTray-0.26.1-Setup.exe",
+      "size": 4178145
     },
     {
       "name": "SHA256SUMS",

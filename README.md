@@ -223,7 +223,7 @@ the page modules it imported at startup: after editing a template, restart it.
 a `desk` block. The app is the hero, drawn in HTML on a Windows desktop rather
 than shown in screenshots: the edge pill on the left edge, the flyout above the
 taskbar, the two taskbar buttons by the clock. A feature with `show` (taskbar,
-pill, warnings) gets a scene; the rest are cards; then first launch, the
+pill, warnings, batteries, keyboards) gets a scene; the rest are cards; then first launch, the
 questions and the downloads again. Each layout draws only its own scenes and
 fails the build on another's.
 

@@ -8,8 +8,8 @@
  *
  * - The masthead is a desktop: the edge pill on its left edge, the flyout
  *   above the taskbar, and the taskbar buttons by the clock.
- * - A feature with `show` gets a scene (taskbar, pill, warnings); the rest are
- *   cards.
+ * - A feature with `show` gets a scene (taskbar, pill, warnings, batteries,
+ *   keyboards); the rest are cards.
  *
  * Everything the app draws is drawn here in HTML, to the app's own measures
  * (audio-tray's src/flyout/theme.rs, src/pill/draw.rs and the TAP's
@@ -61,6 +61,10 @@ const ICON = {
   hangUp: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M3 14c5-5 13-5 18 0l-2.5 2.5-3-1.5v-2.5a10 10 0 0 0-7 0V15l-3 1.5z"/></svg>`,
   wave: `<svg viewBox="0 0 56 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M2 12c6-14 12-14 18 0s12 14 18 0 12-14 16 0"/></svg>`,
   wheel: `<svg viewBox="0 0 22 32" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="1" y="1" width="20" height="30" rx="10"/><path class="tick" d="M11 8v6" stroke-width="2.4" stroke-linecap="round"/></svg>`,
+  keyboard: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>`,
+  mouse: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v3"/></svg>`,
+  batteryLow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="7" width="17" height="10" rx="2"/><path d="M21.5 10.5v3"/><rect x="5" y="9.5" width="3" height="5" rx=".5" fill="currentColor" stroke="none"/></svg>`,
+  laptop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="11" rx="1.5"/><path d="M2 19h20"/></svg>`,
   download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>`,
 } as const;
 
@@ -217,6 +221,7 @@ const SCENES: Record<DeskShow, () => Renderable> = {
           ><b>Night Drive</b><span>Low Orbit</span><small>YouTube Music</small
           ><span class="card-btns">${icon("prev")}${icon("pause")}${icon("next")}</span></span
         >
+        <span class="card-bar"><span class="bar-fill"></span></span>
       </div>
       <div class="card-row">
         <span class="cover cover-b">${icon("wave")}</span>
@@ -229,6 +234,7 @@ const SCENES: Record<DeskShow, () => Renderable> = {
             ></span
           ></span
         >
+        <span class="card-bar live-bar"><span class="bar-fill"></span></span>
       </div>
       <div class="card-call">
         ${faces("m")}
@@ -248,7 +254,59 @@ const SCENES: Record<DeskShow, () => Renderable> = {
     <span class="banner warn edge-in d2">${icon("speakers")}Now on Speakers · Casque (WF-1000XM5) disconnected</span>
     <span class="banner alert edge-in d3">${icon("mic")}Chrome is listening · click to mute</span>
   </div>`,
+  batteries: () => html`<div class="stage stage-batt wall" aria-hidden="true">
+    <span class="banner warn edge-in d1">${icon("batteryLow")}BlackShark V2 Pro battery low · 12%</span>
+    <div class="card normal batt-card edge-in d2">
+      <div class="card-devs">
+        ${disc("headset")}<span>BlackShark V2 Pro</span>${disc("mic")}<span
+          >BlackShark V2 Pro</span
+        >
+      </div>
+      <div class="batt-lines">
+        ${BATTERIES.map(
+          (b) =>
+            html`<span class="batt${raw(b.low ? " low" : "")}"
+              >${icon(b.icon)}<span class="batt-name">${b.name}</span
+              ><b>${String(b.level)}%</b></span
+            >`,
+        )}
+      </div>
+    </div>
+    <div class="toast acrylic edge-in d3">
+      <span class="toast-app"><span class="toast-ic">${icon("headset")}</span>Audio Tray</span>
+      <b>BlackShark V2 Pro battery low</b>
+      <span>12% left. Time to charge it.</span>
+    </div>
+  </div>`,
+  keyboards: () => html`<div class="stage stage-keys wall" aria-hidden="true">
+    <div class="kb-banners">
+      <span class="banner normal kb kb-a">${icon("keyboard")}Built-in keyboard · French</span>
+      <span class="banner normal kb kb-b">${icon("keyboard")}MX Keys · US</span>
+    </div>
+    <div class="kb-desk">
+      <span class="kb-dev kb-a">${icon("laptop")}<small>Built-in keyboard</small><b>AZERTY</b></span>
+      <span class="kb-dev kb-b">${icon("keyboard")}<small>MX Keys</small><b>QWERTY</b></span>
+    </div>
+    <p class="stage-note">type on a keyboard → its layout</p>
+  </div>`,
 };
+
+/**
+ * Batteries on the pill's card, two to a line, amber when low (draw.rs's
+ * battery_lines). Devices of the kinds it reads: Bluetooth, a Logitech
+ * receiver's, a Razer headset's.
+ */
+const BATTERIES: {
+  name: string;
+  icon: keyof typeof ICON;
+  level: number;
+  low?: boolean;
+}[] = [
+  { name: "MX Master 3S", icon: "mouse", level: 82 },
+  { name: "MX Keys", icon: "keyboard", level: 64 },
+  { name: "WF-1000XM5", icon: "earbuds", level: 70 },
+  { name: "BlackShark V2 Pro", icon: "headset", level: 12, low: true },
+];
 
 function scene(feature: ProductFeature, index: number): Renderable {
   const draw = SCENES[feature.show as DeskShow];
